@@ -31,35 +31,11 @@ private struct AuthenticatedRootView: View {
 
     var body: some View {
         if libraryReady {
-            MainPlaceholderView(username: credentials.username)
+            GalleryView()
         } else {
             BuildingLibraryView(credentials: credentials) {
                 didFinishBuild = true
             }
-        }
-    }
-}
-
-/// Temporary landing screen until the gallery is built.
-private struct MainPlaceholderView: View {
-    let username: String
-
-    @Query private var releases: [CachedRelease]
-
-    var body: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
-            VStack(spacing: 20) {
-                Text("Your library is ready")
-                    .font(.system(size: 64, weight: .light, design: .serif))
-                Text("\(releases.count) vinyl releases")
-                    .font(.title2)
-                    .foregroundStyle(.white.opacity(0.7))
-                Text("Signed in as \(username)")
-                    .font(.title3)
-                    .foregroundStyle(.white.opacity(0.4))
-            }
-            .foregroundStyle(.white)
         }
     }
 }
