@@ -20,3 +20,6 @@ Package.resolved
 .vscode/
 .idea/
 *.swp
+
+# Local secrets — copy AppSecrets.example.swift to AppSecrets.swift and fill in
+Sources/Auth/AppSecrets.swift
