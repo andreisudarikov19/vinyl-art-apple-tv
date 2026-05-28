@@ -45,6 +45,11 @@ struct RecordView: View {
     }
 
     private func interactive(_ model: RecordViewModel) -> some View {
+        // The design called for a subtle haptic on each side flip, but tvOS
+        // exposes no Siri Remote haptics API (no .sensoryFeedback, no usable
+        // CoreHaptics hardware), so the flip is confirmed visually only: the
+        // tracklist/side header update in informative view, and the side toast
+        // in cover-focused view.
         Button {
             let flipped = model.flipToNextSide()
             if flipped, model.displayMode == .coverFocused, let side = model.currentSide {

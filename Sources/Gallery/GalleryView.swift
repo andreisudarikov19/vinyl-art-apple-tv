@@ -3,6 +3,9 @@ import SwiftData
 import SwiftUI
 
 struct GalleryView: View {
+    let authenticator: DiscogsAuthenticator
+    let client: DiscogsClient
+
     @Query(sort: \CachedRelease.dateAdded, order: .reverse)
     private var releases: [CachedRelease]
     @Query private var preferences: [UserPreferences]
@@ -11,6 +14,7 @@ struct GalleryView: View {
     @State private var sort: GallerySort = .recentlyAdded
     @State private var tag: String?
     @State private var selected: CachedRelease?
+    @State private var showingSettings = false
 
     private var arranged: [CachedRelease] {
         GalleryArranger.arrange(releases, sort: sort, tag: tag)
@@ -20,11 +24,13 @@ struct GalleryView: View {
         NavigationStack {
             ZStack {
                 Color.black.ignoresSafeArea()
-                if releases.isEmpty {
-                    EmptyCollectionView()
-                } else {
-                    VStack(spacing: 0) {
-                        header
+                VStack(spacing: 0) {
+                    header
+                    if releases.isEmpty {
+                        Spacer()
+                        EmptyCollectionView()
+                        Spacer()
+                    } else {
                         filterRow
                         collection
                     }
@@ -32,6 +38,9 @@ struct GalleryView: View {
             }
             .navigationDestination(item: $selected) { release in
                 RecordView(release: release)
+            }
+            .fullScreenCover(isPresented: $showingSettings) {
+                SettingsView(authenticator: authenticator, client: client)
             }
         }
         .task {
@@ -50,21 +59,29 @@ struct GalleryView: View {
                 .font(.largeTitle.weight(.semibold))
                 .foregroundStyle(.white)
             Spacer()
-            Menu {
-                Picker("Sort", selection: $sort) {
-                    ForEach(GallerySort.allCases, id: \.self) { option in
-                        Text(option.displayName).tag(option)
+            if !releases.isEmpty {
+                Menu {
+                    Picker("Sort", selection: $sort) {
+                        ForEach(GallerySort.allCases, id: \.self) { option in
+                            Text(option.displayName).tag(option)
+                        }
                     }
+                } label: {
+                    SwiftUI.Label("Sort: \(sort.displayName)", systemImage: "arrow.up.arrow.down")
                 }
-            } label: {
-                SwiftUI.Label("Sort: \(sort.displayName)", systemImage: "arrow.up.arrow.down")
+                Button {
+                    layout = layout == .grid ? .carousel : .grid
+                } label: {
+                    Image(systemName: layout == .grid ? "rectangle.split.3x1" : "square.grid.2x2")
+                }
+                .accessibilityLabel(layout == .grid ? "Switch to carousel" : "Switch to grid")
             }
             Button {
-                layout = layout == .grid ? .carousel : .grid
+                showingSettings = true
             } label: {
-                Image(systemName: layout == .grid ? "rectangle.split.3x1" : "square.grid.2x2")
+                Image(systemName: "gearshape")
             }
-            .accessibilityLabel(layout == .grid ? "Switch to carousel" : "Switch to grid")
+            .accessibilityLabel("Settings")
         }
         .padding(.horizontal, 60)
         .padding(.top, 40)
@@ -199,5 +216,10 @@ private struct EmptyCollectionView: View {
             thumbURL: ""
         ))
     }
-    return GalleryView().modelContainer(container)
+    let credentials = DiscogsCredentials(username: "preview", accessToken: "", accessTokenSecret: "")
+    return GalleryView(
+        authenticator: DiscogsAuthenticator(),
+        client: DiscogsClient(credentials: credentials)
+    )
+    .modelContainer(container)
 }
