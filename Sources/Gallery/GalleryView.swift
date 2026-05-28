@@ -10,7 +10,7 @@ struct GalleryView: View {
     private var releases: [CachedRelease]
     @Query private var preferences: [UserPreferences]
 
-    @State private var layout: GalleryLayout = .grid
+    @State private var layout: GalleryLayout = .coverFlow
     @State private var sort: GallerySort = .recentlyAdded
     @State private var tag: String?
     @State private var selected: CachedRelease?
@@ -70,11 +70,11 @@ struct GalleryView: View {
                     SwiftUI.Label("Sort: \(sort.displayName)", systemImage: "arrow.up.arrow.down")
                 }
                 Button {
-                    layout = layout == .grid ? .carousel : .grid
+                    layout = layout == .grid ? .coverFlow : .grid
                 } label: {
-                    Image(systemName: layout == .grid ? "rectangle.split.3x1" : "square.grid.2x2")
+                    Image(systemName: layout == .grid ? "square.stack" : "square.grid.2x2")
                 }
-                .accessibilityLabel(layout == .grid ? "Switch to carousel" : "Switch to grid")
+                .accessibilityLabel(layout == .grid ? "Switch to CoverFlow" : "Switch to grid")
             }
             Button {
                 showingSettings = true
@@ -125,15 +125,9 @@ struct GalleryView: View {
                 }
                 .padding(60)
             }
-        case .carousel:
-            ScrollView(.horizontal, showsIndicators: false) {
-                LazyHStack(spacing: 64) {
-                    ForEach(arranged) { release in
-                        GalleryTile(release: release, size: 420) { selected = release }
-                    }
-                }
-                .padding(80)
-            }
+        case .coverFlow:
+            CoverFlowView(releases: arranged) { selected = $0 }
+                .id("\(sort.rawValue)-\(tag ?? "all")")
         }
     }
 }
