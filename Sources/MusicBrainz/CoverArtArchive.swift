@@ -29,7 +29,9 @@ enum CoverArtArchive {
         let image = listing.images.first(where: { $0.front }) ?? listing.images.first
         guard let chosen = image else { return nil }
 
-        let raw = chosen.thumbnails.size500 ?? chosen.thumbnails.large ?? chosen.image
+        // Prefer the 1200px render for the full-screen cover view; fall back to
+        // the original upload (always present) when no 1200 thumbnail exists.
+        let raw = chosen.thumbnails.size1200 ?? chosen.image
         return httpsUpgraded(raw)
     }
 
@@ -50,12 +52,10 @@ enum CoverArtArchive {
         }
 
         struct Thumbnails: Decodable {
-            let size500: String?
-            let large: String?
+            let size1200: String?
 
             enum CodingKeys: String, CodingKey {
-                case size500 = "500"
-                case large
+                case size1200 = "1200"
             }
         }
     }

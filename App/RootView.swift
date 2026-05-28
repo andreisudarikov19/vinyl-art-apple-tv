@@ -44,6 +44,9 @@ private struct AuthenticatedRootView: View {
                 .environment(\.releaseDetailLoader) { [client] id in
                     try await client.release(id: id)
                 }
+                .environment(\.coverResolver) { [container = modelContext.container] id in
+                    await CoverArtService(modelContainer: container).resolveOne(releaseId: id)
+                }
                 .task { await refreshOnLaunch() }
         } else {
             BuildingLibraryView(credentials: credentials) {

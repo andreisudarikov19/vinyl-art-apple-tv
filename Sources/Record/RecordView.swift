@@ -17,10 +17,25 @@ extension EnvironmentValues {
     }
 }
 
+/// Resolves a single release's higher-quality cover on demand (MusicBrainz +
+/// Cover Art Archive), so opening a record swaps in a better cover right away
+/// instead of waiting for the background sweep to reach it.
+private struct CoverResolverKey: EnvironmentKey {
+    static let defaultValue: @Sendable (Int) async -> Void = { _ in }
+}
+
+extension EnvironmentValues {
+    var coverResolver: @Sendable (Int) async -> Void {
+        get { self[CoverResolverKey.self] }
+        set { self[CoverResolverKey.self] = newValue }
+    }
+}
+
 struct RecordView: View {
     let release: CachedRelease
 
     @Environment(\.releaseDetailLoader) private var loader
+    @Environment(\.coverResolver) private var resolveCover
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var viewModel: RecordViewModel?
@@ -41,6 +56,13 @@ struct RecordView: View {
             let model = RecordViewModel(release: release, loadDetail: loader)
             viewModel = model
             await model.load()
+        }
+        .task {
+            // Jump the cover-art queue for the record being viewed so a better
+            // cover replaces the Discogs one immediately. Skips releases already
+            // attempted (resolved or confirmed to have no Cover Art Archive art).
+            guard !release.coverLookupAttempted else { return }
+            await resolveCover(release.releaseId)
         }
     }
 
@@ -69,8 +91,8 @@ struct RecordView: View {
         .accessibilityLabel("\(release.artistDisplayName), \(release.title). Click to flip the record.")
         .onMoveCommand { direction in
             switch direction {
-            case .down: setMode(.coverFocused, on: model)
-            case .up: setMode(.informative, on: model)
+            case .up: setMode(.coverFocused, on: model)
+            case .down: setMode(.informative, on: model)
             default: break
             }
         }
@@ -85,7 +107,7 @@ struct RecordView: View {
                 .overlay(Color.black.opacity(0.6))
                 .ignoresSafeArea()
             HStack(spacing: 80) {
-                cover(model, size: 620)
+                cover(model, size: 620, cornerRadius: 16, shadowRadius: 40)
                 infoPanel(model)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -95,15 +117,23 @@ struct RecordView: View {
 
     private func coverFocusedStage(_ model: RecordViewModel) -> some View {
         ZStack {
-            AmbientGradientView(imageURL: release.preferredCoverURL)
-            cover(model, size: 820)
+            cover(model, size: nil)
+                .blur(radius: 90)
+                .overlay(Color.black.opacity(0.35))
+                .ignoresSafeArea()
+            cover(model, size: 880, shadowRadius: 30)
         }
     }
 
     // MARK: - Pieces
 
     @ViewBuilder
-    private func cover(_ model: RecordViewModel, size: CGFloat?) -> some View {
+    private func cover(
+        _ model: RecordViewModel,
+        size: CGFloat?,
+        cornerRadius: CGFloat = 0,
+        shadowRadius: CGFloat = 0
+    ) -> some View {
         LazyImage(url: release.preferredCoverURL) { state in
             if let image = state.image {
                 image.resizable().aspectRatio(contentMode: .fill)
@@ -113,8 +143,10 @@ struct RecordView: View {
         }
         .aspectRatio(1, contentMode: size == nil ? .fill : .fit)
         .frame(width: size, height: size)
-        .clipShape(RoundedRectangle(cornerRadius: size == nil ? 0 : 14))
-        .shadow(radius: size == nil ? 0 : 40)
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+        .shadow(radius: shadowRadius)
+        // Cross-fades when the cover URL changes (Discogs → resolved cover).
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.45), value: release.preferredCoverURL)
     }
 
     private func infoPanel(_ model: RecordViewModel) -> some View {
@@ -145,23 +177,15 @@ struct RecordView: View {
                 .foregroundStyle(.white.opacity(0.5))
         case .loaded:
             if let side = model.currentSide {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text(side.name)
-                        .font(.headline)
-                        .foregroundStyle(.white.opacity(0.5))
-                    ForEach(side.tracks) { track in
-                        HStack(spacing: 20) {
-                            Text(track.position)
-                                .frame(width: 70, alignment: .leading)
-                                .foregroundStyle(.white.opacity(0.5))
-                            Text(track.title)
-                                .foregroundStyle(.white)
-                            Spacer(minLength: 20)
-                            Text(track.duration)
-                                .foregroundStyle(.white.opacity(0.5))
-                                .monospacedDigit()
+                VStack(alignment: .leading, spacing: 0) {
+                    sideHeader(side)
+                    ForEach(Array(side.tracks.enumerated()), id: \.element.id) { index, track in
+                        if index > 0 {
+                            Divider()
+                                .overlay(.white.opacity(0.12))
+                                .padding(.leading, 56)
                         }
-                        .font(.title3)
+                        TrackRow(number: index + 1, title: track.title, duration: track.duration)
                     }
                 }
             } else {
@@ -169,6 +193,49 @@ struct RecordView: View {
                     .font(.title3)
                     .foregroundStyle(.white.opacity(0.5))
             }
+        }
+    }
+
+    private func sideHeader(_ side: RecordSide) -> some View {
+        HStack {
+            Text(side.name)
+                .font(.headline)
+                .foregroundStyle(.white.opacity(0.5))
+            Spacer()
+            if let total = Self.totalDuration(of: side) {
+                Text(total)
+                    .font(.headline)
+                    .foregroundStyle(.white.opacity(0.35))
+                    .monospacedDigit()
+            }
+        }
+        .padding(.bottom, 10)
+    }
+
+    /// Sum of a side's track durations, or nil if any track lacks a parseable
+    /// "m:ss" / "h:mm:ss" duration (so a partial total is never shown).
+    private static func totalDuration(of side: RecordSide) -> String? {
+        var total = 0
+        for track in side.tracks {
+            guard let secs = seconds(from: track.duration) else { return nil }
+            total += secs
+        }
+        guard total > 0 else { return nil }
+        return String(format: "%d:%02d", total / 60, total % 60)
+    }
+
+    private static func seconds(from duration: String) -> Int? {
+        let parts = duration.split(separator: ":")
+        guard !parts.isEmpty else { return nil }
+        var nums: [Int] = []
+        for part in parts {
+            guard let value = Int(part) else { return nil }
+            nums.append(value)
+        }
+        switch nums.count {
+        case 2: return nums[0] * 60 + nums[1]
+        case 3: return nums[0] * 3600 + nums[1] * 60 + nums[2]
+        default: return nil
         }
     }
 
@@ -212,5 +279,31 @@ struct RecordView: View {
             guard !Task.isCancelled else { return }
             withAnimation { toast = nil }
         }
+    }
+}
+
+/// One track row in the Apple Music–style side list: sequential number,
+/// title, and right-aligned duration.
+private struct TrackRow: View {
+    let number: Int
+    let title: String
+    let duration: String
+
+    var body: some View {
+        HStack(spacing: 20) {
+            Text("\(number)")
+                .foregroundStyle(.white.opacity(0.4))
+                .monospacedDigit()
+                .frame(width: 36, alignment: .leading)
+            Text(title)
+                .foregroundStyle(.white)
+                .lineLimit(1)
+            Spacer(minLength: 20)
+            Text(duration)
+                .foregroundStyle(.white.opacity(0.45))
+                .monospacedDigit()
+        }
+        .font(.title3)
+        .padding(.vertical, 14)
     }
 }

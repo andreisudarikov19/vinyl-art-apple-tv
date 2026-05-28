@@ -31,6 +31,20 @@ actor CoverArtService {
         }
     }
 
+    /// Resolves a single release on demand (e.g. when its record screen opens),
+    /// so its cover is replaced immediately rather than waiting for the sweep.
+    /// No-op if the release is missing or already attempted.
+    func resolveOne(releaseId: Int) async {
+        let descriptor = FetchDescriptor<CachedRelease>(
+            predicate: #Predicate { $0.releaseId == releaseId && !$0.coverLookupAttempted }
+        )
+        guard let release = try? modelContext.fetch(descriptor).first else { return }
+
+        release.resolvedCoverURL = await resolvedCover(for: release, using: MusicBrainzClient())
+        release.coverLookupAttempted = true
+        try? modelContext.save()
+    }
+
     private func resolvedCover(for release: CachedRelease, using musicBrainz: MusicBrainzClient) async -> String? {
         guard let match = await musicBrainz.bestMatch(
             artist: release.artistDisplayName,
