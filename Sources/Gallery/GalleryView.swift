@@ -31,7 +31,7 @@ struct GalleryView: View {
                 }
             }
             .navigationDestination(item: $selected) { release in
-                RecordPlaceholderView(release: release)
+                RecordView(release: release)
             }
         }
         .task {
@@ -160,25 +160,6 @@ private struct GalleryTile: View {
         .aspectRatio(1, contentMode: .fit)
         .frame(width: size, height: size)
         .clipShape(RoundedRectangle(cornerRadius: 10))
-    }
-}
-
-/// Temporary destination until the record screen is built.
-private struct RecordPlaceholderView: View {
-    let release: CachedRelease
-
-    var body: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
-            VStack(spacing: 16) {
-                Text(release.artistDisplayName).font(.title)
-                Text(release.title).font(.largeTitle.weight(.semibold))
-                Text("Record screen coming soon")
-                    .font(.title3)
-                    .foregroundStyle(.white.opacity(0.4))
-            }
-            .foregroundStyle(.white)
-        }
     }
 }
 
