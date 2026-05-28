@@ -86,6 +86,9 @@ struct RecordView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .buttonStyle(.plain)
+        // The whole screen is the (only) focusable control, so suppress the
+        // system focus ring that otherwise frames the screen edge.
+        .focusEffectDisabled()
         .accessibilityLabel("\(release.artistDisplayName), \(release.title)")
         .accessibilityHint("Swipe left or right to change sides. Swipe up for the cover, down for the tracklist.")
         .onMoveCommand { direction in
