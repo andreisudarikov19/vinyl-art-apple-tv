@@ -59,6 +59,15 @@ final class RecordViewModel {
         return true
     }
 
+    /// Steps back one side. Never wraps — the first side stays put. Returns
+    /// whether the side actually changed.
+    @discardableResult
+    func flipToPreviousSide() -> Bool {
+        guard currentSideIndex > 0 else { return false }
+        currentSideIndex -= 1
+        return true
+    }
+
     func enterCoverFocused() { displayMode = .coverFocused }
     func enterInformative() { displayMode = .informative }
 }
