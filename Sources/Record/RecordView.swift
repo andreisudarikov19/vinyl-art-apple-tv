@@ -221,7 +221,11 @@ struct RecordView: View {
             if let side = model.currentSide {
                 VStack(alignment: .leading, spacing: 0) {
                     sideHeader(side)
-                        .padding(.bottom, 14)
+                        .padding(.bottom, 12)
+                    Rectangle()
+                        .fill(.white.opacity(0.15))
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 1)
                     ForEach(Array(side.tracks.enumerated()), id: \.element.id) { index, track in
                         TrackRow(number: index + 1, title: track.title, duration: track.duration)
                     }
@@ -235,14 +239,14 @@ struct RecordView: View {
     }
 
     private func sideHeader(_ side: RecordSide) -> some View {
-        HStack {
+        HStack(alignment: .firstTextBaseline) {
             Text(side.name)
-                .font(.system(size: 26, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.55))
+                .font(.system(size: 36, weight: .semibold))
+                .foregroundStyle(.white.opacity(0.7))
             Spacer()
             if let total = Self.totalDuration(of: side) {
                 Text(total)
-                    .font(.system(size: 26))
+                    .font(.system(size: 28))
                     .foregroundStyle(.white.opacity(0.4))
                     .monospacedDigit()
             }
