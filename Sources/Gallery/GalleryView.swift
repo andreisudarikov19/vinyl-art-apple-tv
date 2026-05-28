@@ -47,21 +47,18 @@ struct GalleryView: View {
     /// One consistent control panel pinned to the top, floating over the
     /// (full-screen) collection. No title — the covers are the content.
     private var toolbar: some View {
-        HStack(spacing: 28) {
+        HStack(spacing: 18) {
             if !releases.isEmpty {
                 sortMenu
                 genreMenu
-            }
-            Spacer()
-            if !releases.isEmpty {
                 layoutToggle
             }
             settingsButton
         }
-        .padding(.horizontal, 60)
-        .padding(.vertical, 28)
-        .frame(maxWidth: .infinity)
-        .background(.ultraThinMaterial)
+        .padding(.horizontal, 28)
+        .padding(.vertical, 14)
+        .glassBar()
+        .padding(.top, 28)
     }
 
     private var sortMenu: some View {
@@ -137,6 +134,19 @@ struct GalleryView: View {
                     .padding(.bottom, 60)
                 }
             }
+        }
+    }
+}
+
+private extension View {
+    /// Wraps the toolbar in tvOS 26 Liquid Glass (a floating glass capsule);
+    /// falls back to a frosted material on tvOS 18–25.
+    @ViewBuilder
+    func glassBar() -> some View {
+        if #available(tvOS 26.0, *) {
+            self.glassEffect()
+        } else {
+            self.background(.ultraThinMaterial, in: Capsule())
         }
     }
 }
