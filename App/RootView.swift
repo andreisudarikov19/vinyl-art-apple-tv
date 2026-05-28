@@ -24,6 +24,12 @@ private struct AuthenticatedRootView: View {
 
     @Query private var preferences: [UserPreferences]
     @State private var didFinishBuild = false
+    @State private var client: DiscogsClient
+
+    init(credentials: DiscogsCredentials) {
+        self.credentials = credentials
+        _client = State(initialValue: DiscogsClient(credentials: credentials))
+    }
 
     private var libraryReady: Bool {
         didFinishBuild || preferences.first?.lastSyncDate != nil
@@ -32,6 +38,9 @@ private struct AuthenticatedRootView: View {
     var body: some View {
         if libraryReady {
             GalleryView()
+                .environment(\.releaseDetailLoader) { [client] id in
+                    try await client.release(id: id)
+                }
         } else {
             BuildingLibraryView(credentials: credentials) {
                 didFinishBuild = true
