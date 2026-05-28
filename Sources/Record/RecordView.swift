@@ -160,24 +160,27 @@ struct RecordView: View {
     }
 
     /// Album cover on black with a faded mirror reflection beneath it — the
-    /// look of older iTunes / Cover Flow visualizations.
+    /// look of older iTunes / Cover Flow visualizations. The cover is unframed
+    /// (no rounding, no shadow); the reflection dissolves fully into the black.
     private func reflectedCover(_ size: CGFloat) -> some View {
         VStack(spacing: 0) {
-            cover(size, cornerRadius: 4, shadowRadius: 24)
-            cover(size, cornerRadius: 4)
+            cover(size)
+            cover(size)
                 .scaleEffect(x: 1, y: -1)
+                .frame(height: size / 6, alignment: .top)
+                .clipped()
+                // Mask the clipped strip so it fades from a faint reflection at
+                // the top to fully transparent at the bottom — no hard cutoff.
                 .mask(
                     LinearGradient(
                         stops: [
-                            .init(color: .white.opacity(0.45), location: 0),
-                            .init(color: .clear, location: 0.55),
+                            .init(color: .white.opacity(0.4), location: 0),
+                            .init(color: .clear, location: 0.95),
                         ],
                         startPoint: .top,
                         endPoint: .bottom
                     )
                 )
-                .frame(height: size * 0.5, alignment: .top)
-                .clipped()
         }
     }
 
