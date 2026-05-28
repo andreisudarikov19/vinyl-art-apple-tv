@@ -59,6 +59,9 @@ struct GalleryView: View {
         .padding(.horizontal, 28)
         .padding(.vertical, 14)
         .glassBar()
+        // Keep left/right focus moves among the controls instead of escaping
+        // to the full-screen CoverFlow behind the bar.
+        .focusSection()
         .padding(.top, 28)
     }
 
