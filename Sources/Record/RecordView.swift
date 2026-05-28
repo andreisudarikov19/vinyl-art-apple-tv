@@ -73,10 +73,7 @@ struct RecordView: View {
         // tracklist/side header update in informative view, and the side toast
         // in cover-focused view.
         Button {
-            let flipped = model.flipToNextSide()
-            if flipped, model.displayMode == .coverFocused, let side = model.currentSide {
-                showToast(side.name)
-            }
+            changeSide(on: model, forward: true)
         } label: {
             ZStack {
                 if model.displayMode == .coverFocused {
@@ -86,13 +83,17 @@ struct RecordView: View {
                 }
                 toastOverlay
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(release.artistDisplayName), \(release.title). Click to flip the record.")
+        .accessibilityLabel("\(release.artistDisplayName), \(release.title)")
+        .accessibilityHint("Swipe left or right to change sides. Swipe up for the cover, down for the tracklist.")
         .onMoveCommand { direction in
             switch direction {
             case .up: setMode(.coverFocused, on: model)
             case .down: setMode(.informative, on: model)
+            case .right: changeSide(on: model, forward: true)
+            case .left: changeSide(on: model, forward: false)
             default: break
             }
         }
@@ -101,47 +102,56 @@ struct RecordView: View {
     // MARK: - Stages
 
     private func informativeStage(_ model: RecordViewModel) -> some View {
-        ZStack {
-            cover(model, size: nil)
-                .blur(radius: 60)
-                .overlay(Color.black.opacity(0.6))
-                .ignoresSafeArea()
-            HStack(spacing: 80) {
-                cover(model, size: 620, cornerRadius: 16, shadowRadius: 40)
-                infoPanel(model)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+        HStack(alignment: .top, spacing: 100) {
+            VStack(alignment: .leading, spacing: 24) {
+                cover(coverSide, cornerRadius: 12, shadowRadius: 30)
+                albumHeader
             }
-            .padding(100)
+            tracklist(model)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .padding(.horizontal, 100)
+        .padding(.top, 90)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(blurredBackdrop(dark: 0.5))
     }
 
     private func coverFocusedStage(_ model: RecordViewModel) -> some View {
-        ZStack {
-            cover(model, size: nil)
-                .blur(radius: 90)
-                .overlay(Color.black.opacity(0.35))
-                .ignoresSafeArea()
-            cover(model, size: 880, shadowRadius: 30)
-        }
+        reflectedCover(600)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.black.ignoresSafeArea())
     }
 
     // MARK: - Pieces
 
-    @ViewBuilder
-    private func cover(
-        _ model: RecordViewModel,
-        size: CGFloat?,
-        cornerRadius: CGFloat = 0,
-        shadowRadius: CGFloat = 0
-    ) -> some View {
+    private let coverSide: CGFloat = 520
+
+    /// Edge-to-edge blurred copy of the cover, the ambient backdrop behind both
+    /// stages. Fills the whole screen; `dark` scrim keeps foreground legible.
+    private func blurredBackdrop(dark: Double) -> some View {
         LazyImage(url: release.preferredCoverURL) { state in
             if let image = state.image {
-                image.resizable().aspectRatio(contentMode: .fill)
+                image.resizable().scaledToFill()
+            } else {
+                Color.black
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .clipped()
+        .blur(radius: 80, opaque: true)
+        .overlay(Color.black.opacity(dark))
+        .ignoresSafeArea()
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.45), value: release.preferredCoverURL)
+    }
+
+    private func cover(_ size: CGFloat, cornerRadius: CGFloat = 0, shadowRadius: CGFloat = 0) -> some View {
+        LazyImage(url: release.preferredCoverURL) { state in
+            if let image = state.image {
+                image.resizable().scaledToFill()
             } else {
                 Rectangle().fill(.white.opacity(0.06))
             }
         }
-        .aspectRatio(1, contentMode: size == nil ? .fill : .fit)
         .frame(width: size, height: size)
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
         .shadow(radius: shadowRadius)
@@ -149,48 +159,69 @@ struct RecordView: View {
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.45), value: release.preferredCoverURL)
     }
 
-    private func infoPanel(_ model: RecordViewModel) -> some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Text(release.artistDisplayName)
-                .font(.title2)
-                .foregroundStyle(.white.opacity(0.8))
-            Text(release.title)
-                .font(.system(size: 60, weight: .semibold))
-                .foregroundStyle(.white)
-            Text(subtitle)
-                .font(.title3)
-                .foregroundStyle(.white.opacity(0.6))
-            Divider().overlay(.white.opacity(0.2))
-            tracklist(model)
-            Spacer(minLength: 0)
+    /// Album cover on black with a faded mirror reflection beneath it — the
+    /// look of older iTunes / Cover Flow visualizations.
+    private func reflectedCover(_ size: CGFloat) -> some View {
+        VStack(spacing: 0) {
+            cover(size, cornerRadius: 4, shadowRadius: 24)
+            cover(size, cornerRadius: 4)
+                .scaleEffect(x: 1, y: -1)
+                .mask(
+                    LinearGradient(
+                        stops: [
+                            .init(color: .white.opacity(0.45), location: 0),
+                            .init(color: .clear, location: 0.55),
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .frame(height: size * 0.5, alignment: .top)
+                .clipped()
         }
+    }
+
+    private var albumHeader: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(release.title)
+                .font(.system(size: 42, weight: .bold))
+                .foregroundStyle(.white)
+                .lineLimit(2)
+            Text(release.artistDisplayName)
+                .font(.system(size: 31))
+                .foregroundStyle(.white.opacity(0.7))
+                .lineLimit(1)
+            if !subtitle.isEmpty {
+                Text(subtitle)
+                    .font(.system(size: 26))
+                    .foregroundStyle(.white.opacity(0.5))
+                    .lineLimit(1)
+            }
+        }
+        .frame(width: coverSide, alignment: .leading)
     }
 
     @ViewBuilder
     private func tracklist(_ model: RecordViewModel) -> some View {
         switch model.loadState {
         case .loading:
-            ProgressView().controlSize(.large).padding(.top, 20)
+            ProgressView().controlSize(.large)
         case .failed:
             Text("Couldn't load the tracklist.")
-                .font(.title3)
+                .font(.system(size: 30))
                 .foregroundStyle(.white.opacity(0.5))
         case .loaded:
             if let side = model.currentSide {
                 VStack(alignment: .leading, spacing: 0) {
                     sideHeader(side)
+                        .padding(.bottom, 14)
                     ForEach(Array(side.tracks.enumerated()), id: \.element.id) { index, track in
-                        if index > 0 {
-                            Divider()
-                                .overlay(.white.opacity(0.12))
-                                .padding(.leading, 56)
-                        }
                         TrackRow(number: index + 1, title: track.title, duration: track.duration)
                     }
                 }
             } else {
                 Text("No tracklist available.")
-                    .font(.title3)
+                    .font(.system(size: 30))
                     .foregroundStyle(.white.opacity(0.5))
             }
         }
@@ -199,17 +230,16 @@ struct RecordView: View {
     private func sideHeader(_ side: RecordSide) -> some View {
         HStack {
             Text(side.name)
-                .font(.headline)
-                .foregroundStyle(.white.opacity(0.5))
+                .font(.system(size: 26, weight: .semibold))
+                .foregroundStyle(.white.opacity(0.55))
             Spacer()
             if let total = Self.totalDuration(of: side) {
                 Text(total)
-                    .font(.headline)
-                    .foregroundStyle(.white.opacity(0.35))
+                    .font(.system(size: 26))
+                    .foregroundStyle(.white.opacity(0.4))
                     .monospacedDigit()
             }
         }
-        .padding(.bottom, 10)
     }
 
     /// Sum of a side's track durations, or nil if any track lacks a parseable
@@ -271,6 +301,15 @@ struct RecordView: View {
         }
     }
 
+    /// Switches to the next/previous side. In cover-focused view the overlay is
+    /// hidden, so a brief "Side B" toast confirms the change.
+    private func changeSide(on model: RecordViewModel, forward: Bool) {
+        let moved = forward ? model.flipToNextSide() : model.flipToPreviousSide()
+        if moved, model.displayMode == .coverFocused, let side = model.currentSide {
+            showToast(side.name)
+        }
+    }
+
     private func showToast(_ text: String) {
         toastTask?.cancel()
         withAnimation { toast = text }
@@ -282,28 +321,30 @@ struct RecordView: View {
     }
 }
 
-/// One track row in the Apple Music–style side list: sequential number,
-/// title, and right-aligned duration.
+/// One track row in the Apple Music–style side list: sequential number, title,
+/// and right-aligned duration. No separators — matches Music on tvOS.
 private struct TrackRow: View {
     let number: Int
     let title: String
     let duration: String
 
     var body: some View {
-        HStack(spacing: 20) {
+        HStack(spacing: 24) {
             Text("\(number)")
+                .font(.system(size: 28))
                 .foregroundStyle(.white.opacity(0.4))
                 .monospacedDigit()
-                .frame(width: 36, alignment: .leading)
+                .frame(width: 44, alignment: .leading)
             Text(title)
+                .font(.system(size: 33))
                 .foregroundStyle(.white)
                 .lineLimit(1)
-            Spacer(minLength: 20)
+            Spacer(minLength: 24)
             Text(duration)
-                .foregroundStyle(.white.opacity(0.45))
+                .font(.system(size: 28))
+                .foregroundStyle(.white.opacity(0.4))
                 .monospacedDigit()
         }
-        .font(.title3)
-        .padding(.vertical, 14)
+        .padding(.vertical, 16)
     }
 }

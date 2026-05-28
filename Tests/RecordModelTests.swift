@@ -83,6 +83,19 @@ struct RecordViewModelTests {
         #expect(model.currentSide?.name == "Side B")
     }
 
+    @Test func flipBackStepsAndStopsAtFirstSide() async throws {
+        let detail = try makeReleaseDetail(tracklist: [track("A1", "a"), track("B1", "b")])
+        let model = RecordViewModel(release: sampleRelease()) { _ in detail }
+        await model.load()
+
+        #expect(model.flipToPreviousSide() == false) // already on the first side
+        model.flipToNextSide()
+        #expect(model.currentSide?.name == "Side B")
+        #expect(model.flipToPreviousSide() == true)
+        #expect(model.currentSide?.name == "Side A")
+        #expect(model.flipToPreviousSide() == false)
+    }
+
     @Test func loadFailureSetsFailedState() async {
         let model = RecordViewModel(release: sampleRelease()) { _ in
             throw DiscogsClientError.rateLimited
