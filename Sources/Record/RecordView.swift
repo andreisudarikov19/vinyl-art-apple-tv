@@ -85,9 +85,10 @@ struct RecordView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .buttonStyle(.plain)
-        // The whole screen is the (only) focusable control, so suppress the
-        // system focus ring that otherwise frames the screen edge.
+        // The whole screen is the (only) focusable control. `.plain` +
+        // focusEffectDisabled still leaves a focus ring framing the screen
+        // edge on tvOS, so use a custom style that renders only the label.
+        .buttonStyle(AmbientButtonStyle())
         .focusEffectDisabled()
         .accessibilityLabel("\(release.artistDisplayName), \(release.title)")
         .accessibilityHint("Swipe left or right to change sides. Swipe up for the cover, down for the tracklist.")
@@ -324,6 +325,15 @@ struct RecordView: View {
             guard !Task.isCancelled else { return }
             withAnimation { toast = nil }
         }
+    }
+}
+
+/// Renders only the label — no focus ring, scale, or other chrome. The record
+/// screen is one full-screen control, so any focus decoration just draws an
+/// unwanted frame at the screen edge.
+private struct AmbientButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
     }
 }
 
