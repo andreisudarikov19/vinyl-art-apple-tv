@@ -3,7 +3,9 @@ import SwiftData
 
 enum GalleryLayout: String, Codable, CaseIterable, Sendable {
     case grid
-    case carousel
+    // Stored rawValue stays "carousel" so preferences saved before the
+    // CoverFlow rename still decode.
+    case coverFlow = "carousel"
 }
 
 enum GallerySort: String, Codable, CaseIterable, Sendable {
@@ -30,7 +32,7 @@ final class UserPreferences {
     init(
         discogsUsername: String = "",
         lastSyncDate: Date? = nil,
-        galleryLayout: GalleryLayout = .grid,
+        galleryLayout: GalleryLayout = .coverFlow,
         gallerySort: GallerySort = .recentlyAdded
     ) {
         self.discogsUsername = discogsUsername
