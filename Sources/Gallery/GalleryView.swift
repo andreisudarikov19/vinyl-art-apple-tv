@@ -22,19 +22,10 @@ struct GalleryView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
+            ZStack(alignment: .top) {
                 Color.black.ignoresSafeArea()
-                VStack(spacing: 0) {
-                    header
-                    if releases.isEmpty {
-                        Spacer()
-                        EmptyCollectionView()
-                        Spacer()
-                    } else {
-                        filterRow
-                        collection
-                    }
-                }
+                content
+                toolbar
             }
             .navigationDestination(item: $selected) { release in
                 RecordView(release: release)
@@ -53,81 +44,99 @@ struct GalleryView: View {
         .onChange(of: sort) { _, new in preferences.first?.gallerySort = new }
     }
 
-    private var header: some View {
-        HStack(alignment: .firstTextBaseline) {
-            Text("Your Collection")
-                .font(.largeTitle.weight(.semibold))
-                .foregroundStyle(.white)
+    /// One consistent control panel pinned to the top, floating over the
+    /// (full-screen) collection. No title — the covers are the content.
+    private var toolbar: some View {
+        HStack(spacing: 28) {
+            if !releases.isEmpty {
+                sortMenu
+                genreMenu
+            }
             Spacer()
             if !releases.isEmpty {
-                Menu {
-                    Picker("Sort", selection: $sort) {
-                        ForEach(GallerySort.allCases, id: \.self) { option in
-                            Text(option.displayName).tag(option)
-                        }
-                    }
-                } label: {
-                    SwiftUI.Label("Sort: \(sort.displayName)", systemImage: "arrow.up.arrow.down")
-                }
-                Button {
-                    layout = layout == .grid ? .coverFlow : .grid
-                } label: {
-                    Image(systemName: layout == .grid ? "square.stack" : "square.grid.2x2")
-                }
-                .accessibilityLabel(layout == .grid ? "Switch to CoverFlow" : "Switch to grid")
+                layoutToggle
             }
-            Button {
-                showingSettings = true
-            } label: {
-                Image(systemName: "gearshape")
-            }
-            .accessibilityLabel("Settings")
+            settingsButton
         }
         .padding(.horizontal, 60)
-        .padding(.top, 40)
+        .padding(.vertical, 28)
+        .frame(maxWidth: .infinity)
+        .background(.ultraThinMaterial)
+    }
+
+    private var sortMenu: some View {
+        Menu {
+            Picker("Sort", selection: $sort) {
+                ForEach(GallerySort.allCases, id: \.self) { option in
+                    Text(option.displayName).tag(option)
+                }
+            }
+        } label: {
+            SwiftUI.Label("Sort: \(sort.displayName)", systemImage: "arrow.up.arrow.down")
+        }
     }
 
     @ViewBuilder
-    private var filterRow: some View {
+    private var genreMenu: some View {
         let tags = GalleryArranger.filterTags(releases)
         if !tags.isEmpty {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 16) {
-                    chip(title: "All", isSelected: tag == nil) { tag = nil }
+            Menu {
+                Picker("Genre", selection: $tag) {
+                    Text("All Genres").tag(String?.none)
                     ForEach(tags, id: \.self) { name in
-                        chip(title: name, isSelected: tag == name) { tag = name }
+                        Text(name).tag(Optional(name))
                     }
                 }
-                .padding(.horizontal, 60)
-                .padding(.vertical, 24)
+            } label: {
+                SwiftUI.Label(tag ?? "All Genres", systemImage: "line.3.horizontal.decrease.circle")
             }
         }
     }
 
-    private func chip(title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: action) { Text(title) }
-            .buttonStyle(.bordered)
-            .tint(isSelected ? .white : .secondary)
+    private var layoutToggle: some View {
+        Button {
+            layout = layout == .grid ? .coverFlow : .grid
+        } label: {
+            Image(systemName: layout == .grid ? "square.stack" : "square.grid.2x2")
+        }
+        .accessibilityLabel(layout == .grid ? "Switch to CoverFlow" : "Switch to grid")
+    }
+
+    private var settingsButton: some View {
+        Button {
+            showingSettings = true
+        } label: {
+            Image(systemName: "gearshape")
+        }
+        .accessibilityLabel("Settings")
     }
 
     @ViewBuilder
-    private var collection: some View {
-        switch layout {
-        case .grid:
-            ScrollView {
-                LazyVGrid(
-                    columns: [GridItem(.adaptive(minimum: 280), spacing: 50)],
-                    spacing: 56
-                ) {
-                    ForEach(arranged) { release in
-                        GalleryTile(release: release) { selected = release }
+    private var content: some View {
+        if releases.isEmpty {
+            EmptyCollectionView()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            switch layout {
+            case .coverFlow:
+                // Fills the entire screen; the toolbar floats over the top.
+                CoverFlowView(releases: arranged) { selected = $0 }
+                    .id("\(sort.rawValue)-\(tag ?? "all")")
+            case .grid:
+                ScrollView {
+                    LazyVGrid(
+                        columns: [GridItem(.adaptive(minimum: 280), spacing: 50)],
+                        spacing: 56
+                    ) {
+                        ForEach(arranged) { release in
+                            GalleryTile(release: release) { selected = release }
+                        }
                     }
+                    .padding(.horizontal, 60)
+                    .padding(.top, 150) // clear the floating toolbar
+                    .padding(.bottom, 60)
                 }
-                .padding(60)
             }
-        case .coverFlow:
-            CoverFlowView(releases: arranged) { selected = $0 }
-                .id("\(sort.rawValue)-\(tag ?? "all")")
         }
     }
 }
