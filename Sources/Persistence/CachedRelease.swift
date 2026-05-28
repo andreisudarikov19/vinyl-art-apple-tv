@@ -101,6 +101,25 @@ extension CachedRelease {
         )
     }
 
+    /// Refreshes the Discogs-sourced fields from a collection entry on
+    /// re-sync, deliberately preserving `resolvedCoverURL` and
+    /// `coverLookupAttempted`, which are owned by the cover-art pipeline.
+    func apply(_ release: CollectionRelease) {
+        let info = release.basicInformation
+        instanceId = release.instanceId
+        title = info.title
+        artistDisplayName = info.artistDisplayName
+        year = info.year
+        dateAdded = Self.parseDate(release.dateAdded)
+        masterId = info.masterId
+        labelName = info.primaryLabel?.name
+        catalogNumber = info.primaryLabel?.catno
+        genres = info.genres
+        styles = info.styles
+        discogsCoverURL = info.coverImage
+        thumbURL = info.thumb
+    }
+
     // ISO8601DateFormatter is thread-safe for parsing, so a single shared
     // instance is fine despite not being Sendable.
     nonisolated(unsafe) private static let dateAddedFormatter: ISO8601DateFormatter = {

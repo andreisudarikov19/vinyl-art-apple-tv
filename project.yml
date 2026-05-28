@@ -44,3 +44,15 @@ targets:
         product: Nuke
       - package: Nuke
         product: NukeUI
+
+  VinylForAppleTVTests:
+    type: bundle.unit-test
+    platform: tvOS
+    sources:
+      - path: Tests
+    dependencies:
+      - target: VinylForAppleTV
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.andreisudarikov.VinylForAppleTVTests
+        GENERATE_INFOPLIST_FILE: YES
