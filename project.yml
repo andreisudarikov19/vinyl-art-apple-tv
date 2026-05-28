@@ -28,6 +28,8 @@ targets:
     sources:
       - path: App
       - path: Sources
+        excludes:
+          - "**/*.example.swift"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.andreisudarikov.VinylForAppleTV
