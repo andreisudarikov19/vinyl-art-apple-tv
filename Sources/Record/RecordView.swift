@@ -85,9 +85,10 @@ struct RecordView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .buttonStyle(.plain)
-        // The whole screen is the (only) focusable control, so suppress the
-        // system focus ring that otherwise frames the screen edge.
+        // The whole screen is the (only) focusable control. `.plain` +
+        // focusEffectDisabled still leaves a focus ring framing the screen
+        // edge on tvOS, so use a custom style that renders only the label.
+        .buttonStyle(AmbientButtonStyle())
         .focusEffectDisabled()
         .accessibilityLabel("\(release.artistDisplayName), \(release.title)")
         .accessibilityHint("Swipe left or right to change sides. Swipe up for the cover, down for the tracklist.")
@@ -220,7 +221,11 @@ struct RecordView: View {
             if let side = model.currentSide {
                 VStack(alignment: .leading, spacing: 0) {
                     sideHeader(side)
-                        .padding(.bottom, 14)
+                        .padding(.bottom, 12)
+                    Rectangle()
+                        .fill(.white.opacity(0.15))
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 1)
                     ForEach(Array(side.tracks.enumerated()), id: \.element.id) { index, track in
                         TrackRow(number: index + 1, title: track.title, duration: track.duration)
                     }
@@ -234,14 +239,14 @@ struct RecordView: View {
     }
 
     private func sideHeader(_ side: RecordSide) -> some View {
-        HStack {
+        HStack(alignment: .firstTextBaseline) {
             Text(side.name)
-                .font(.system(size: 26, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.55))
+                .font(.system(size: 36, weight: .semibold))
+                .foregroundStyle(.white.opacity(0.7))
             Spacer()
             if let total = Self.totalDuration(of: side) {
                 Text(total)
-                    .font(.system(size: 26))
+                    .font(.system(size: 28))
                     .foregroundStyle(.white.opacity(0.4))
                     .monospacedDigit()
             }
@@ -324,6 +329,15 @@ struct RecordView: View {
             guard !Task.isCancelled else { return }
             withAnimation { toast = nil }
         }
+    }
+}
+
+/// Renders only the label — no focus ring, scale, or other chrome. The record
+/// screen is one full-screen control, so any focus decoration just draws an
+/// unwanted frame at the screen edge.
+private struct AmbientButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
     }
 }
 
