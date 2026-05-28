@@ -15,6 +15,7 @@ struct GalleryView: View {
     @State private var tag: String?
     @State private var selected: CachedRelease?
     @State private var showingSettings = false
+    @FocusState private var toolbarFocused: Bool
 
     private var arranged: [CachedRelease] {
         GalleryArranger.arrange(releases, sort: sort, tag: tag)
@@ -71,6 +72,7 @@ struct GalleryView: View {
         } label: {
             SwiftUI.Label("Sort: \(sort.displayName)", systemImage: "arrow.up.arrow.down")
         }
+        .focused($toolbarFocused) // target for swipe-up from the CoverFlow
     }
 
     @ViewBuilder
@@ -117,8 +119,12 @@ struct GalleryView: View {
             switch layout {
             case .coverFlow:
                 // Fills the entire screen; the toolbar floats over the top.
-                CoverFlowView(releases: arranged) { selected = $0 }
-                    .id("\(sort.rawValue)-\(tag ?? "all")")
+                CoverFlowView(
+                    releases: arranged,
+                    onOpen: { selected = $0 },
+                    onMoveUp: { toolbarFocused = true }
+                )
+                .id("\(sort.rawValue)-\(tag ?? "all")")
             case .grid:
                 ScrollView {
                     LazyVGrid(

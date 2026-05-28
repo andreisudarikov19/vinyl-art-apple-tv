@@ -10,6 +10,9 @@ import SwiftUI
 struct CoverFlowView: View {
     let releases: [CachedRelease]
     var onOpen: (CachedRelease) -> Void
+    /// Called on swipe-up. This view's onMoveCommand consumes the up gesture,
+    /// so the parent uses this to move focus to the toolbar explicitly.
+    var onMoveUp: () -> Void = {}
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var selectedIndex = 0
@@ -52,7 +55,8 @@ struct CoverFlowView: View {
             switch direction {
             case .left: move(-1)
             case .right: move(1)
-            default: break // let up/down move focus to the toolbar/filters
+            case .up: onMoveUp() // onMoveCommand consumes up; hand focus to the toolbar
+            default: break
             }
         }
         .onAppear { focused = true }
