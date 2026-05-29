@@ -8,8 +8,12 @@ private func makeReleaseDetail(tracklist: [[String: Any]]) throws -> ReleaseDeta
     return try JSONDecoder().decode(ReleaseDetail.self, from: data)
 }
 
-private func track(_ position: String, _ title: String, duration: String = "3:00", type: String = "track") -> [String: Any] {
-    ["position": position, "title": title, "duration": duration, "type_": type]
+private func track(_ position: String, _ title: String, duration: String = "3:00", type: String = "track", composedBy: [String] = []) -> [String: Any] {
+    var entry: [String: Any] = ["position": position, "title": title, "duration": duration, "type_": type]
+    if !composedBy.isEmpty {
+        entry["extraartists"] = composedBy.map { ["name": $0, "role": "Composed By"] }
+    }
+    return entry
 }
 
 struct RecordSidesTests {
@@ -37,6 +41,16 @@ struct RecordSidesTests {
         let sides = RecordSides.from(detail.tracklist)
         #expect(sides.count == 1)
         #expect(sides[0].tracks.map(\.title) == ["One"])
+    }
+
+    @Test func extractsComposedByCredits() throws {
+        let detail = try makeReleaseDetail(tracklist: [
+            track("A1", "Spain", composedBy: ["Chick Corea", "Joaquín Rodrigo"]),
+            track("A2", "Crystal Silence"),
+        ])
+        let sides = RecordSides.from(detail.tracklist)
+        #expect(sides[0].tracks[0].composers == "Chick Corea, Joaquín Rodrigo")
+        #expect(sides[0].tracks[1].composers == "")
     }
 
     @Test func numericPositionsCollapseToSingleSide() throws {

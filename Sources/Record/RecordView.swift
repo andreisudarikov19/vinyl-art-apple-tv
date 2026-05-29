@@ -227,7 +227,7 @@ struct RecordView: View {
                         .frame(maxWidth: .infinity)
                         .frame(height: 1)
                     ForEach(Array(side.tracks.enumerated()), id: \.element.id) { index, track in
-                        TrackRow(number: index + 1, title: track.title, duration: track.duration)
+                        TrackRow(number: index + 1, title: track.title, composers: track.composers, duration: track.duration)
                     }
                 }
             } else {
@@ -346,6 +346,7 @@ private struct AmbientButtonStyle: ButtonStyle {
 private struct TrackRow: View {
     let number: Int
     let title: String
+    let composers: String
     let duration: String
 
     var body: some View {
@@ -355,10 +356,19 @@ private struct TrackRow: View {
                 .foregroundStyle(.white.opacity(0.4))
                 .monospacedDigit()
                 .frame(width: 44, alignment: .leading)
-            Text(title)
-                .font(.system(size: 33))
-                .foregroundStyle(.white)
-                .lineLimit(1)
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                Text(title)
+                    .font(.system(size: 33))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .layoutPriority(1)
+                if !composers.isEmpty {
+                    Text("by \(composers)")
+                        .font(.system(size: 24))
+                        .foregroundStyle(.white.opacity(0.4))
+                        .lineLimit(1)
+                }
+            }
             Spacer(minLength: 24)
             Text(duration)
                 .font(.system(size: 28))
