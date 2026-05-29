@@ -68,8 +68,10 @@ struct GalleryView: View {
         .padding(.horizontal, 28)
         .padding(.vertical, 14)
         .glassBar()
-        // Keep left/right focus moves among the controls instead of escaping
-        // to the full-screen CoverFlow behind the bar.
+        // Keep left/right focus moves among the controls. Without this the
+        // full-screen view behind the bar (CoverFlow's giant button, or any
+        // mosaic tile) wins horizontal focus moves and traps the user. Down
+        // escapes via the mosaic's focus trampoline / CoverFlow's geometry.
         .focusSection()
         .padding(.top, 28)
     }
@@ -245,7 +247,11 @@ struct GalleryView: View {
                 )
                 .id("\(sort.rawValue)-\(tag ?? "all")")
             case .grid:
-                MosaicGridView(releases: arranged) { selected = $0 }
+                MosaicGridView(
+                    releases: arranged,
+                    onOpen: { selected = $0 },
+                    onMoveUp: { toolbarFocused = true }
+                )
             }
         }
     }
@@ -262,6 +268,7 @@ private extension View {
             self.background(.ultraThinMaterial, in: Capsule())
         }
     }
+
 }
 
 private struct EmptyCollectionView: View {

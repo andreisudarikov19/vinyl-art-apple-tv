@@ -11,10 +11,16 @@ import SwiftUI
 struct MosaicGridView: View {
     let releases: [CachedRelease]
     var onOpen: (CachedRelease) -> Void
+    /// Called when focus tries to leave the top row of tiles upward. The
+    /// parent uses this to move focus to the toolbar — the focus engine
+    /// doesn't reliably step out of the grid into the toolbar on its own.
+    var onMoveUp: () -> Void = {}
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @FocusState private var focusedID: Int?
+    @FocusState private var trampolineFocused: Bool
     @State private var glowColor: Color = Color(white: 0.15)
+    @State private var trampolineArmed: Bool = true
 
     // Tuning knobs
     private let columnCount = 7
@@ -33,23 +39,18 @@ struct MosaicGridView: View {
     }
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
             // Same backdrop as CoverFlow: black with a soft glow tinted by the
             // focused cover, so the empty top/bottom of the wall isn't dead black.
             CollectionGlowBackground(glowColor: glowColor)
             ScrollView {
                 LazyVGrid(columns: columns, spacing: gutter) {
-                    ForEach(releases) { release in
-                        tile(release)
+                    ForEach(Array(releases.enumerated()), id: \.element.releaseId) { index, release in
+                        tile(release, at: index)
                     }
                 }
                 .padding(.top, 150) // clear the floating toolbar
                 .padding(.bottom, 140)
-                // Group the tiles into a focus section so a "down" press from
-                // the toolbar (also a focus section) sees the grid as a single
-                // adjacent target, instead of struggling to pick one tile out
-                // of dozens and staying trapped in the toolbar.
-                .focusSection()
                 .overlayPreferenceValue(FocusedTileBounds.self) { anchor in
                     GeometryReader { proxy in
                         if let anchor, let release = focusedRelease {
@@ -66,6 +67,34 @@ struct MosaicGridView: View {
                     }
                 }
             }
+            // Focus trampoline: an invisible focusable strip occupying the gap
+            // between the floating toolbar and the first row of tiles. The
+            // tvOS focus engine doesn't reliably step focus from the toolbar
+            // into the dense grid of small tile buttons inside a ScrollView,
+            // so we give it a single, large, geometrically adjacent target
+            // here and redirect to the first tile once focus arrives. The
+            // strip is fully REMOVED from the hierarchy once a tile is
+            // focused (not just disabled) so it can't act as a focus barrier
+            // when the user later moves up from the grid back to the toolbar.
+            if trampolineArmed {
+                Color.clear
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 50)
+                    .padding(.top, 100)
+                    .focusable()
+                    .focused($trampolineFocused)
+                    .focusEffectDisabled()
+                    .onChange(of: trampolineFocused) { _, focused in
+                        guard focused, let first = releases.first?.releaseId else { return }
+                        focusedID = first
+                        trampolineArmed = false
+                    }
+            }
+        }
+        .onChange(of: focusedID) { _, new in
+            // When focus has left the grid (back up to the toolbar), re-arm
+            // the trampoline so the next down-press is caught again.
+            if new == nil { trampolineArmed = true }
         }
         // Edge-to-edge: drop the safe-area (overscan) inset so the wall fills
         // the full screen width.
@@ -82,7 +111,7 @@ struct MosaicGridView: View {
 
     // Flat tile in the wall. Reports its bounds (only while focused) so the
     // overlay can draw the magnified lens at exactly this position.
-    private func tile(_ release: CachedRelease) -> some View {
+    private func tile(_ release: CachedRelease, at index: Int) -> some View {
         Button {
             onOpen(release)
         } label: {
@@ -95,6 +124,38 @@ struct MosaicGridView: View {
         .focusEffectDisabled()
         .focused($focusedID, equals: release.releaseId)
         .accessibilityLabel("\(release.artistDisplayName) – \(release.title)")
+        // The focus engine doesn't reliably step focus out of these tiles to
+        // the toolbar above, and onMoveCommand consumes all directions, so
+        // each tile drives its own navigation: arithmetic for in-grid moves,
+        // a callback to the parent for escaping upward to the toolbar.
+        .onMoveCommand { direction in
+            move(from: index, direction: direction)
+        }
+    }
+
+    private func move(from index: Int, direction: MoveCommandDirection) {
+        let col = index % columnCount
+        let count = releases.count
+        switch direction {
+        case .left:
+            if col > 0 { focusedID = releases[index - 1].releaseId }
+        case .right:
+            if col + 1 < columnCount, index + 1 < count {
+                focusedID = releases[index + 1].releaseId
+            }
+        case .up:
+            let above = index - columnCount
+            if above >= 0 {
+                focusedID = releases[above].releaseId
+            } else {
+                onMoveUp() // escape to the toolbar
+            }
+        case .down:
+            let below = index + columnCount
+            if below < count { focusedID = releases[below].releaseId }
+        @unknown default:
+            break
+        }
     }
 
     private func cover(_ release: CachedRelease) -> some View {
