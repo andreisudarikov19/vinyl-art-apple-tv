@@ -245,19 +245,7 @@ struct GalleryView: View {
                 )
                 .id("\(sort.rawValue)-\(tag ?? "all")")
             case .grid:
-                ScrollView {
-                    LazyVGrid(
-                        columns: [GridItem(.adaptive(minimum: 280), spacing: 50)],
-                        spacing: 56
-                    ) {
-                        ForEach(arranged) { release in
-                            GalleryTile(release: release) { selected = release }
-                        }
-                    }
-                    .padding(.horizontal, 60)
-                    .padding(.top, 150) // clear the floating toolbar
-                    .padding(.bottom, 60)
-                }
+                MosaicGridView(releases: arranged) { selected = $0 }
             }
         }
     }
@@ -273,48 +261,6 @@ private extension View {
         } else {
             self.background(.ultraThinMaterial, in: Capsule())
         }
-    }
-}
-
-private struct GalleryTile: View {
-    let release: CachedRelease
-    var size: CGFloat = 280
-    var onOpen: () -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Button(action: onOpen) { cover }
-                .buttonStyle(.card)
-            Text(release.artistDisplayName)
-                .font(.headline)
-                .lineLimit(1)
-                .foregroundStyle(.white)
-            Text(release.title)
-                .font(.subheadline)
-                .lineLimit(1)
-                .foregroundStyle(.white.opacity(0.6))
-        }
-        .frame(width: size)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(release.artistDisplayName) – \(release.title)")
-    }
-
-    private var cover: some View {
-        LazyImage(url: release.preferredCoverURL) { state in
-            if let image = state.image {
-                image.resizable().aspectRatio(contentMode: .fill)
-            } else {
-                ZStack {
-                    Rectangle().fill(.white.opacity(0.08))
-                    Image(systemName: "opticaldisc")
-                        .font(.system(size: size / 4))
-                        .foregroundStyle(.white.opacity(0.3))
-                }
-            }
-        }
-        .aspectRatio(1, contentMode: .fit)
-        .frame(width: size, height: size)
-        .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 }
 
