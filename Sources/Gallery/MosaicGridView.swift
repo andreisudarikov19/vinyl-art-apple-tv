@@ -30,11 +30,13 @@ struct MosaicGridView: View {
                         tile(release)
                     }
                 }
-                .padding(.horizontal, 40)
                 .padding(.top, 150) // clear the floating toolbar
                 .padding(.bottom, 140)
             }
         }
+        // Edge-to-edge: drop the safe-area (overscan) inset so the wall fills
+        // the full screen width.
+        .ignoresSafeArea(.container, edges: .horizontal)
     }
 
     @ViewBuilder
