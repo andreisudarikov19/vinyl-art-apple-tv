@@ -3,7 +3,7 @@ import Foundation
 extension GallerySort {
     var displayName: String {
         switch self {
-        case .recentlyAdded: return "Recently Added"
+        case .recentlyAdded: return "Recently added"
         case .artist: return "Artist"
         case .album: return "Album"
         case .year: return "Year"

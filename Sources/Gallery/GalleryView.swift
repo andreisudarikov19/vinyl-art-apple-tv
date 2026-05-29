@@ -90,13 +90,13 @@ struct GalleryView: View {
         if !tags.isEmpty {
             Menu {
                 Picker("Genre", selection: $tag) {
-                    Text("All Genres").tag(String?.none)
+                    Text("All genres").tag(String?.none)
                     ForEach(tags, id: \.self) { name in
                         Text(name).tag(Optional(name))
                     }
                 }
             } label: {
-                SwiftUI.Label(tag ?? "All Genres", systemImage: "line.3.horizontal.decrease.circle")
+                SwiftUI.Label(tag ?? "All genres", systemImage: "line.3.horizontal.decrease.circle")
             }
         }
     }
@@ -115,19 +115,20 @@ struct GalleryView: View {
             Button {
                 Task { await runRefresh() }
             } label: {
-                SwiftUI.Label("Refresh Collection", systemImage: "arrow.clockwise")
+                SwiftUI.Label("Refresh collection", systemImage: "arrow.clockwise")
             }
             .disabled(isRefreshing)
             Section {
+                Text("Account: \(accountName)")
                 Button {
                     Task { await signOut(erase: false) }
                 } label: {
-                    SwiftUI.Label("Sign Out (Keep Library)", systemImage: "rectangle.portrait.and.arrow.right")
+                    SwiftUI.Label("Sign out (keep library)", systemImage: "rectangle.portrait.and.arrow.right")
                 }
                 Button(role: .destructive) {
                     Task { await signOut(erase: true) }
                 } label: {
-                    SwiftUI.Label("Sign Out & Erase Library", systemImage: "trash")
+                    SwiftUI.Label("Sign out & erase library", systemImage: "trash")
                 }
             }
         } label: {
@@ -139,6 +140,11 @@ struct GalleryView: View {
     private var isRefreshing: Bool {
         if case .running = refresh { return true }
         return false
+    }
+
+    private var accountName: String {
+        let name = preferences.first?.discogsUsername ?? ""
+        return name.isEmpty ? "Discogs" : name
     }
 
     /// Transient progress pill shown while a manual refresh runs (the menu
