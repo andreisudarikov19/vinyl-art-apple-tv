@@ -56,9 +56,11 @@ struct GalleryView: View {
     private var toolbar: some View {
         HStack(spacing: 18) {
             if !releases.isEmpty {
+                suggestButton
+                separator
                 sortMenu
                 genreMenu
-                suggestButton
+                separator
                 layoutToggle
             }
             settingsMenu
@@ -70,6 +72,13 @@ struct GalleryView: View {
         // to the full-screen CoverFlow behind the bar.
         .focusSection()
         .padding(.top, 28)
+    }
+
+    private var separator: some View {
+        Rectangle()
+            .fill(.white.opacity(0.4))
+            .frame(width: 2, height: 32)
+            .padding(.horizontal, 6)
     }
 
     private var sortMenu: some View {
