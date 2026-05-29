@@ -13,9 +13,17 @@ struct GalleryView: View {
     @State private var layout: GalleryLayout = .coverFlow
     @State private var sort: GallerySort = .recentlyAdded
     @State private var tag: String?
+    @Environment(\.modelContext) private var modelContext
     @State private var selected: CachedRelease?
-    @State private var showingSettings = false
+    @State private var refresh: RefreshState = .idle
     @FocusState private var toolbarFocused: Bool
+
+    private enum RefreshState: Equatable {
+        case idle
+        case running(processed: Int, total: Int)
+        case done(stored: Int)
+        case failed
+    }
 
     private var arranged: [CachedRelease] {
         GalleryArranger.arrange(releases, sort: sort, tag: tag)
@@ -31,9 +39,7 @@ struct GalleryView: View {
             .navigationDestination(item: $selected) { release in
                 RecordView(release: release)
             }
-            .fullScreenCover(isPresented: $showingSettings) {
-                SettingsView(authenticator: authenticator, client: client)
-            }
+            .overlay(alignment: .bottom) { refreshHUD }
         }
         .task {
             if let stored = preferences.first {
@@ -54,7 +60,7 @@ struct GalleryView: View {
                 genreMenu
                 layoutToggle
             }
-            settingsButton
+            settingsMenu
         }
         .padding(.horizontal, 28)
         .padding(.vertical, 14)
@@ -104,13 +110,97 @@ struct GalleryView: View {
         .accessibilityLabel(layout == .grid ? "Switch to CoverFlow" : "Switch to grid")
     }
 
-    private var settingsButton: some View {
-        Button {
-            showingSettings = true
+    private var settingsMenu: some View {
+        Menu {
+            Button {
+                Task { await runRefresh() }
+            } label: {
+                SwiftUI.Label("Refresh Collection", systemImage: "arrow.clockwise")
+            }
+            .disabled(isRefreshing)
+            Section {
+                Button {
+                    Task { await signOut(erase: false) }
+                } label: {
+                    SwiftUI.Label("Sign Out (Keep Library)", systemImage: "rectangle.portrait.and.arrow.right")
+                }
+                Button(role: .destructive) {
+                    Task { await signOut(erase: true) }
+                } label: {
+                    SwiftUI.Label("Sign Out & Erase Library", systemImage: "trash")
+                }
+            }
         } label: {
             Image(systemName: "gearshape")
         }
         .accessibilityLabel("Settings")
+    }
+
+    private var isRefreshing: Bool {
+        if case .running = refresh { return true }
+        return false
+    }
+
+    /// Transient progress pill shown while a manual refresh runs (the menu
+    /// closes on tap, so feedback surfaces here instead of a sheet).
+    @ViewBuilder
+    private var refreshHUD: some View {
+        switch refresh {
+        case .idle:
+            EmptyView()
+        case .running(let processed, let total):
+            hudPill(total > 0 ? "Refreshing… \(processed)/\(total)" : "Refreshing…", showsSpinner: true)
+        case .done(let stored):
+            hudPill("Updated \(stored)", showsSpinner: false)
+        case .failed:
+            hudPill("Refresh failed", showsSpinner: false)
+        }
+    }
+
+    private func hudPill(_ text: String, showsSpinner: Bool) -> some View {
+        HStack(spacing: 14) {
+            if showsSpinner { ProgressView() }
+            Text(text)
+                .font(.headline)
+                .foregroundStyle(.white)
+                .monospacedDigit()
+        }
+        .padding(.horizontal, 28)
+        .padding(.vertical, 16)
+        .glassBar()
+        .padding(.bottom, 60)
+        .transition(.opacity)
+    }
+
+    private func runRefresh() async {
+        withAnimation { refresh = .running(processed: 0, total: 0) }
+        let service = CollectionSyncService(modelContainer: modelContext.container)
+        do {
+            let summary = try await service.sync(using: client, forceFullBuild: true) { update in
+                Task { @MainActor in
+                    refresh = .running(processed: update.processed, total: update.total)
+                }
+            }
+            withAnimation { refresh = .done(stored: summary.storedReleaseCount) }
+            try? await Task.sleep(for: .seconds(2))
+            if case .done = refresh { withAnimation { refresh = .idle } }
+        } catch {
+            withAnimation { refresh = .failed }
+            try? await Task.sleep(for: .seconds(2))
+            if case .failed = refresh { withAnimation { refresh = .idle } }
+        }
+    }
+
+    private func signOut(erase: Bool) async {
+        if erase {
+            try? modelContext.delete(model: CachedRelease.self)
+            if let prefs = preferences.first {
+                prefs.lastSyncDate = nil
+                prefs.discogsUsername = ""
+            }
+            try? modelContext.save()
+        }
+        await authenticator.signOut()
     }
 
     @ViewBuilder
