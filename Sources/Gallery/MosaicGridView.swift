@@ -56,7 +56,7 @@ struct MosaicGridView: View {
                     if isFocused { titlePlate(release) }
                 }
         }
-        .buttonStyle(.plain)
+        .buttonStyle(BareButtonStyle())
         .focusEffectDisabled()
         .focused($focusedID, equals: release.releaseId)
         .accessibilityLabel("\(release.artistDisplayName) – \(release.title)")
@@ -95,6 +95,14 @@ struct MosaicGridView: View {
         .padding(.vertical, 10)
         .frame(maxWidth: .infinity)
         .glassPlate(id: 1, in: lensNamespace)
+    }
+}
+
+/// Renders only the label — no focus platter or scale. The mosaic controls its
+/// own focus visual (lift + magnify + glass plate) via focusedID.
+private struct BareButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
     }
 }
 
