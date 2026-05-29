@@ -56,8 +56,11 @@ struct GalleryView: View {
     private var toolbar: some View {
         HStack(spacing: 18) {
             if !releases.isEmpty {
+                suggestButton
+                separator
                 sortMenu
                 genreMenu
+                separator
                 layoutToggle
             }
             settingsMenu
@@ -69,6 +72,13 @@ struct GalleryView: View {
         // to the full-screen CoverFlow behind the bar.
         .focusSection()
         .padding(.top, 28)
+    }
+
+    private var separator: some View {
+        Rectangle()
+            .fill(.white.opacity(0.4))
+            .frame(width: 2, height: 32)
+            .padding(.horizontal, 6)
     }
 
     private var sortMenu: some View {
@@ -108,6 +118,16 @@ struct GalleryView: View {
             Image(systemName: layout == .grid ? "square.stack" : "square.grid.2x2")
         }
         .accessibilityLabel(layout == .grid ? "Switch to CoverFlow" : "Switch to grid")
+    }
+
+    /// Opens a random album from the current (sorted/filtered) collection
+    /// straight into the track view.
+    private var suggestButton: some View {
+        Button {
+            selected = arranged.randomElement()
+        } label: {
+            SwiftUI.Label("Suggest", systemImage: "sparkles")
+        }
     }
 
     private var settingsMenu: some View {
