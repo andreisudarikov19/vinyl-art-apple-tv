@@ -58,6 +58,7 @@ struct GalleryView: View {
             if !releases.isEmpty {
                 sortMenu
                 genreMenu
+                suggestButton
                 layoutToggle
             }
             settingsMenu
@@ -108,6 +109,16 @@ struct GalleryView: View {
             Image(systemName: layout == .grid ? "square.stack" : "square.grid.2x2")
         }
         .accessibilityLabel(layout == .grid ? "Switch to CoverFlow" : "Switch to grid")
+    }
+
+    /// Opens a random album from the current (sorted/filtered) collection
+    /// straight into the track view.
+    private var suggestButton: some View {
+        Button {
+            selected = arranged.randomElement()
+        } label: {
+            SwiftUI.Label("Suggest", systemImage: "sparkles")
+        }
     }
 
     private var settingsMenu: some View {
