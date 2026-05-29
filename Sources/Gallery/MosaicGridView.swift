@@ -1,3 +1,4 @@
+import Nuke
 import NukeUI
 import SwiftUI
 
@@ -13,6 +14,7 @@ struct MosaicGridView: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @FocusState private var focusedID: Int?
+    @State private var glowColor: Color = Color(white: 0.15)
 
     // Tuning knobs
     private let columnCount = 7
@@ -31,26 +33,31 @@ struct MosaicGridView: View {
     }
 
     var body: some View {
-        ScrollView {
-            LazyVGrid(columns: columns, spacing: gutter) {
-                ForEach(releases) { release in
-                    tile(release)
+        ZStack {
+            // Same backdrop as CoverFlow: black with a soft glow tinted by the
+            // focused cover, so the empty top/bottom of the wall isn't dead black.
+            CollectionGlowBackground(glowColor: glowColor)
+            ScrollView {
+                LazyVGrid(columns: columns, spacing: gutter) {
+                    ForEach(releases) { release in
+                        tile(release)
+                    }
                 }
-            }
-            .padding(.top, 150) // clear the floating toolbar
-            .padding(.bottom, 140)
-            .overlayPreferenceValue(FocusedTileBounds.self) { anchor in
-                GeometryReader { proxy in
-                    if let anchor, let release = focusedRelease {
-                        let rect = proxy[anchor]
-                        let scale: CGFloat = reduceMotion ? 1 : 1.18
-                        lens(release, coverSize: rect.size)
-                            .scaleEffect(scale)
-                            // Shift down so the COVER (not the whole lens, which
-                            // includes the title below) stays aligned with the cell.
-                            .position(x: rect.midX, y: rect.midY + (titleGap + titleAreaHeight) / 2 * scale)
-                            .allowsHitTesting(false)
-                            .animation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.8), value: focusedID)
+                .padding(.top, 150) // clear the floating toolbar
+                .padding(.bottom, 140)
+                .overlayPreferenceValue(FocusedTileBounds.self) { anchor in
+                    GeometryReader { proxy in
+                        if let anchor, let release = focusedRelease {
+                            let rect = proxy[anchor]
+                            let scale: CGFloat = reduceMotion ? 1 : 1.18
+                            lens(release, coverSize: rect.size)
+                                .scaleEffect(scale)
+                                // Shift down so the COVER (not the whole lens, which
+                                // includes the title below) stays aligned with the cell.
+                                .position(x: rect.midX, y: rect.midY + (titleGap + titleAreaHeight) / 2 * scale)
+                                .allowsHitTesting(false)
+                                .animation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.8), value: focusedID)
+                        }
                     }
                 }
             }
@@ -58,6 +65,14 @@ struct MosaicGridView: View {
         // Edge-to-edge: drop the safe-area (overscan) inset so the wall fills
         // the full screen width.
         .ignoresSafeArea(.container, edges: .horizontal)
+        .task(id: focusedID) { await updateGlow() }
+    }
+
+    private func updateGlow() async {
+        guard let url = focusedRelease?.preferredCoverURL else { return }
+        if let image = try? await ImagePipeline.shared.image(for: url) {
+            glowColor = CoverColor.dominant(from: image, releaseId: focusedRelease?.releaseId ?? 0)
+        }
     }
 
     // Flat tile in the wall. Reports its bounds (only while focused) so the

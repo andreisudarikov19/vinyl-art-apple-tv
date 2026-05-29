@@ -74,18 +74,7 @@ struct CoverFlowView: View {
     // MARK: - Pieces
 
     private var background: some View {
-        ZStack {
-            Color.black
-            RadialGradient(
-                colors: [glowColor.opacity(0.7), glowColor.opacity(0.28), .clear],
-                center: .center,
-                startRadius: coverSize * 0.4,
-                endRadius: coverSize * 2.2
-            )
-            .blendMode(.plusLighter)
-        }
-        .ignoresSafeArea()
-        .animation(.easeInOut(duration: 0.5), value: glowColor)
+        CollectionGlowBackground(glowColor: glowColor, reference: coverSize)
     }
 
     private var flow: some View {
