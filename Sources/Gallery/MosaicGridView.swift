@@ -45,6 +45,11 @@ struct MosaicGridView: View {
                 }
                 .padding(.top, 150) // clear the floating toolbar
                 .padding(.bottom, 140)
+                // Group the tiles into a focus section so a "down" press from
+                // the toolbar (also a focus section) sees the grid as a single
+                // adjacent target, instead of struggling to pick one tile out
+                // of dozens and staying trapped in the toolbar.
+                .focusSection()
                 .overlayPreferenceValue(FocusedTileBounds.self) { anchor in
                     GeometryReader { proxy in
                         if let anchor, let release = focusedRelease {
