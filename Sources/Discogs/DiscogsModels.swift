@@ -105,10 +105,25 @@ struct TrackEntry: Decodable, Sendable {
     let title: String
     let duration: String
     let type: String
+    /// Names credited as "Composed By" on this track (from Discogs extraartists).
+    let composers: [String]
 
     enum CodingKeys: String, CodingKey {
-        case position, title, duration
+        case position, title, duration, extraartists
         case type = "type_"
+    }
+
+    private struct Credit: Decodable {
+        let name: String
+        let role: String
+
+        init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            name = try c.decodeIfPresent(String.self, forKey: .name) ?? ""
+            role = try c.decodeIfPresent(String.self, forKey: .role) ?? ""
+        }
+
+        enum CodingKeys: String, CodingKey { case name, role }
     }
 
     init(from decoder: Decoder) throws {
@@ -117,6 +132,11 @@ struct TrackEntry: Decodable, Sendable {
         title = try c.decodeIfPresent(String.self, forKey: .title) ?? ""
         duration = try c.decodeIfPresent(String.self, forKey: .duration) ?? ""
         type = try c.decodeIfPresent(String.self, forKey: .type) ?? "track"
+        let credits = try c.decodeIfPresent([Credit].self, forKey: .extraartists) ?? []
+        composers = credits
+            .filter { $0.role.localizedCaseInsensitiveContains("Composed By") }
+            .map { cleanArtistName($0.name) }
+            .filter { !$0.isEmpty }
     }
 }
 

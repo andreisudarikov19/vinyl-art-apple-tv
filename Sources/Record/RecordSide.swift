@@ -4,6 +4,8 @@ struct RecordTrack: Identifiable, Equatable, Sendable {
     let id: String
     let position: String
     let title: String
+    /// "Composed By" credits, joined for display (e.g. "Chick Corea, Joaquín Rodrigo"). Empty when none.
+    let composers: String
     let duration: String
 }
 
@@ -31,6 +33,7 @@ enum RecordSides {
                     id: "\(ordinal)",
                     position: entry.position,
                     title: entry.title,
+                    composers: entry.composers.joined(separator: ", "),
                     duration: entry.duration
                 )
             )
