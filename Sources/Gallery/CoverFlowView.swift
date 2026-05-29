@@ -35,19 +35,24 @@ struct CoverFlowView: View {
                 onOpen(releases[selectedIndex])
             }
         } label: {
-            ZStack {
+            ZStack(alignment: .top) {
                 background
                 if releases.isEmpty {
                     Text("No matches")
                         .font(.title3)
                         .foregroundStyle(.white.opacity(0.5))
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-                    flow
-                    VStack {
-                        Spacer()
+                    // Explicit vertical layout: cover row sits a fixed inset
+                    // below the safe area (the same gap the toolbar sits below
+                    // the screen's top edge, so the bar reads as balanced), and
+                    // the metadata flows directly underneath the cover instead
+                    // of being pinned to the bottom of the screen.
+                    VStack(spacing: 28) {
+                        flow
                         metadata
-                            .padding(.bottom, 70)
                     }
+                    .padding(.top, 138)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -97,9 +102,6 @@ struct CoverFlowView: View {
                     .opacity(opacity(for: d))
             }
         }
-        // Sits 11% of screen-height below center so the carousel clears the
-        // floating toolbar with breathing room instead of crowding under it.
-        .offset(y: 79)
         .animation(reduceMotion ? nil : .spring(response: 0.38, dampingFraction: 0.82), value: selectedIndex)
     }
 
