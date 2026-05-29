@@ -21,7 +21,10 @@ struct CoverFlowView: View {
     @FocusState private var focused: Bool
 
     // Tuning knobs
-    private let coverSize: CGFloat = 460
+    // Cover size is ~57% of a 1080p TV's vertical resolution so the centered
+    // cover reads as the room's focal point on a real screen (460pt looked
+    // small on hardware even though it filled the simulator nicely).
+    private let coverSize: CGFloat = 620
     private let windowRadius = 6
     private let sideAngle: Double = 58
     private let sideScale: CGFloat = 0.84
@@ -32,19 +35,24 @@ struct CoverFlowView: View {
                 onOpen(releases[selectedIndex])
             }
         } label: {
-            ZStack {
+            ZStack(alignment: .top) {
                 background
                 if releases.isEmpty {
                     Text("No matches")
                         .font(.title3)
                         .foregroundStyle(.white.opacity(0.5))
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-                    flow
-                    VStack {
-                        Spacer()
+                    // Explicit vertical layout: cover row sits a fixed inset
+                    // below the safe area (the same gap the toolbar sits below
+                    // the screen's top edge, so the bar reads as balanced), and
+                    // the metadata flows directly underneath the cover instead
+                    // of being pinned to the bottom of the screen.
+                    VStack(spacing: 28) {
+                        flow
                         metadata
-                            .padding(.bottom, 70)
                     }
+                    .padding(.top, 138)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -94,7 +102,6 @@ struct CoverFlowView: View {
                     .opacity(opacity(for: d))
             }
         }
-        .offset(y: -40)
         .animation(reduceMotion ? nil : .spring(response: 0.38, dampingFraction: 0.82), value: selectedIndex)
     }
 

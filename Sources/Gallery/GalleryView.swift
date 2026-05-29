@@ -54,7 +54,7 @@ struct GalleryView: View {
     /// One consistent control panel pinned to the top, floating over the
     /// (full-screen) collection. No title — the covers are the content.
     private var toolbar: some View {
-        HStack(spacing: 18) {
+        HStack(spacing: 7) {
             if !releases.isEmpty {
                 suggestButton
                 separator
@@ -65,22 +65,27 @@ struct GalleryView: View {
             }
             settingsMenu
         }
-        .padding(.horizontal, 28)
-        .padding(.vertical, 14)
+        // Match the inner inset on every side (top/bottom/left/right) and use
+        // the same 7pt as the HStack spacing so the gaps between controls,
+        // around separators, and inside the capsule all read uniform.
+        .padding(7)
         .glassBar()
         // Keep left/right focus moves among the controls. Without this the
         // full-screen view behind the bar (CoverFlow's giant button, or any
         // mosaic tile) wins horizontal focus moves and traps the user. Down
         // escapes via the mosaic's focus trampoline / CoverFlow's geometry.
         .focusSection()
-        .padding(.top, 28)
+        // Sits high in the safe area to match Music's top bar on tvOS — the
+        // bar reads "floating chrome" instead of "second header."
+        .padding(.top, 12)
     }
 
     private var separator: some View {
         Rectangle()
             .fill(.white.opacity(0.4))
             .frame(width: 2, height: 32)
-            .padding(.horizontal, 6)
+        // No horizontal padding — the HStack's own spacing (7) provides the
+        // gap on either side so it matches the rest of the bar's geometry.
     }
 
     private var sortMenu: some View {

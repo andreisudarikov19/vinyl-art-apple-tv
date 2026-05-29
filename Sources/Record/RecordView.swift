@@ -121,7 +121,10 @@ struct RecordView: View {
     }
 
     private func coverFocusedStage(_ model: RecordViewModel) -> some View {
-        reflectedCover(600)
+        // ~76% of a 1080p screen — the cover plays as ambient art on a real
+        // TV instead of looking like a thumbnail. The mirror adds size/6
+        // beneath it, so the total stays comfortably inside 1080.
+        reflectedCover(820)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color.black.ignoresSafeArea())
     }
