@@ -17,6 +17,7 @@ struct CoverFlowView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var selectedIndex = 0
     @State private var glowColor: Color = Color(white: 0.15)
+    @State private var didGrabInitialFocus = false
     @FocusState private var focused: Bool
 
     // Tuning knobs
@@ -59,7 +60,14 @@ struct CoverFlowView: View {
             default: break
             }
         }
-        .onAppear { focused = true }
+        // Grab focus only on the first appearance — not when the view
+        // re-appears after a toolbar menu closes (that would steal focus back
+        // from the toolbar). View identity changes on sort/filter, re-arming it.
+        .onAppear {
+            guard !didGrabInitialFocus else { return }
+            didGrabInitialFocus = true
+            focused = true
+        }
         .task(id: selectedIndex) { await updateGlow() }
     }
 
