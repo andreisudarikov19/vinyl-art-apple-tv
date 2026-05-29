@@ -2,36 +2,57 @@ import NukeUI
 import SwiftUI
 
 /// Grid browse mode as a full-color "tapestry": a dense, edge-to-edge wall of
-/// sharp covers with hairline gutters. The focused cover lifts above the wall
-/// inside a Liquid Glass lens/mount that holds its title and refracts the
-/// neighbouring covers; the lens glides between tiles as focus moves. Falls
-/// back to a frosted-material lens on tvOS 18–25.
+/// sharp covers with hairline gutters. The focused cover lifts and magnifies
+/// above the wall inside a Liquid Glass bezel that holds its title and refracts
+/// the neighbouring covers. The focused lens is rendered as a single overlay on
+/// top of the grid (positioned at the focused cell via an anchor) so it always
+/// draws above its neighbours — LazyVGrid doesn't reliably honour zIndex.
 struct MosaicGridView: View {
     let releases: [CachedRelease]
     var onOpen: (CachedRelease) -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @FocusState private var focusedID: Int?
-    @Namespace private var lensNamespace
 
     // Tuning knobs
     private let columnCount = 7
     private let gutter: CGFloat = 2
+    private let bezel: CGFloat = 14
+    private let titleGap: CGFloat = 8
+    private let titleAreaHeight: CGFloat = 56
 
     private var columns: [GridItem] {
         Array(repeating: GridItem(.flexible(), spacing: gutter), count: columnCount)
     }
 
+    private var focusedRelease: CachedRelease? {
+        guard let focusedID else { return nil }
+        return releases.first { $0.releaseId == focusedID }
+    }
+
     var body: some View {
         ScrollView {
-            lensContainer {
-                LazyVGrid(columns: columns, spacing: gutter) {
-                    ForEach(releases) { release in
-                        tile(release)
+            LazyVGrid(columns: columns, spacing: gutter) {
+                ForEach(releases) { release in
+                    tile(release)
+                }
+            }
+            .padding(.top, 150) // clear the floating toolbar
+            .padding(.bottom, 140)
+            .overlayPreferenceValue(FocusedTileBounds.self) { anchor in
+                GeometryReader { proxy in
+                    if let anchor, let release = focusedRelease {
+                        let rect = proxy[anchor]
+                        let scale: CGFloat = reduceMotion ? 1 : 1.18
+                        lens(release, coverSize: rect.size)
+                            .scaleEffect(scale)
+                            // Shift down so the COVER (not the whole lens, which
+                            // includes the title below) stays aligned with the cell.
+                            .position(x: rect.midX, y: rect.midY + (titleGap + titleAreaHeight) / 2 * scale)
+                            .allowsHitTesting(false)
+                            .animation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.8), value: focusedID)
                     }
                 }
-                .padding(.top, 150) // clear the floating toolbar
-                .padding(.bottom, 140)
             }
         }
         // Edge-to-edge: drop the safe-area (overscan) inset so the wall fills
@@ -39,33 +60,21 @@ struct MosaicGridView: View {
         .ignoresSafeArea(.container, edges: .horizontal)
     }
 
-    @ViewBuilder
-    private func lensContainer<C: View>(@ViewBuilder _ content: () -> C) -> some View {
-        if #available(tvOS 26.0, *) {
-            GlassEffectContainer { content() }
-        } else {
-            content()
-        }
-    }
-
+    // Flat tile in the wall. Reports its bounds (only while focused) so the
+    // overlay can draw the magnified lens at exactly this position.
     private func tile(_ release: CachedRelease) -> some View {
-        let isFocused = focusedID == release.releaseId
-        return Button {
+        Button {
             onOpen(release)
         } label: {
             cover(release)
-                .overlay(alignment: .bottom) {
-                    if isFocused { titlePlate(release) }
+                .anchorPreference(key: FocusedTileBounds.self, value: .bounds) {
+                    focusedID == release.releaseId ? $0 : nil
                 }
         }
         .buttonStyle(BareButtonStyle())
         .focusEffectDisabled()
         .focused($focusedID, equals: release.releaseId)
         .accessibilityLabel("\(release.artistDisplayName) – \(release.title)")
-        .scaleEffect(isFocused ? 1.16 : 1)
-        .shadow(color: .black.opacity(isFocused ? 0.65 : 0), radius: isFocused ? 30 : 0, y: isFocused ? 18 : 0)
-        .zIndex(isFocused ? 1 : 0)
-        .animation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.78), value: isFocused)
     }
 
     private func cover(_ release: CachedRelease) -> some View {
@@ -79,29 +88,42 @@ struct MosaicGridView: View {
         .aspectRatio(1, contentMode: .fit)
     }
 
-    /// Liquid Glass title plate over the bottom of the focused cover — frosts
-    /// only that strip, refracting the art beneath the text. Glides between
-    /// tiles via the shared glass id.
-    private func titlePlate(_ release: CachedRelease) -> some View {
-        VStack(spacing: 2) {
-            Text(release.artistDisplayName)
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundStyle(.white)
-                .lineLimit(1)
-            Text(release.title)
-                .font(.system(size: 16))
-                .foregroundStyle(.white.opacity(0.75))
-                .lineLimit(1)
+    /// The magnified focused cover, crisp, set in a Liquid Glass bezel that
+    /// holds the title and refracts the surrounding covers.
+    private func lens(_ release: CachedRelease, coverSize: CGSize) -> some View {
+        VStack(spacing: titleGap) {
+            cover(release)
+                .frame(width: coverSize.width, height: coverSize.height)
+                .clipShape(RoundedRectangle(cornerRadius: 4))
+            VStack(spacing: 2) {
+                Text(release.artistDisplayName)
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                Text(release.title)
+                    .font(.system(size: 15))
+                    .foregroundStyle(.white.opacity(0.75))
+                    .lineLimit(1)
+            }
+            .frame(maxWidth: coverSize.width)
+            .frame(height: titleAreaHeight)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
-        .frame(maxWidth: .infinity)
-        .glassPlate(id: 1, in: lensNamespace)
+        .padding(bezel)
+        .glassBezel()
+        .shadow(color: .black.opacity(0.6), radius: 30, y: 16)
+    }
+}
+
+/// Bounds of the currently-focused tile, used to position the overlay lens.
+private struct FocusedTileBounds: PreferenceKey {
+    static let defaultValue: Anchor<CGRect>? = nil
+    static func reduce(value: inout Anchor<CGRect>?, nextValue: () -> Anchor<CGRect>?) {
+        value = value ?? nextValue()
     }
 }
 
 /// Renders only the label — no focus platter or scale. The mosaic controls its
-/// own focus visual (lift + magnify + glass plate) via focusedID.
+/// own focus visual (the overlay lens) via focusedID.
 private struct BareButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -110,12 +132,11 @@ private struct BareButtonStyle: ButtonStyle {
 
 private extension View {
     @ViewBuilder
-    func glassPlate(id: Int, in namespace: Namespace.ID) -> some View {
+    func glassBezel() -> some View {
         if #available(tvOS 26.0, *) {
-            self.glassEffect(.regular, in: RoundedRectangle(cornerRadius: 8))
-                .glassEffectID(id, in: namespace)
+            self.glassEffect(.regular, in: RoundedRectangle(cornerRadius: 18))
         } else {
-            self.background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
+            self.background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18))
         }
     }
 }
