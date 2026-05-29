@@ -66,7 +66,7 @@ struct GalleryView: View {
             settingsMenu
         }
         .padding(.horizontal, 28)
-        .padding(.vertical, 10)
+        .padding(.vertical, 7)
         .glassBar()
         // Keep left/right focus moves among the controls. Without this the
         // full-screen view behind the bar (CoverFlow's giant button, or any

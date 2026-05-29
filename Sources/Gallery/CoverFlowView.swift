@@ -97,7 +97,9 @@ struct CoverFlowView: View {
                     .opacity(opacity(for: d))
             }
         }
-        .offset(y: -40)
+        // Sits 11% of screen-height below center so the carousel clears the
+        // floating toolbar with breathing room instead of crowding under it.
+        .offset(y: 79)
         .animation(reduceMotion ? nil : .spring(response: 0.38, dampingFraction: 0.82), value: selectedIndex)
     }
 
