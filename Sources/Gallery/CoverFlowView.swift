@@ -21,7 +21,10 @@ struct CoverFlowView: View {
     @FocusState private var focused: Bool
 
     // Tuning knobs
-    private let coverSize: CGFloat = 460
+    // Cover size is ~57% of a 1080p TV's vertical resolution so the centered
+    // cover reads as the room's focal point on a real screen (460pt looked
+    // small on hardware even though it filled the simulator nicely).
+    private let coverSize: CGFloat = 620
     private let windowRadius = 6
     private let sideAngle: Double = 58
     private let sideScale: CGFloat = 0.84

@@ -66,14 +66,16 @@ struct GalleryView: View {
             settingsMenu
         }
         .padding(.horizontal, 28)
-        .padding(.vertical, 14)
+        .padding(.vertical, 10)
         .glassBar()
         // Keep left/right focus moves among the controls. Without this the
         // full-screen view behind the bar (CoverFlow's giant button, or any
         // mosaic tile) wins horizontal focus moves and traps the user. Down
         // escapes via the mosaic's focus trampoline / CoverFlow's geometry.
         .focusSection()
-        .padding(.top, 28)
+        // Sits high in the safe area to match Music's top bar on tvOS — the
+        // bar reads "floating chrome" instead of "second header."
+        .padding(.top, 12)
     }
 
     private var separator: some View {
