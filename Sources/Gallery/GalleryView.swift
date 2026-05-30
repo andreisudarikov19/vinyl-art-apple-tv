@@ -145,6 +145,9 @@ struct GalleryView: View {
                 SwiftUI.Label("Refresh collection", systemImage: "arrow.clockwise")
             }
             .disabled(isRefreshing)
+            Toggle(isOn: haloAutoEngageBinding) {
+                SwiftUI.Label("Engage halo automatically", systemImage: "circle.dotted")
+            }
             Section {
                 Text("Account: \(accountName)")
                 Button {
@@ -162,6 +165,19 @@ struct GalleryView: View {
             Image(systemName: "gearshape")
         }
         .accessibilityLabel("Settings")
+    }
+
+    /// Binds the Toggle to the persisted preference, creating the
+    /// preferences row on first read if it's missing.
+    private var haloAutoEngageBinding: Binding<Bool> {
+        Binding(
+            get: { preferences.first?.haloAutoEngage ?? true },
+            set: { newValue in
+                let prefs = preferences.first ?? UserPreferences()
+                if preferences.first == nil { modelContext.insert(prefs) }
+                prefs.haloAutoEngage = newValue
+            }
+        )
     }
 
     private var isRefreshing: Bool {

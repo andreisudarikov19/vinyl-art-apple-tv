@@ -1,5 +1,6 @@
 import Nuke
 import NukeUI
+import SwiftData
 import SwiftUI
 
 /// Classic Cover Flow browse mode: a 3D carousel of album covers with mirror
@@ -20,6 +21,15 @@ struct CoverFlowView: View {
     @State private var didGrabInitialFocus = false
     @FocusState private var focused: Bool
 
+    @Query private var preferences: [UserPreferences]
+    @State private var palette: CoverPalette = .placeholder
+    @State private var haloEngaged: Bool = false
+    @State private var haloIdleTask: Task<Void, Never>?
+
+    private var isAutoHalo: Bool {
+        preferences.first?.haloAutoEngage ?? true
+    }
+
     // Tuning knobs
     // Cover size is ~57% of a 1080p TV's vertical resolution so the centered
     // cover reads as the room's focal point on a real screen (460pt looked
@@ -37,6 +47,10 @@ struct CoverFlowView: View {
         } label: {
             ZStack(alignment: .top) {
                 background
+                // Halo blobs sit between the static radial glow and the cover
+                // row — they originate behind the cover and bloom outward.
+                HaloView(palette: palette, isEngaged: haloEngaged)
+                    .ignoresSafeArea()
                 if releases.isEmpty {
                     Text("No matches")
                         .font(.title3)
@@ -62,8 +76,12 @@ struct CoverFlowView: View {
         .focused($focused)
         .onMoveCommand { direction in
             switch direction {
-            case .left: move(-1)
-            case .right: move(1)
+            case .left:
+                move(-1)
+                restartHaloIdleTimer()
+            case .right:
+                move(1)
+                restartHaloIdleTimer()
             case .up: onMoveUp() // onMoveCommand consumes up; hand focus to the toolbar
             default: break
             }
@@ -76,7 +94,18 @@ struct CoverFlowView: View {
             didGrabInitialFocus = true
             focused = true
         }
-        .task(id: selectedIndex) { await updateGlow() }
+        .task(id: selectedIndex) { await refreshBackdrop() }
+        .onChange(of: focused) { _, isFocused in
+            // When focus leaves CoverFlow (e.g. up to the toolbar), the user
+            // is no longer browsing here; cancel the idle timer so the halo
+            // doesn't engage behind the scenes. When focus returns, re-arm.
+            if isFocused {
+                restartHaloIdleTimer()
+            } else {
+                cancelHaloIdleTimer()
+            }
+        }
+        .suppressesScreensaver(haloEngaged)
     }
 
     // MARK: - Pieces
@@ -159,11 +188,41 @@ struct CoverFlowView: View {
         selectedIndex = next
     }
 
-    private func updateGlow() async {
-        guard let url = current?.preferredCoverURL else { return }
-        if let image = try? await ImagePipeline.shared.image(for: url) {
-            glowColor = CoverColor.dominant(from: image, releaseId: current?.releaseId ?? 0)
+    /// Refreshes both the radial glow tint and the 3-colour halo palette
+    /// when the focused cover changes. Also restarts the 60s idle countdown
+    /// — a focus change is "user input", so any previously-engaged halo
+    /// disengages immediately and re-engages only after 60s without further
+    /// navigation (auto mode only).
+    private func refreshBackdrop() async {
+        guard let url = current?.preferredCoverURL,
+              let image = try? await ImagePipeline.shared.image(for: url) else {
+            restartHaloIdleTimer()
+            return
         }
+        let releaseId = current?.releaseId ?? 0
+        glowColor = CoverColor.dominant(from: image, releaseId: releaseId)
+        palette = CoverColor.palette(from: image, releaseId: releaseId)
+        restartHaloIdleTimer()
+    }
+
+    /// Cancels any in-flight idle countdown and starts a fresh 60s wait.
+    /// Halo goes off immediately; engages again after 60s of no input.
+    /// No-op when manual mode is on (CoverFlow has no halo in that mode).
+    private func restartHaloIdleTimer() {
+        haloIdleTask?.cancel()
+        haloEngaged = false
+        guard isAutoHalo, focused else { return }
+        haloIdleTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(60))
+            guard !Task.isCancelled else { return }
+            haloEngaged = true
+        }
+    }
+
+    private func cancelHaloIdleTimer() {
+        haloIdleTask?.cancel()
+        haloIdleTask = nil
+        haloEngaged = false
     }
 }
 
