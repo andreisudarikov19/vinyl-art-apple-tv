@@ -367,12 +367,17 @@ struct RecordView: View {
         case .loaded:
             if let side = model.currentSide {
                 VStack(alignment: .leading, spacing: 0) {
-                    sideHeader(side)
-                        .padding(.bottom, 12)
-                    Rectangle()
-                        .fill(.white.opacity(0.15))
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 1)
+                    HStack(alignment: .center, spacing: 24) {
+                        sideTuner(model)
+                            .frame(maxWidth: .infinity)
+                        if let total = Self.totalDuration(of: side) {
+                            Text(total)
+                                .font(.system(size: 24))
+                                .foregroundStyle(.white.opacity(0.4))
+                                .monospacedDigit()
+                        }
+                    }
+                    .padding(.bottom, 18)
                     ForEach(Array(side.tracks.enumerated()), id: \.element.id) { index, track in
                         TrackRow(number: index + 1, title: track.title, composers: track.composers, duration: track.duration)
                     }
@@ -385,18 +390,93 @@ struct RecordView: View {
         }
     }
 
-    private func sideHeader(_ side: RecordSide) -> some View {
-        HStack(alignment: .firstTextBaseline) {
-            Text(side.name)
-                .font(.system(size: 36, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.7))
-            Spacer()
-            if let total = Self.totalDuration(of: side) {
-                Text(total)
-                    .font(.system(size: 28))
-                    .foregroundStyle(.white.opacity(0.4))
-                    .monospacedDigit()
+    /// A vintage-radio-tuner-styled side selector: a thin hairline running
+    /// the width of the tracklist, with each side's letter label spaced
+    /// evenly above it, and a Liquid Glass pill "needle" that glides to the
+    /// current side. The letter inside the thumb stands in for the current
+    /// side's static label (which we hide so the thumb doesn't double-print).
+    /// Falls back to a single-position display for unsided tracklists (CD
+    /// rips and the like).
+    private func sideTuner(_ model: RecordViewModel) -> some View {
+        let sides = model.sides
+        let currentIndex = model.currentSideIndex
+        let count = max(sides.count, 1)
+
+        return GeometryReader { geo in
+            let width = geo.size.width
+            let segmentWidth = width / CGFloat(count)
+            let centerY = geo.size.height / 2
+
+            ZStack {
+                // Hairline along the bottom — replaces the old standalone
+                // divider that used to sit beneath the side header.
+                VStack(spacing: 0) {
+                    Spacer()
+                    Rectangle()
+                        .fill(.white.opacity(0.18))
+                        .frame(height: 1)
+                }
+
+                // Tick marks dropping into the hairline at each side's
+                // position. Subtle — they orient the eye to the available
+                // sides without competing with the labels.
+                ForEach(0..<sides.count, id: \.self) { i in
+                    Rectangle()
+                        .fill(.white.opacity(0.25))
+                        .frame(width: 1, height: 8)
+                        .position(
+                            x: CGFloat(i) * segmentWidth + segmentWidth / 2,
+                            y: geo.size.height - 4
+                        )
+                }
+
+                // Static side letters. The current side's letter is rendered
+                // transparent so the moving thumb's letter doesn't overlap
+                // a stationary one.
+                ForEach(Array(sides.enumerated()), id: \.element.id) { i, side in
+                    Text(side.id)
+                        .font(.system(size: 22, weight: .medium))
+                        .foregroundStyle(i == currentIndex ? Color.clear : Color.white.opacity(0.35))
+                        .monospacedDigit()
+                        .position(
+                            x: CGFloat(i) * segmentWidth + segmentWidth / 2,
+                            y: centerY
+                        )
+                }
+
+                // The needle — a Liquid Glass capsule carrying the current
+                // side's letter, sliding between positions on a spring.
+                if sides.indices.contains(currentIndex) {
+                    tunerThumb(letter: sides[currentIndex].id)
+                        .position(
+                            x: CGFloat(currentIndex) * segmentWidth + segmentWidth / 2,
+                            y: centerY
+                        )
+                        .animation(.spring(response: 0.42, dampingFraction: 0.78), value: currentIndex)
+                }
             }
+        }
+        .frame(height: 60)
+    }
+
+    @ViewBuilder
+    private func tunerThumb(letter: String) -> some View {
+        ZStack {
+            tunerThumbGlass
+            Text(letter)
+                .font(.system(size: 22, weight: .semibold))
+                .foregroundStyle(.white)
+                .monospacedDigit()
+        }
+        .frame(width: 52, height: 40)
+    }
+
+    @ViewBuilder
+    private var tunerThumbGlass: some View {
+        if #available(tvOS 26.0, *) {
+            Capsule().fill(.regularMaterial).glassEffect()
+        } else {
+            Capsule().fill(.ultraThinMaterial)
         }
     }
 
@@ -490,6 +570,11 @@ private struct AmbientButtonStyle: ButtonStyle {
 
 /// One track row in the Apple Music–style side list: sequential number, title,
 /// and right-aligned duration. No separators — matches Music on tvOS.
+///
+/// Title is allowed to wrap to a second line for long song names rather than
+/// truncating with an ellipsis — the side list has vertical room. Composers
+/// drop to their own line beneath the title (not beside it on the same row
+/// where a long title would have pushed them off-screen anyway).
 private struct TrackRow: View {
     let number: Int
     let title: String
@@ -497,18 +582,23 @@ private struct TrackRow: View {
     let duration: String
 
     var body: some View {
-        HStack(spacing: 24) {
+        // First-text-baseline alignment so the number and duration sit on the
+        // baseline of the title's *first* line when the title wraps —
+        // otherwise center alignment would float them awkwardly between two
+        // title lines.
+        HStack(alignment: .firstTextBaseline, spacing: 24) {
             Text("\(number)")
                 .font(.system(size: 28))
                 .foregroundStyle(.white.opacity(0.4))
                 .monospacedDigit()
                 .frame(width: 44, alignment: .leading)
-            HStack(alignment: .firstTextBaseline, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.system(size: 33))
                     .foregroundStyle(.white)
-                    .lineLimit(1)
-                    .layoutPriority(1)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
                 if !composers.isEmpty {
                     Text("by \(composers)")
                         .font(.system(size: 24))
@@ -516,6 +606,7 @@ private struct TrackRow: View {
                         .lineLimit(1)
                 }
             }
+            .layoutPriority(1)
             Spacer(minLength: 24)
             Text(duration)
                 .font(.system(size: 28))

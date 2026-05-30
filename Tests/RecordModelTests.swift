@@ -59,6 +59,47 @@ struct RecordSidesTests {
         #expect(sides.count == 1)
         #expect(sides[0].name == "Tracklist")
     }
+
+    /// A 2xLP using Discogs' disc-prefixed convention ("1-A1", "2-A1") must
+    /// still produce four sides labelled A/B/C/D — the same as if the
+    /// release had used continuous lettering. Disc 2's "A" maps to "C", and
+    /// disc 2's "B" maps to "D".
+    @Test func discPrefixedPositionsMapToContinuousLettering() throws {
+        let detail = try makeReleaseDetail(tracklist: [
+            track("1-A1", "a1"), track("1-A2", "a2"),
+            track("1-B1", "b1"),
+            track("2-A1", "c1"),
+            track("2-B1", "d1"), track("2-B2", "d2"),
+        ])
+        let sides = RecordSides.from(detail.tracklist)
+        #expect(sides.map(\.name) == ["Side A", "Side B", "Side C", "Side D"])
+        #expect(sides[2].tracks.map(\.title) == ["c1"])
+        #expect(sides[3].tracks.map(\.title) == ["d1", "d2"])
+    }
+
+    @Test func dotSeparatedDiscPrefixAlsoWorks() throws {
+        let detail = try makeReleaseDetail(tracklist: [
+            track("1.A1", "a"), track("2.A1", "c"),
+        ])
+        let sides = RecordSides.from(detail.tracklist)
+        #expect(sides.map(\.name) == ["Side A", "Side C"])
+    }
+
+    @Test func unseparatedDiscPrefixAlsoWorks() throws {
+        let detail = try makeReleaseDetail(tracklist: [
+            track("1A1", "a"), track("2B1", "d"),
+        ])
+        let sides = RecordSides.from(detail.tracklist)
+        #expect(sides.map(\.name) == ["Side A", "Side D"])
+    }
+
+    @Test func threeDiscReleaseExtendsToSidesEandF() throws {
+        let detail = try makeReleaseDetail(tracklist: [
+            track("1-A1", "a"), track("2-A1", "c"), track("3-A1", "e"),
+        ])
+        let sides = RecordSides.from(detail.tracklist)
+        #expect(sides.map(\.name) == ["Side A", "Side C", "Side E"])
+    }
 }
 
 @MainActor
