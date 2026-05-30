@@ -54,6 +54,10 @@ struct RecordView: View {
     @State private var idleTask: Task<Void, Never>?
     @FocusState private var screenFocused: Bool
     @FocusState private var pillFocused: Bool
+    /// Drives the cover-focused ken-burns: oscillates 1.0..1.03 with a 60s
+    /// total cycle (30s each direction). Imperceptible per second; adds
+    /// subtle life over a side of an LP. Disabled in Reduce Motion.
+    @State private var coverBreath: CGFloat = 1.0
 
     private var isAutoHalo: Bool {
         preferences.first?.haloAutoEngage ?? true
@@ -207,21 +211,16 @@ struct RecordView: View {
     }
 
     private func coverFocusedStage(_ model: RecordViewModel) -> some View {
-        // ~76% of a 1080p screen — the cover plays as ambient art on a real
-        // TV instead of looking like a thumbnail. The mirror adds size/6
-        // beneath it, so the total stays comfortably inside 1080.
         ZStack {
             Color.black.ignoresSafeArea()
             // Halo blobs sit behind the cover, born at the screen centre and
             // drifting outward. The cover hides their cores; only the bloom
             // past its silhouette becomes visible. The rich style adds a
             // breathing ambient base and a second tier of edge-origin blobs
-            // after 60s of continuous engagement — the cover-focused screen
-            // gives the halo so much "frame" to fill that the CoverFlow
-            // configuration reads as empty here.
+            // after 60s of continuous engagement.
             HaloView(palette: palette, isEngaged: isHaloEngaged, style: .rich)
                 .ignoresSafeArea()
-            reflectedCover(820)
+            featuredCover(820)
             if !isAutoHalo {
                 VStack {
                     Spacer()
@@ -231,6 +230,29 @@ struct RecordView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    /// The cover displayed as ambient art on the cover-focused stage. Three
+    /// touches separate this from the cover in the informative view:
+    /// - **Cover-tinted drop shadow** anchors the cover in its halo. The
+    ///   classic iTunes-Cover-Flow mirror reflection used to live here, but
+    ///   it felt dated alongside the halo blobs and forced a layout dance
+    ///   on engagement. A coloured shadow lets the cover read as the source
+    ///   of the colour around it and removes the need for fade coordination.
+    /// - **Slow ken-burns** breathes the cover between 1.00x and 1.03x on a
+    ///   60-second cycle (30s up, 30s down). Imperceptible per second; adds
+    ///   subtle life over a long viewing session. Disabled in Reduce Motion.
+    /// - **Centred at screen centre**, no longer offset by reflection mass.
+    private func featuredCover(_ size: CGFloat) -> some View {
+        cover(size)
+            .shadow(color: palette.dominant.opacity(0.4), radius: 60, x: 0, y: 20)
+            .scaleEffect(coverBreath)
+            .onAppear {
+                guard !reduceMotion else { return }
+                withAnimation(.easeInOut(duration: 30).repeatForever(autoreverses: true)) {
+                    coverBreath = 1.03
+                }
+            }
     }
 
     /// Manual-mode toggle pill: liquid glass capsule below the cover.
@@ -312,43 +334,6 @@ struct RecordView: View {
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.45), value: release.preferredCoverURL)
     }
 
-    /// Album cover on black with a faded mirror reflection beneath it — the
-    /// look of older iTunes / Cover Flow visualizations. The cover is unframed
-    /// (no rounding, no shadow); the reflection dissolves into the black.
-    ///
-    /// Built as a ZStack rather than a VStack so the cover's position is
-    /// anchored at screen centre independently of the reflection. When the
-    /// halo engages the reflection fades out (glowing blobs alongside a
-    /// mirror reflection reads incoherent) — and because the cover wasn't
-    /// pinned to the VStack centre, it doesn't shift vertically as the
-    /// reflection comes and goes.
-    private func reflectedCover(_ size: CGFloat) -> some View {
-        // Shorter than the old size/6 — keeps the composition balanced
-        // around the cover instead of pulling the visual weight downward.
-        let reflectionHeight: CGFloat = 70
-        return ZStack {
-            cover(size)
-            cover(size)
-                .scaleEffect(x: 1, y: -1)
-                .frame(width: size, height: reflectionHeight, alignment: .top)
-                .clipped()
-                .mask(
-                    LinearGradient(
-                        stops: [
-                            .init(color: .white.opacity(0.4), location: 0),
-                            .init(color: .clear, location: 0.95),
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                // Place reflection directly beneath the cover: shift its
-                // centre down by half-cover + half-reflection.
-                .offset(y: (size + reflectionHeight) / 2)
-                .opacity(isHaloEngaged ? 0 : 1)
-                .animation(.easeInOut(duration: 1.5), value: isHaloEngaged)
-        }
-    }
 
     private var albumHeader: some View {
         VStack(alignment: .leading, spacing: 6) {
