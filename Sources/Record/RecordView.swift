@@ -1,4 +1,6 @@
+import Nuke
 import NukeUI
+import SwiftData
 import SwiftUI
 
 /// Loads a release's tracklist for the record screen. Injected via the
@@ -42,6 +44,32 @@ struct RecordView: View {
     @State private var toast: String?
     @State private var toastTask: Task<Void, Never>?
 
+    @Query private var preferences: [UserPreferences]
+    @State private var palette: CoverPalette = .placeholder
+    @State private var autoHaloEngaged: Bool = false
+    // Manual-mode pill state. Persists across records within an app session
+    // (so toggling the halo on for one record keeps it on when you return);
+    // resets to false on app launch via UserDefaults clearing in App.init.
+    @AppStorage("haloPillEngaged") private var manualHaloEngaged: Bool = false
+    @State private var idleTask: Task<Void, Never>?
+    @FocusState private var screenFocused: Bool
+    @FocusState private var pillFocused: Bool
+    /// Drives the cover-focused ken-burns: oscillates 1.0..1.03 with a 60s
+    /// total cycle (30s each direction). Imperceptible per second; adds
+    /// subtle life over a side of an LP. Disabled in Reduce Motion.
+    @State private var coverBreath: CGFloat = 1.0
+
+    private var isAutoHalo: Bool {
+        preferences.first?.haloAutoEngage ?? true
+    }
+
+    /// Whether the halo should currently be drawn. Only true while we're on
+    /// the cover-focused stage — informative view has its own backdrop.
+    private var isHaloEngaged: Bool {
+        guard viewModel?.displayMode == .coverFocused else { return false }
+        return isAutoHalo ? autoHaloEngaged : manualHaloEngaged
+    }
+
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
@@ -64,6 +92,43 @@ struct RecordView: View {
             guard !release.coverLookupAttempted else { return }
             await resolveCover(release.releaseId)
         }
+        .task(id: release.preferredCoverURL) { await loadPalette() }
+        .suppressesScreensaver(isHaloEngaged)
+    }
+
+    /// Pulls the (already-cached) cover from Nuke once it's available and
+    /// extracts a 3-colour palette. Reruns when the URL changes (Discogs ->
+    /// resolved Cover Art Archive art). Falls back to the placeholder palette
+    /// so the halo doesn't render with a stale colour from a previous record.
+    private func loadPalette() async {
+        guard let url = release.preferredCoverURL else {
+            palette = .placeholder
+            return
+        }
+        if let image = try? await ImagePipeline.shared.image(for: url) {
+            palette = CoverColor.palette(from: image, releaseId: release.releaseId)
+        }
+    }
+
+    // MARK: - Halo idle timer (cover-focused, auto mode)
+
+    /// Resets the cover-focused idle timer: halo off now, will re-engage after
+    /// 3 seconds with no further input. Called on entering cover-focused and
+    /// on every user input while there. Only used in auto mode.
+    private func restartHaloIdleTimer() {
+        idleTask?.cancel()
+        autoHaloEngaged = false
+        idleTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(3))
+            guard !Task.isCancelled else { return }
+            autoHaloEngaged = true
+        }
+    }
+
+    private func cancelHaloIdleTimer() {
+        idleTask?.cancel()
+        idleTask = nil
+        autoHaloEngaged = false
     }
 
     private func interactive(_ model: RecordViewModel) -> some View {
@@ -85,20 +150,45 @@ struct RecordView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        // The whole screen is the (only) focusable control. `.plain` +
-        // focusEffectDisabled still leaves a focus ring framing the screen
-        // edge on tvOS, so use a custom style that renders only the label.
+        // The whole screen is the main focusable control (the manual-mode
+        // halo pill is a sibling focus target). `.plain` + focusEffectDisabled
+        // still leaves a focus ring framing the screen edge on tvOS, so use a
+        // custom style that renders only the label.
         .buttonStyle(AmbientButtonStyle())
         .focusEffectDisabled()
+        .focused($screenFocused)
         .accessibilityLabel("\(release.artistDisplayName), \(release.title)")
         .accessibilityHint("Swipe left or right to change sides. Swipe up for the cover, down for the tracklist.")
         .onMoveCommand { direction in
+            let wasCoverFocused = model.displayMode == .coverFocused
             switch direction {
-            case .up: setMode(.coverFocused, on: model)
+            case .up:
+                if wasCoverFocused, !isAutoHalo {
+                    // Manual mode + already on cover stage: up reaches for the
+                    // halo pill that lives below the cover (the focus engine
+                    // wouldn't find it through "up" on its own).
+                    pillFocused = true
+                } else {
+                    setMode(.coverFocused, on: model)
+                }
             case .down: setMode(.informative, on: model)
             case .right: changeSide(on: model, forward: true)
             case .left: changeSide(on: model, forward: false)
             default: break
+            }
+            // Strict "any input -> halo off, 3s idle to re-engage" rule for
+            // auto mode whenever we stay on the cover-focused stage.
+            if isAutoHalo, model.displayMode == .coverFocused {
+                restartHaloIdleTimer()
+            }
+        }
+        .task(id: model.displayMode) {
+            // Mode transitions: arm the idle timer when arriving at the
+            // cover-focused stage (auto mode), cancel it on departure.
+            if model.displayMode == .coverFocused, isAutoHalo {
+                restartHaloIdleTimer()
+            } else {
+                cancelHaloIdleTimer()
             }
         }
     }
@@ -121,12 +211,90 @@ struct RecordView: View {
     }
 
     private func coverFocusedStage(_ model: RecordViewModel) -> some View {
-        // ~76% of a 1080p screen — the cover plays as ambient art on a real
-        // TV instead of looking like a thumbnail. The mirror adds size/6
-        // beneath it, so the total stays comfortably inside 1080.
-        reflectedCover(820)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.black.ignoresSafeArea())
+        ZStack {
+            Color.black.ignoresSafeArea()
+            // Halo blobs sit behind the cover, born at the screen centre and
+            // drifting outward. The cover hides their cores; only the bloom
+            // past its silhouette becomes visible. The rich style adds a
+            // breathing ambient base and a second tier of edge-origin blobs
+            // after 60s of continuous engagement.
+            HaloView(palette: palette, isEngaged: isHaloEngaged, style: .rich)
+                .ignoresSafeArea()
+            featuredCover(820)
+            if !isAutoHalo {
+                VStack {
+                    Spacer()
+                    haloPill
+                        .padding(.bottom, 28)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    /// The cover displayed as ambient art on the cover-focused stage. Three
+    /// touches separate this from the cover in the informative view:
+    /// - **Cover-tinted drop shadow** anchors the cover in its halo. The
+    ///   classic iTunes-Cover-Flow mirror reflection used to live here, but
+    ///   it felt dated alongside the halo blobs and forced a layout dance
+    ///   on engagement. A coloured shadow lets the cover read as the source
+    ///   of the colour around it and removes the need for fade coordination.
+    /// - **Slow ken-burns** breathes the cover between 1.00x and 1.03x on a
+    ///   60-second cycle (30s up, 30s down). Imperceptible per second; adds
+    ///   subtle life over a long viewing session. Disabled in Reduce Motion.
+    /// - **Centred at screen centre**, no longer offset by reflection mass.
+    private func featuredCover(_ size: CGFloat) -> some View {
+        cover(size)
+            .shadow(color: palette.dominant.opacity(0.4), radius: 60, x: 0, y: 20)
+            .scaleEffect(coverBreath)
+            .onAppear {
+                guard !reduceMotion else { return }
+                withAnimation(.easeInOut(duration: 30).repeatForever(autoreverses: true)) {
+                    coverBreath = 1.03
+                }
+            }
+    }
+
+    /// Manual-mode toggle pill: liquid glass capsule below the cover.
+    /// Only rendered when haloAutoEngage is OFF.
+    private var haloPill: some View {
+        Button {
+            manualHaloEngaged.toggle()
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: "circle.dotted")
+                Text("Halo")
+            }
+            .font(.system(size: 24, weight: .semibold))
+            .foregroundStyle(manualHaloEngaged ? .black : .white)
+            .padding(.horizontal, 28)
+            .padding(.vertical, 14)
+            .background {
+                if manualHaloEngaged {
+                    Capsule().fill(.white.opacity(0.92))
+                } else {
+                    haloPillGlass
+                }
+            }
+        }
+        .buttonStyle(.plain)
+        .focused($pillFocused)
+        .accessibilityLabel(manualHaloEngaged ? "Halo on" : "Halo off")
+        .accessibilityHint("Toggles the ambient halo around the cover.")
+        // Down from the pill returns focus to the cover-screen button. Other
+        // directions are no-ops (pill is the only horizontal control here).
+        .onMoveCommand { direction in
+            if direction == .down { screenFocused = true }
+        }
+    }
+
+    @ViewBuilder
+    private var haloPillGlass: some View {
+        if #available(tvOS 26.0, *) {
+            Capsule().fill(.regularMaterial).glassEffect()
+        } else {
+            Capsule().fill(.regularMaterial)
+        }
     }
 
     // MARK: - Pieces
@@ -166,30 +334,6 @@ struct RecordView: View {
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.45), value: release.preferredCoverURL)
     }
 
-    /// Album cover on black with a faded mirror reflection beneath it — the
-    /// look of older iTunes / Cover Flow visualizations. The cover is unframed
-    /// (no rounding, no shadow); the reflection dissolves fully into the black.
-    private func reflectedCover(_ size: CGFloat) -> some View {
-        VStack(spacing: 0) {
-            cover(size)
-            cover(size)
-                .scaleEffect(x: 1, y: -1)
-                .frame(height: size / 6, alignment: .top)
-                .clipped()
-                // Mask the clipped strip so it fades from a faint reflection at
-                // the top to fully transparent at the bottom — no hard cutoff.
-                .mask(
-                    LinearGradient(
-                        stops: [
-                            .init(color: .white.opacity(0.4), location: 0),
-                            .init(color: .clear, location: 0.95),
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-        }
-    }
 
     private var albumHeader: some View {
         VStack(alignment: .leading, spacing: 6) {

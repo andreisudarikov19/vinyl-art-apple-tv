@@ -29,16 +29,23 @@ final class UserPreferences {
     var galleryLayout: GalleryLayout
     var gallerySort: GallerySort
 
+    /// When true, the halo engages on its own after a per-mode idle period.
+    /// When false, the user controls it manually via the pill on the
+    /// cover-focused screen (and CoverFlow shows no halo at all).
+    var haloAutoEngage: Bool = true
+
     init(
         discogsUsername: String = "",
         lastSyncDate: Date? = nil,
         galleryLayout: GalleryLayout = .coverFlow,
-        gallerySort: GallerySort = .recentlyAdded
+        gallerySort: GallerySort = .recentlyAdded,
+        haloAutoEngage: Bool = true
     ) {
         self.discogsUsername = discogsUsername
         self.lastSyncDate = lastSyncDate
         self.galleryLayout = galleryLayout
         self.gallerySort = gallerySort
+        self.haloAutoEngage = haloAutoEngage
     }
 }
 
