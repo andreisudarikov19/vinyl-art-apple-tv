@@ -214,8 +214,12 @@ struct RecordView: View {
             Color.black.ignoresSafeArea()
             // Halo blobs sit behind the cover, born at the screen centre and
             // drifting outward. The cover hides their cores; only the bloom
-            // past its silhouette becomes visible.
-            HaloView(palette: palette, isEngaged: isHaloEngaged)
+            // past its silhouette becomes visible. The rich style adds a
+            // breathing ambient base and a second tier of edge-origin blobs
+            // after 60s of continuous engagement — the cover-focused screen
+            // gives the halo so much "frame" to fill that the CoverFlow
+            // configuration reads as empty here.
+            HaloView(palette: palette, isEngaged: isHaloEngaged, style: .rich)
                 .ignoresSafeArea()
             reflectedCover(820)
             if !isAutoHalo {
@@ -310,16 +314,24 @@ struct RecordView: View {
 
     /// Album cover on black with a faded mirror reflection beneath it — the
     /// look of older iTunes / Cover Flow visualizations. The cover is unframed
-    /// (no rounding, no shadow); the reflection dissolves fully into the black.
+    /// (no rounding, no shadow); the reflection dissolves into the black.
+    ///
+    /// Built as a ZStack rather than a VStack so the cover's position is
+    /// anchored at screen centre independently of the reflection. When the
+    /// halo engages the reflection fades out (glowing blobs alongside a
+    /// mirror reflection reads incoherent) — and because the cover wasn't
+    /// pinned to the VStack centre, it doesn't shift vertically as the
+    /// reflection comes and goes.
     private func reflectedCover(_ size: CGFloat) -> some View {
-        VStack(spacing: 0) {
+        // Shorter than the old size/6 — keeps the composition balanced
+        // around the cover instead of pulling the visual weight downward.
+        let reflectionHeight: CGFloat = 70
+        return ZStack {
             cover(size)
             cover(size)
                 .scaleEffect(x: 1, y: -1)
-                .frame(height: size / 6, alignment: .top)
+                .frame(width: size, height: reflectionHeight, alignment: .top)
                 .clipped()
-                // Mask the clipped strip so it fades from a faint reflection at
-                // the top to fully transparent at the bottom — no hard cutoff.
                 .mask(
                     LinearGradient(
                         stops: [
@@ -330,6 +342,11 @@ struct RecordView: View {
                         endPoint: .bottom
                     )
                 )
+                // Place reflection directly beneath the cover: shift its
+                // centre down by half-cover + half-reflection.
+                .offset(y: (size + reflectionHeight) / 2)
+                .opacity(isHaloEngaged ? 0 : 1)
+                .animation(.easeInOut(duration: 1.5), value: isHaloEngaged)
         }
     }
 
