@@ -490,6 +490,11 @@ private struct AmbientButtonStyle: ButtonStyle {
 
 /// One track row in the Apple Music–style side list: sequential number, title,
 /// and right-aligned duration. No separators — matches Music on tvOS.
+///
+/// Title is allowed to wrap to a second line for long song names rather than
+/// truncating with an ellipsis — the side list has vertical room. Composers
+/// drop to their own line beneath the title (not beside it on the same row
+/// where a long title would have pushed them off-screen anyway).
 private struct TrackRow: View {
     let number: Int
     let title: String
@@ -497,18 +502,23 @@ private struct TrackRow: View {
     let duration: String
 
     var body: some View {
-        HStack(spacing: 24) {
+        // First-text-baseline alignment so the number and duration sit on the
+        // baseline of the title's *first* line when the title wraps —
+        // otherwise center alignment would float them awkwardly between two
+        // title lines.
+        HStack(alignment: .firstTextBaseline, spacing: 24) {
             Text("\(number)")
                 .font(.system(size: 28))
                 .foregroundStyle(.white.opacity(0.4))
                 .monospacedDigit()
                 .frame(width: 44, alignment: .leading)
-            HStack(alignment: .firstTextBaseline, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.system(size: 33))
                     .foregroundStyle(.white)
-                    .lineLimit(1)
-                    .layoutPriority(1)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
                 if !composers.isEmpty {
                     Text("by \(composers)")
                         .font(.system(size: 24))
@@ -516,6 +526,7 @@ private struct TrackRow: View {
                         .lineLimit(1)
                 }
             }
+            .layoutPriority(1)
             Spacer(minLength: 24)
             Text(duration)
                 .font(.system(size: 28))
