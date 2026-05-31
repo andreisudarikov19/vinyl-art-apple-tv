@@ -105,15 +105,19 @@ struct TrackEntry: Decodable, Sendable {
     let title: String
     let duration: String
     let type: String
-    /// Names credited as "Composed By" on this track (from Discogs extraartists).
-    let composers: [String]
+    /// Tracklist-displayable credits, grouped by display role and preserving
+    /// the order roles first appear in Discogs' extraartists list. See
+    /// `tracklistRoleDisplay(_:)` for the role-to-prefix mapping and the
+    /// list of roles that are filtered out (producer, engineer, instrument
+    /// credits — too much detail per row).
+    let credits: [TrackCredit]
 
     enum CodingKeys: String, CodingKey {
         case position, title, duration, extraartists
         case type = "type_"
     }
 
-    private struct Credit: Decodable {
+    private struct RawCredit: Decodable {
         let name: String
         let role: String
 
@@ -132,11 +136,23 @@ struct TrackEntry: Decodable, Sendable {
         title = try c.decodeIfPresent(String.self, forKey: .title) ?? ""
         duration = try c.decodeIfPresent(String.self, forKey: .duration) ?? ""
         type = try c.decodeIfPresent(String.self, forKey: .type) ?? "track"
-        let credits = try c.decodeIfPresent([Credit].self, forKey: .extraartists) ?? []
-        composers = credits
-            .filter { $0.role.localizedCaseInsensitiveContains("Composed By") }
-            .map { cleanArtistName($0.name) }
-            .filter { !$0.isEmpty }
+        let raw = try c.decodeIfPresent([RawCredit].self, forKey: .extraartists) ?? []
+        // Group by display role, preserving the order each role first
+        // appears in the raw list. A track that lists two backing
+        // vocalists then a composer renders as "Backing vocals by … ,
+        // Composed by …" — in that order.
+        var roleOrder: [String] = []
+        var namesByRole: [String: [String]] = [:]
+        for entry in raw {
+            guard let role = tracklistRoleDisplay(entry.role) else { continue }
+            let name = cleanArtistName(entry.name)
+            guard !name.isEmpty else { continue }
+            if namesByRole[role] == nil { roleOrder.append(role) }
+            namesByRole[role, default: []].append(name)
+        }
+        credits = roleOrder.map { role in
+            TrackCredit(role: role, names: namesByRole[role] ?? [])
+        }
     }
 }
 
@@ -158,13 +174,62 @@ extension BasicInformation {
 extension TrackEntry {
     var isHeading: Bool { type == "heading" }
 
-    /// The vinyl side parsed from the position (e.g. "A1" -> "A", "B2" -> "B").
-    /// nil for headings or numeric-only positions.
+    /// The vinyl side parsed from the Discogs position. Handles:
+    ///   "A1"       → "A"   — single-disc, side letter at the start
+    ///   "C1"/"D1"  → "C"/"D" — multi-disc with continuous lettering
+    ///   "1-A1"     → "A"   — disc-prefixed (hyphen separator)
+    ///   "2-A1"     → "C"   — disc 2 maps onto continuous lettering
+    ///   "1.A1"     → "A"   — disc-prefixed (dot separator)
+    ///   "1A1"      → "A"   — disc-prefixed (no separator)
+    /// For disc-prefixed positions we shift the letter by `(disc - 1) * 2`
+    /// so a 2xLP's "1-A" and "2-A" become Side A and Side C — the convention
+    /// vinyl box sets use universally. Without this mapping a 2xLP's disc 2
+    /// tracks would either collide with disc 1's letters or (when Discogs
+    /// uses a leading digit) be parsed as having no side at all and disappear
+    /// from the sides list.
+    /// nil for headings or positions without any side letter.
     var side: String? {
         guard !isHeading else { return nil }
-        let letters = position.prefix { $0.isLetter }
-        return letters.isEmpty ? nil : String(letters).uppercased()
+        let (disc, letters) = splitDiscAndLetters(position)
+        guard !letters.isEmpty else { return nil }
+        guard letters.count == 1,
+              let scalar = letters.unicodeScalars.first,
+              ("A"..."Z").contains(letters) else {
+            return letters // unusual code (e.g. "AA"); pass through verbatim
+        }
+        let baseOffset = Int(scalar.value - UnicodeScalar("A").value)
+        let totalOffset = max(0, disc - 1) * 2 + baseOffset
+        guard totalOffset < 26,
+              let mapped = UnicodeScalar(UInt32(totalOffset) + UnicodeScalar("A").value) else {
+            return letters
+        }
+        return String(mapped)
     }
+}
+
+/// Splits a Discogs position string into (disc number, side letters).
+/// Returns `(disc: 1, letters: "")` for a position with no recognisable side.
+/// Examples: "A1" → (1, "A"), "1-A1" → (1, "A"), "2-A1" → (2, "A"),
+/// "1.B3" → (1, "B"), "12" → (1, ""), "1" → (1, "").
+private func splitDiscAndLetters(_ position: String) -> (disc: Int, letters: String) {
+    var idx = position.startIndex
+    var digits = ""
+    while idx < position.endIndex, position[idx].isNumber {
+        digits.append(position[idx])
+        idx = position.index(after: idx)
+    }
+    if idx < position.endIndex, position[idx] == "-" || position[idx] == "." {
+        idx = position.index(after: idx)
+    }
+    var letters = ""
+    while idx < position.endIndex, position[idx].isLetter {
+        letters.append(position[idx])
+        idx = position.index(after: idx)
+    }
+    // Leading digits with no following letters = a track number, not a disc
+    // prefix (e.g. "12" is track 12 on a CD, disc number stays at 1).
+    let disc = letters.isEmpty ? 1 : (Int(digits) ?? 1)
+    return (disc, letters.uppercased())
 }
 
 /// Discogs disambiguates duplicate artist names with a trailing " (2)", " (3)", etc.
