@@ -83,6 +83,20 @@ struct RecordView: View {
         return isAutoHalo ? autoHaloEngaged : manualHaloEngaged
     }
 
+    /// True whenever the informative-view backdrop ambient drift is running
+    /// (post-15s idle, paused on input). Used alongside the halo to gate
+    /// screensaver suppression — both ambient states keep the screen safe.
+    private var isBackdropAmbientEngaged: Bool {
+        backdropEngagedAt != nil
+    }
+
+    /// Either ambient state (cover-focused halo or informative backdrop
+    /// drift) is active — keep tvOS's screensaver held back so it doesn't
+    /// interrupt the moving pixels that are themselves the burn-in defence.
+    private var suppressesSystemScreensaver: Bool {
+        isHaloEngaged || isBackdropAmbientEngaged
+    }
+
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
@@ -106,7 +120,7 @@ struct RecordView: View {
             await resolveCover(release.releaseId)
         }
         .task(id: release.preferredCoverURL) { await loadPalette() }
-        .suppressesScreensaver(isHaloEngaged)
+        .suppressesScreensaver(suppressesSystemScreensaver)
     }
 
     /// Pulls the (already-cached) cover from Nuke once it's available and
