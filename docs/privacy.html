@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Privacy Policy — Vinyl for Apple TV</title>
+  <meta name="description" content="What Vinyl for Apple TV does and does not do with your data.">
+  <meta name="theme-color" content="#0a0908">
+  <link rel="icon" type="image/png" href="assets/icon.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <a class="nav-brand" href="./">
+        <img src="assets/icon.png" alt="Vinyl for Apple TV icon">
+        <span>Vinyl for Apple TV</span>
+      </a>
+      <nav class="nav-links">
+        <a href="index.html#features">Features</a>
+        <a href="support.html">Support</a>
+        <a href="privacy.html">Privacy</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <article class="container content">
+      <h1>Privacy Policy</h1>
+      <p class="updated">Last updated: 31 May 2026.</p>
+
+      <p>Vinyl for Apple TV (“the app”) is designed to do as little with your data as possible. It is a viewer for a Discogs collection you already own — nothing more. This policy describes, in plain language, what the app accesses, what it stores, and what it never does.</p>
+
+      <h2>Who runs the app</h2>
+      <p>The app is built and maintained by Andrei Sudarikov as an independent project. There is no company, no server, and no third-party operator behind it. Source code is publicly visible at <a href="https://github.com/andreisudarikov19/vinyl-art-apple-tv">github.com/andreisudarikov19/vinyl-art-apple-tv</a>.</p>
+
+      <h2>What the app accesses</h2>
+      <ul>
+        <li><strong>Your Discogs account.</strong> When you sign in, the app uses Discogs's OAuth flow so you can authorise it to read your collection. The app receives an access token that lets it list the records you own and read their public metadata (artist, title, tracklist, year, catalog number). It does not have permission to make changes to your Discogs account.</li>
+        <li><strong>Cover-art lookups.</strong> When Discogs does not return a high-resolution cover for a release, the app may query the public Cover Art Archive and MusicBrainz APIs by release metadata (artist + album + catalog number) to find a better image. These are anonymous queries — no account information is sent.</li>
+      </ul>
+
+      <h2>What the app stores</h2>
+      <ul>
+        <li><strong>On your Apple TV, locally only.</strong> Your Discogs collection is cached on-device using SwiftData (Apple's standard local-storage framework). Cover images are cached using the Nuke image library. Your access token is stored in the device keychain. None of this leaves the Apple TV.</li>
+        <li><strong>Through iCloud, if you have it enabled.</strong> Like any tvOS app, the system may back up the app's local data to your personal iCloud account under Apple's standard backup mechanisms. The developer does not have access to this data — it is governed by <a href="https://www.apple.com/legal/privacy/">Apple's privacy policy</a>.</li>
+      </ul>
+
+      <h2>What the app does <em>not</em> do</h2>
+      <ul>
+        <li><strong>No analytics.</strong> The app does not include Google Analytics, Firebase, Mixpanel, Segment, Sentry, Crashlytics, or any other telemetry SDK. Crash logs that you choose to share with Apple via the system-level "Share with App Developers" setting are the only signal the developer ever receives, and they contain no personal information beyond what Apple itself anonymises.</li>
+        <li><strong>No advertising.</strong> The app shows no ads and contains no advertising SDKs. There is no tracker that follows you between apps or websites.</li>
+        <li><strong>No third-party servers.</strong> The app talks directly to <a href="https://www.discogs.com">Discogs</a>, <a href="https://coverartarchive.org">Cover Art Archive</a>, and <a href="https://musicbrainz.org">MusicBrainz</a> over HTTPS. There is no backend operated by the developer.</li>
+        <li><strong>No data sale.</strong> The developer never sells, shares, or transmits any personal information about you, because the developer never receives any to begin with.</li>
+      </ul>
+
+      <h2>Third-party services</h2>
+      <p>The app interacts with three external services that have their own privacy policies. By signing in or browsing covers, you are subject to their terms as well as this one.</p>
+      <ul>
+        <li><a href="https://www.discogs.com/privacy">Discogs Privacy Policy</a></li>
+        <li><a href="https://metabrainz.org/privacy">MusicBrainz / Cover Art Archive Privacy Policy</a></li>
+        <li><a href="https://www.apple.com/legal/privacy/">Apple Privacy Policy</a> (iCloud, TestFlight, App Store)</li>
+      </ul>
+
+      <h2>Children's privacy</h2>
+      <p>The app is rated 4+ on the App Store. It does not knowingly collect any data from anyone, regardless of age.</p>
+
+      <h2>Your choices</h2>
+      <ul>
+        <li><strong>Revoking access.</strong> You can disconnect the app from your Discogs account at any time from <a href="https://www.discogs.com/settings/applications">your Discogs application settings</a>. Doing so immediately invalidates the access token; the next time the app launches, it will prompt you to sign in again.</li>
+        <li><strong>Deleting data.</strong> Uninstalling the app from your Apple TV removes all locally cached data (collection, cover images, access token). If iCloud backup is enabled, you can also delete the app's backup data via the Apple TV's system Settings.</li>
+      </ul>
+
+      <h2>Changes to this policy</h2>
+      <p>If this policy changes in a meaningful way, the change will be noted here and the "Last updated" date will be revised. Because the app collects nothing, material changes are not expected.</p>
+
+      <h2>Contact</h2>
+      <p>For privacy questions, write to <a href="mailto:SUPPORT_EMAIL_PLACEHOLDER">SUPPORT_EMAIL_PLACEHOLDER</a>. For bug reports, the project's <a href="https://github.com/andreisudarikov19/vinyl-art-apple-tv/issues">GitHub issues page</a> is the fastest route.</p>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <div>Vinyl for Apple TV — made with care by Andrei Sudarikov.</div>
+      <div class="footer-links">
+        <a href="privacy.html">Privacy</a>
+        <a href="support.html">Support</a>
+        <a href="https://github.com/andreisudarikov19/vinyl-art-apple-tv">GitHub</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
