@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Support — Vinyl for Apple TV</title>
+  <meta name="description" content="Help, FAQ, and contact information for Vinyl for Apple TV.">
+  <meta name="theme-color" content="#0a0908">
+  <link rel="icon" type="image/png" href="assets/icon.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <a class="nav-brand" href="./">
+        <img src="assets/icon.png" alt="Vinyl for Apple TV icon">
+        <span>Vinyl for Apple TV</span>
+      </a>
+      <nav class="nav-links">
+        <a href="index.html#features">Features</a>
+        <a href="support.html">Support</a>
+        <a href="privacy.html">Privacy</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <article class="container content">
+      <h1>Support</h1>
+      <p class="updated">Help with Vinyl for Apple TV.</p>
+
+      <p>The fastest way to get a question answered or a bug fixed is to write to <a href="mailto:SUPPORT_EMAIL_PLACEHOLDER">SUPPORT_EMAIL_PLACEHOLDER</a>. For reproducible bugs and feature requests, opening an issue on <a href="https://github.com/andreisudarikov19/vinyl-art-apple-tv/issues">GitHub</a> also works well and gives the conversation a permanent home.</p>
+
+      <p>When reporting an issue, including the following helps a lot:</p>
+      <ul>
+        <li>Your Apple TV model and tvOS version (Settings → System → About).</li>
+        <li>The app version, shown in the in-app settings menu.</li>
+        <li>A short description of what you were doing when the problem appeared.</li>
+        <li>If it concerns a specific record, the Discogs release ID (the number in the release URL).</li>
+      </ul>
+
+      <h2>Frequently asked questions</h2>
+
+      <div class="faq">
+        <details>
+          <summary>What do I need to use the app?</summary>
+          <p>An Apple TV running tvOS 18 or later, and a free <a href="https://www.discogs.com">Discogs</a> account with at least a few records in your collection. The app is read-only — it never modifies your Discogs data.</p>
+        </details>
+
+        <details>
+          <summary>How do I sign in?</summary>
+          <p>The first time you open the app, it shows a Discogs authorisation code on the TV. Open the URL on your phone or computer, log in to Discogs, paste the code, and approve. From then on the Apple TV stays signed in until you uninstall the app or revoke access from <a href="https://www.discogs.com/settings/applications">your Discogs settings</a>.</p>
+        </details>
+
+        <details>
+          <summary>Why is one of my covers missing or low-resolution?</summary>
+          <p>Discogs allows community-submitted images and not every release has a hi-res one uploaded. The app falls back to the Cover Art Archive (a free, open image database run alongside MusicBrainz) when Discogs comes up short. If neither has a usable image, the cover stays blank — uploading a better cover to Discogs is the fix, and it propagates back to the app on the next sync.</p>
+        </details>
+
+        <details>
+          <summary>Does the app play music?</summary>
+          <p>No. Vinyl for Apple TV is a viewer for your physical collection. It shows artwork, tracklists, credits, and the room-ambient halo — but it never plays audio. The intent is to sit alongside your turntable, not replace it.</p>
+        </details>
+
+        <details>
+          <summary>How does the halo / screensaver-suppression mode work?</summary>
+          <p>When you open a record and switch to ambient mode, the app paints the screen with cover-derived colour blobs. While ambient mode is on, the app tells tvOS to keep the screen awake — handy if you want to sit with a record for an hour without the screensaver kicking in. Pressing any button on the Siri Remote re-engages the controls; leaving it alone for a few seconds returns to ambient mode.</p>
+        </details>
+
+        <details>
+          <summary>How does the app handle multi-disc releases?</summary>
+          <p>Double LPs, triple LPs, and box sets appear with one side selector per side (A, B, C, D, and so on). The slider at the bottom of the record screen lets you scroll between them; Discogs's disc-prefixed track positions (1-A1, 2-A1, etc.) are parsed automatically so nothing goes missing.</p>
+        </details>
+
+        <details>
+          <summary>Where is my data stored?</summary>
+          <p>Locally on your Apple TV. Your collection metadata is cached in SwiftData; cover images live in the Nuke image cache; your Discogs access token is in the device keychain. Nothing leaves the device except the requests the app makes to Discogs and the Cover Art Archive. See the <a href="privacy.html">privacy policy</a> for the full story.</p>
+        </details>
+
+        <details>
+          <summary>How do I remove the app and its data?</summary>
+          <p>Uninstall the app from the Apple TV home screen (focus the icon, hold the Siri Remote's centre button, choose Delete). All local data is removed with the app. If iCloud backup is enabled, you can also clear the app's backup via Settings → Users and Accounts → iCloud → Manage Storage.</p>
+        </details>
+
+        <details>
+          <summary>I'm a beta tester. How do I report something specific to a build?</summary>
+          <p>From the TestFlight app on your iPhone, open Vinyl for Apple TV, tap the build number, and use "Send Beta Feedback" — that bundles the build, device, and OS version automatically. You can also email the address above with the same information typed in.</p>
+        </details>
+      </div>
+
+      <h2>Contact</h2>
+      <p>Direct email: <a href="mailto:SUPPORT_EMAIL_PLACEHOLDER">SUPPORT_EMAIL_PLACEHOLDER</a>. Replies usually come within a few days.</p>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <div>Vinyl for Apple TV — made with care by Andrei Sudarikov.</div>
+      <div class="footer-links">
+        <a href="privacy.html">Privacy</a>
+        <a href="support.html">Support</a>
+        <a href="https://github.com/andreisudarikov19/vinyl-art-apple-tv">GitHub</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
