@@ -105,15 +105,19 @@ struct TrackEntry: Decodable, Sendable {
     let title: String
     let duration: String
     let type: String
-    /// Names credited as "Composed By" on this track (from Discogs extraartists).
-    let composers: [String]
+    /// Tracklist-displayable credits, grouped by display role and preserving
+    /// the order roles first appear in Discogs' extraartists list. See
+    /// `tracklistRoleDisplay(_:)` for the role-to-prefix mapping and the
+    /// list of roles that are filtered out (producer, engineer, instrument
+    /// credits — too much detail per row).
+    let credits: [TrackCredit]
 
     enum CodingKeys: String, CodingKey {
         case position, title, duration, extraartists
         case type = "type_"
     }
 
-    private struct Credit: Decodable {
+    private struct RawCredit: Decodable {
         let name: String
         let role: String
 
@@ -132,11 +136,23 @@ struct TrackEntry: Decodable, Sendable {
         title = try c.decodeIfPresent(String.self, forKey: .title) ?? ""
         duration = try c.decodeIfPresent(String.self, forKey: .duration) ?? ""
         type = try c.decodeIfPresent(String.self, forKey: .type) ?? "track"
-        let credits = try c.decodeIfPresent([Credit].self, forKey: .extraartists) ?? []
-        composers = credits
-            .filter { $0.role.localizedCaseInsensitiveContains("Composed By") }
-            .map { cleanArtistName($0.name) }
-            .filter { !$0.isEmpty }
+        let raw = try c.decodeIfPresent([RawCredit].self, forKey: .extraartists) ?? []
+        // Group by display role, preserving the order each role first
+        // appears in the raw list. A track that lists two backing
+        // vocalists then a composer renders as "Backing vocals by … ,
+        // Composed by …" — in that order.
+        var roleOrder: [String] = []
+        var namesByRole: [String: [String]] = [:]
+        for entry in raw {
+            guard let role = tracklistRoleDisplay(entry.role) else { continue }
+            let name = cleanArtistName(entry.name)
+            guard !name.isEmpty else { continue }
+            if namesByRole[role] == nil { roleOrder.append(role) }
+            namesByRole[role, default: []].append(name)
+        }
+        credits = roleOrder.map { role in
+            TrackCredit(role: role, names: namesByRole[role] ?? [])
+        }
     }
 }
 

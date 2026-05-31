@@ -66,10 +66,18 @@ actor DiscogsClient {
     }
 
     /// Full release including tracklist. Fetched lazily when a record opens,
-    /// not during initial library build.
+    /// not during initial library build. Retries once on timeout —
+    /// /releases/{id} returns the entire tracklist + metadata + credits in a
+    /// single payload that can run to 100KB+ for box sets, and Discogs has
+    /// been observed to occasionally take longer than `URLSession`'s default
+    /// 60s on the first hit. A second attempt usually succeeds.
     func release(id: Int) async throws -> ReleaseDetail {
         let url = URL(string: "https://api.discogs.com/releases/\(id)")!
-        return try await get(url: url)
+        do {
+            return try await get(url: url)
+        } catch let error as URLError where error.code == .timedOut {
+            return try await get(url: url)
+        }
     }
 
     private func get<T: Decodable & Sendable>(url: URL) async throws -> T {

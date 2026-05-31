@@ -59,6 +59,19 @@ struct RecordView: View {
     /// subtle life over a side of an LP. Disabled in Reduce Motion.
     @State private var coverBreath: CGFloat = 1.0
 
+    /// Informative-view backdrop ambient motion: engages after 15 s of
+    /// stillness and freezes mid-motion the instant the user interacts.
+    /// `backdropEngagedAt` is the wall-clock moment the current engagement
+    /// started (nil while paused). `backdropFrozenTime` is the total accrued
+    /// "virtual time" the motion has run across previous engagements — when
+    /// the ambient re-engages it resumes from this point, so the cycles pick
+    /// up at exactly the phase they were paused at. The 4 s fade-in is also
+    /// driven off virtual time (min(1, virtualT / 4)) so it pauses with the
+    /// rest of the motion instead of continuing to ramp during freeze.
+    @State private var backdropEngagedAt: Date?
+    @State private var backdropFrozenTime: TimeInterval = 0
+    @State private var backdropIdleTask: Task<Void, Never>?
+
     private var isAutoHalo: Bool {
         preferences.first?.haloAutoEngage ?? true
     }
@@ -131,6 +144,53 @@ struct RecordView: View {
         autoHaloEngaged = false
     }
 
+    // MARK: - Backdrop ambient idle timer (informative view)
+
+    /// Freezes the ambient motion at its current configuration and arms a
+    /// 15-second timer that will resume the motion from that frozen state.
+    /// Called on entering informative view and on every directional input
+    /// while there. The freeze is achieved by capturing the elapsed virtual
+    /// time into `backdropFrozenTime` and nilling `backdropEngagedAt` — no
+    /// fade-out animation, the motion just holds where it is.
+    private func restartBackdropIdleTimer() {
+        backdropIdleTask?.cancel()
+        freezeBackdropMotion()
+        backdropIdleTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(15))
+            guard !Task.isCancelled else { return }
+            // Resume: set the new engagement origin to now. Virtual time
+            // continues from backdropFrozenTime onward.
+            backdropEngagedAt = Date()
+        }
+    }
+
+    private func cancelBackdropIdleTimer() {
+        backdropIdleTask?.cancel()
+        backdropIdleTask = nil
+        freezeBackdropMotion()
+    }
+
+    /// Captures however much virtual time elapsed since the most recent
+    /// engagement into `backdropFrozenTime`, then clears `backdropEngagedAt`
+    /// so virtual time stops advancing. Idempotent — calling on an already
+    /// frozen motion is a no-op.
+    private func freezeBackdropMotion() {
+        guard let engagedAt = backdropEngagedAt else { return }
+        backdropFrozenTime += Date().timeIntervalSince(engagedAt)
+        backdropEngagedAt = nil
+    }
+
+    /// Total accrued virtual time the backdrop motion has been engaged
+    /// for, as of `now`. While engaged this advances at wall-clock pace;
+    /// while paused (`backdropEngagedAt == nil`) it's frozen at the last
+    /// captured value.
+    private func backdropVirtualTime(at now: Date) -> TimeInterval {
+        if let engagedAt = backdropEngagedAt {
+            return backdropFrozenTime + now.timeIntervalSince(engagedAt)
+        }
+        return backdropFrozenTime
+    }
+
     private func interactive(_ model: RecordViewModel) -> some View {
         // The design called for a subtle haptic on each side flip, but tvOS
         // exposes no Siri Remote haptics API (no .sensoryFeedback, no usable
@@ -140,13 +200,19 @@ struct RecordView: View {
         Button {
             changeSide(on: model, forward: true)
         } label: {
-            ZStack {
+            // top-leading alignment so a tall informative stage (lots of
+            // tracks with multiple credits) anchors at the top instead of
+            // being centred — the latter would push the cover above the
+            // visible area as the tracklist grew. The toast overrides with
+            // its own centred frame so it still appears mid-screen.
+            ZStack(alignment: .topLeading) {
                 if model.displayMode == .coverFocused {
                     coverFocusedStage(model).transition(.opacity)
                 } else {
                     informativeStage(model).transition(.opacity)
                 }
                 toastOverlay
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
@@ -181,14 +247,24 @@ struct RecordView: View {
             if isAutoHalo, model.displayMode == .coverFocused {
                 restartHaloIdleTimer()
             }
+            // Same rule for the informative backdrop, with a 15 s idle
+            // window: any directional input restarts the wait.
+            if model.displayMode == .informative {
+                restartBackdropIdleTimer()
+            }
         }
         .task(id: model.displayMode) {
-            // Mode transitions: arm the idle timer when arriving at the
-            // cover-focused stage (auto mode), cancel it on departure.
+            // Mode transitions arm the relevant idle timer for the stage
+            // we're entering, and cancel the one we're leaving.
             if model.displayMode == .coverFocused, isAutoHalo {
                 restartHaloIdleTimer()
             } else {
                 cancelHaloIdleTimer()
+            }
+            if model.displayMode == .informative {
+                restartBackdropIdleTimer()
+            } else {
+                cancelBackdropIdleTimer()
             }
         }
     }
@@ -301,22 +377,74 @@ struct RecordView: View {
 
     private let coverSide: CGFloat = 520
 
-    /// Edge-to-edge blurred copy of the cover, the ambient backdrop behind both
-    /// stages. Fills the whole screen; `dark` scrim keeps foreground legible.
+    /// Edge-to-edge blurred copy of the cover, the ambient backdrop behind
+    /// the informative stage. Fills the whole screen; `dark` scrim keeps
+    /// foreground legible.
+    ///
+    /// The backdrop drifts: a slow ken-burns zoom (~90 s cycle), an elliptical
+    /// pan (~120 s) and a gentle saturation breath (~50 s). The three cycles
+    /// are out of phase so the combined motion doesn't visibly repeat for
+    /// several minutes — rewards the user for lingering on the tracklist
+    /// with a quiet "the cover is alive" reading without ever competing for
+    /// attention with the title / artist / tracks. Reduce Motion freezes all
+    /// three.
     private func blurredBackdrop(dark: Double) -> some View {
-        LazyImage(url: release.preferredCoverURL) { state in
-            if let image = state.image {
-                image.resizable().scaledToFill()
-            } else {
-                Color.black
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { context in
+            // Virtual time: accrued time the motion has been engaged across
+            // ALL engagements so far. Frozen when paused, resumes from the
+            // exact same value on the next engagement — every cycle (zoom,
+            // pan, saturation, fade) picks up at the phase it was paused at.
+            let virtualT = backdropVirtualTime(at: context.date)
+            // Fade-in: 4-second ease driven off virtual time, so it pauses
+            // along with the motion when the user interacts.
+            let fade = min(1.0, virtualT / 4.0)
+            // Three out-of-phase cycles. The scale formula has a non-zero
+            // baseline (+0.20 * fade) independent of zoom phase: that
+            // guarantees the image is at least ~20% over-scaled whenever
+            // any pan is happening, keeping the image's edges past the
+            // screen's edges in every direction so the black "back" can
+            // never appear. Pan ±80pt on a 1080pt-tall frame requires
+            // scale ≥ 1.0 + 80/540 ≈ 1.148; the 1.20 baseline gives a
+            // ~5% safety margin against any wobble.
+            let zoomPhase = (sin(virtualT * 2 * .pi / 60.0) + 1) / 2 // 0..1 over 60s
+            let scale: CGFloat = reduceMotion
+                ? 1.0
+                : 1.0 + (0.20 + 0.25 * CGFloat(zoomPhase)) * CGFloat(fade)
+            let panX: CGFloat = reduceMotion
+                ? 0
+                : CGFloat(sin(virtualT * 2 * .pi / 75.0) * 80 * fade)
+            // Cosine with a 0.7x frequency offset traces an ellipse rather
+            // than a straight line, so the pan never just wobbles left-right.
+            let panY: CGFloat = reduceMotion
+                ? 0
+                : CGFloat(cos(virtualT * 2 * .pi / 75.0 * 0.7) * 80 * fade)
+            // Saturation modulated as a delta off 1.0 so a fade=0 produces
+            // a neutral saturation rather than a wrong base value.
+            let saturationDelta = sin(virtualT * 2 * .pi / 40.0) * 0.12
+            let saturation: Double = reduceMotion
+                ? 1.0
+                : 1.0 + saturationDelta * fade
+
+            LazyImage(url: release.preferredCoverURL) { state in
+                if let image = state.image {
+                    image.resizable().scaledToFill()
+                } else {
+                    Color.black
+                }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .clipped()
+            .blur(radius: 80, opaque: true)
+            // Transforms applied AFTER the blur so the blur isn't recomputed
+            // every frame — only the cheap zoom / pan / saturation filters
+            // re-evaluate on each timeline tick.
+            .scaleEffect(scale)
+            .offset(x: panX, y: panY)
+            .saturation(saturation)
+            .overlay(Color.black.opacity(dark))
+            .ignoresSafeArea()
+            .animation(reduceMotion ? nil : .easeInOut(duration: 0.45), value: release.preferredCoverURL)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .clipped()
-        .blur(radius: 80, opaque: true)
-        .overlay(Color.black.opacity(dark))
-        .ignoresSafeArea()
-        .animation(reduceMotion ? nil : .easeInOut(duration: 0.45), value: release.preferredCoverURL)
     }
 
     private func cover(_ size: CGFloat, cornerRadius: CGFloat = 0, shadowRadius: CGFloat = 0) -> some View {
@@ -336,7 +464,7 @@ struct RecordView: View {
 
 
     private var albumHeader: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 10) {
             Text(release.title)
                 .font(.system(size: 42, weight: .bold))
                 .foregroundStyle(.white)
@@ -345,14 +473,62 @@ struct RecordView: View {
                 .font(.system(size: 31))
                 .foregroundStyle(.white.opacity(0.7))
                 .lineLimit(1)
-            if !subtitle.isEmpty {
-                Text(subtitle)
-                    .font(.system(size: 26))
-                    .foregroundStyle(.white.opacity(0.5))
-                    .lineLimit(1)
+            // Year, genres, and styles are categorical metadata — render as
+            // frosted-glass tag pills that flow within the cover's width and
+            // wrap to additional rows when they don't fit on one line. The
+            // year pill carries a calendar SF Symbol so it reads as a date
+            // anchor at a glance; genre / style pills are text-only.
+            if !catalogTags.isEmpty {
+                FlowLayout(spacing: 8) {
+                    ForEach(catalogTags, id: \.self) { tag in
+                        tagPill(tag)
+                    }
+                }
+                .padding(.top, 4)
             }
         }
         .frame(width: coverSide, alignment: .leading)
+    }
+
+    /// The line of "1985 · Jazz · Big Band" categorical metadata, split into
+    /// individual tags. Year goes first (chronological anchor and the only
+    /// pill that carries an icon), then genres, then more-specific styles.
+    private var catalogTags: [CatalogTag] {
+        var out: [CatalogTag] = []
+        if release.year > 0 {
+            out.append(CatalogTag(label: String(release.year), systemImage: "calendar"))
+        }
+        out.append(contentsOf: release.genres.map { CatalogTag(label: $0, systemImage: nil) })
+        out.append(contentsOf: release.styles.map { CatalogTag(label: $0, systemImage: nil) })
+        return out
+    }
+
+    private func tagPill(_ tag: CatalogTag) -> some View {
+        HStack(spacing: 8) {
+            if let symbol = tag.systemImage {
+                Image(systemName: symbol)
+                    .font(.system(size: 18, weight: .medium))
+            }
+            Text(tag.label)
+                .font(.system(size: 22, weight: .medium))
+        }
+        .foregroundStyle(.white.opacity(0.88))
+        .padding(.horizontal, 16)
+        .padding(.vertical, 6)
+        .background(tagPillBackground)
+    }
+
+    /// Frosted glass for the catalog tag pills: an ultra-thin material for
+    /// the blurred translucency behind the text, plus a thin white stroke
+    /// for the edge highlight that sells the "glass" reading at TV viewing
+    /// distance. No tvOS 26 dependency — `.ultraThinMaterial` is available
+    /// on every supported version.
+    private var tagPillBackground: some View {
+        Capsule()
+            .fill(.ultraThinMaterial)
+            .overlay(
+                Capsule().strokeBorder(.white.opacity(0.22), lineWidth: 0.8)
+            )
     }
 
     @ViewBuilder
@@ -367,19 +543,27 @@ struct RecordView: View {
         case .loaded:
             if let side = model.currentSide {
                 VStack(alignment: .leading, spacing: 0) {
-                    HStack(alignment: .center, spacing: 24) {
-                        sideTuner(model)
-                            .frame(maxWidth: .infinity)
-                        if let total = Self.totalDuration(of: side) {
-                            Text(total)
-                                .font(.system(size: 24))
-                                .foregroundStyle(.white.opacity(0.4))
-                                .monospacedDigit()
+                    // Hairline lives in the parent ZStack now so it runs the
+                    // full row width — under the slider AND the duration —
+                    // instead of being clipped to the slider's column.
+                    ZStack(alignment: .bottom) {
+                        Rectangle()
+                            .fill(.white.opacity(0.18))
+                            .frame(height: 1)
+                        HStack(alignment: .center, spacing: 24) {
+                            sideTuner(model)
+                                .frame(maxWidth: .infinity)
+                            if let total = Self.totalDuration(of: side) {
+                                Text(total)
+                                    .font(.system(size: 24))
+                                    .foregroundStyle(.white.opacity(0.4))
+                                    .monospacedDigit()
+                            }
                         }
                     }
                     .padding(.bottom, 18)
                     ForEach(Array(side.tracks.enumerated()), id: \.element.id) { index, track in
-                        TrackRow(number: index + 1, title: track.title, composers: track.composers, duration: track.duration)
+                        TrackRow(number: index + 1, title: track.title, credits: track.credits, duration: track.duration)
                     }
                 }
             } else {
@@ -408,18 +592,9 @@ struct RecordView: View {
             let centerY = geo.size.height / 2
 
             ZStack {
-                // Hairline along the bottom — replaces the old standalone
-                // divider that used to sit beneath the side header.
-                VStack(spacing: 0) {
-                    Spacer()
-                    Rectangle()
-                        .fill(.white.opacity(0.18))
-                        .frame(height: 1)
-                }
-
-                // Tick marks dropping into the hairline at each side's
-                // position. Subtle — they orient the eye to the available
-                // sides without competing with the labels.
+                // Tick marks at each side's position, dropping into the
+                // hairline (which lives in the parent ZStack now so it can
+                // stretch under the duration text too).
                 ForEach(0..<sides.count, id: \.self) { i in
                     Rectangle()
                         .fill(.white.opacity(0.25))
@@ -431,8 +606,8 @@ struct RecordView: View {
                 }
 
                 // Static side letters. The current side's letter is rendered
-                // transparent so the moving thumb's letter doesn't overlap
-                // a stationary one.
+                // transparent so the moving thumb's "Side X" label doesn't
+                // double-print on a stationary letter behind it.
                 ForEach(Array(sides.enumerated()), id: \.element.id) { i, side in
                     Text(side.id)
                         .font(.system(size: 22, weight: .medium))
@@ -445,7 +620,9 @@ struct RecordView: View {
                 }
 
                 // The needle — a Liquid Glass capsule carrying the current
-                // side's letter, sliding between positions on a spring.
+                // side's full name ("Side A"), sliding between positions on
+                // a spring. The "Side" word lives here so it's prominent
+                // without needing a separate header.
                 if sides.indices.contains(currentIndex) {
                     tunerThumb(letter: sides[currentIndex].id)
                         .position(
@@ -463,12 +640,11 @@ struct RecordView: View {
     private func tunerThumb(letter: String) -> some View {
         ZStack {
             tunerThumbGlass
-            Text(letter)
+            Text("Side \(letter)")
                 .font(.system(size: 22, weight: .semibold))
                 .foregroundStyle(.white)
-                .monospacedDigit()
         }
-        .frame(width: 52, height: 40)
+        .frame(width: 120, height: 44)
     }
 
     @ViewBuilder
@@ -522,14 +698,6 @@ struct RecordView: View {
 
     // MARK: - Behavior
 
-    private var subtitle: String {
-        var parts: [String] = []
-        if release.year > 0 { parts.append(String(release.year)) }
-        parts.append(contentsOf: release.genres)
-        parts.append(contentsOf: release.styles)
-        return parts.joined(separator: " · ")
-    }
-
     private func setMode(_ mode: RecordViewModel.DisplayMode, on model: RecordViewModel) {
         withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.4)) {
             switch mode {
@@ -572,13 +740,14 @@ private struct AmbientButtonStyle: ButtonStyle {
 /// and right-aligned duration. No separators — matches Music on tvOS.
 ///
 /// Title is allowed to wrap to a second line for long song names rather than
-/// truncating with an ellipsis — the side list has vertical room. Composers
-/// drop to their own line beneath the title (not beside it on the same row
-/// where a long title would have pushed them off-screen anyway).
+/// truncating with an ellipsis — the side list has vertical room. Credit
+/// lines (Composed by / Vocals by / Backing vocals by / Lyrics by / etc.)
+/// each get their own line beneath the title in the same subdued style,
+/// in the order they appear on Discogs.
 private struct TrackRow: View {
     let number: Int
     let title: String
-    let composers: String
+    let credits: [TrackCredit]
     let duration: String
 
     var body: some View {
@@ -599,11 +768,13 @@ private struct TrackRow: View {
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)
-                if !composers.isEmpty {
-                    Text("by \(composers)")
+                ForEach(credits, id: \.role) { credit in
+                    Text(credit.displayLine)
                         .font(.system(size: 24))
                         .foregroundStyle(.white.opacity(0.4))
-                        .lineLimit(1)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
             .layoutPriority(1)
@@ -614,5 +785,79 @@ private struct TrackRow: View {
                 .monospacedDigit()
         }
         .padding(.vertical, 16)
+    }
+}
+
+/// One pill in the catalog-tag row beneath the album header. The optional
+/// `systemImage` lets the year tag display a calendar glyph in front of its
+/// label while genres / styles stay text-only.
+private struct CatalogTag: Hashable {
+    let label: String
+    let systemImage: String?
+}
+
+/// Simple flow layout: places subviews left-to-right, wraps to the next line
+/// when the next subview wouldn't fit in the proposed width. Used for the
+/// catalog tag strip under the album header so genres / styles wrap cleanly
+/// inside the cover's width instead of overflowing or truncating.
+private struct FlowLayout: Layout {
+    var spacing: CGFloat = 8
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let maxWidth = proposal.width ?? .infinity
+        let arranged = arrange(subviews: subviews, maxWidth: maxWidth)
+        return CGSize(width: arranged.width, height: arranged.height)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let arranged = arrange(subviews: subviews, maxWidth: bounds.width)
+        for placement in arranged.placements {
+            placement.subview.place(
+                at: CGPoint(x: bounds.minX + placement.x, y: bounds.minY + placement.y),
+                proposal: .unspecified
+            )
+        }
+    }
+
+    private struct Placement {
+        let subview: LayoutSubview
+        let x: CGFloat
+        let y: CGFloat
+    }
+
+    private struct Arrangement {
+        let width: CGFloat
+        let height: CGFloat
+        let placements: [Placement]
+    }
+
+    private func arrange(subviews: Subviews, maxWidth: CGFloat) -> Arrangement {
+        var placements: [Placement] = []
+        var cursorX: CGFloat = 0
+        var cursorY: CGFloat = 0
+        var lineHeight: CGFloat = 0
+        var maxRowWidth: CGFloat = 0
+
+        for subview in subviews {
+            let size = subview.sizeThatFits(.unspecified)
+            // Wrap if this subview wouldn't fit on the current line (but
+            // never wrap at the very start of a line — a single subview
+            // wider than the line just overflows rather than disappearing).
+            if cursorX > 0, cursorX + size.width > maxWidth {
+                maxRowWidth = max(maxRowWidth, cursorX - spacing)
+                cursorX = 0
+                cursorY += lineHeight + spacing
+                lineHeight = 0
+            }
+            placements.append(Placement(subview: subview, x: cursorX, y: cursorY))
+            cursorX += size.width + spacing
+            lineHeight = max(lineHeight, size.height)
+        }
+        maxRowWidth = max(maxRowWidth, cursorX - spacing)
+        return Arrangement(
+            width: max(0, maxRowWidth),
+            height: cursorY + lineHeight,
+            placements: placements
+        )
     }
 }

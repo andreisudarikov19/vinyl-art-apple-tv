@@ -8,10 +8,10 @@ private func makeReleaseDetail(tracklist: [[String: Any]]) throws -> ReleaseDeta
     return try JSONDecoder().decode(ReleaseDetail.self, from: data)
 }
 
-private func track(_ position: String, _ title: String, duration: String = "3:00", type: String = "track", composedBy: [String] = []) -> [String: Any] {
+private func track(_ position: String, _ title: String, duration: String = "3:00", type: String = "track", credits: [(name: String, role: String)] = []) -> [String: Any] {
     var entry: [String: Any] = ["position": position, "title": title, "duration": duration, "type_": type]
-    if !composedBy.isEmpty {
-        entry["extraartists"] = composedBy.map { ["name": $0, "role": "Composed By"] }
+    if !credits.isEmpty {
+        entry["extraartists"] = credits.map { ["name": $0.name, "role": $0.role] }
     }
     return entry
 }
@@ -45,12 +45,83 @@ struct RecordSidesTests {
 
     @Test func extractsComposedByCredits() throws {
         let detail = try makeReleaseDetail(tracklist: [
-            track("A1", "Spain", composedBy: ["Chick Corea", "Joaquín Rodrigo"]),
+            track("A1", "Spain", credits: [
+                (name: "Chick Corea", role: "Composed By"),
+                (name: "Joaquín Rodrigo", role: "Composed By"),
+            ]),
             track("A2", "Crystal Silence"),
         ])
         let sides = RecordSides.from(detail.tracklist)
-        #expect(sides[0].tracks[0].composers == "Chick Corea, Joaquín Rodrigo")
-        #expect(sides[0].tracks[1].composers == "")
+        let credits = sides[0].tracks[0].credits
+        #expect(credits.count == 1)
+        #expect(credits[0].role == "Composed by")
+        #expect(credits[0].names == ["Chick Corea", "Joaquín Rodrigo"])
+        #expect(credits[0].displayLine == "Composed by Chick Corea, Joaquín Rodrigo")
+        #expect(sides[0].tracks[1].credits.isEmpty)
+    }
+
+    @Test func extractsLeadAndBackingVocalsSeparately() throws {
+        let detail = try makeReleaseDetail(tracklist: [
+            track("A1", "Song", credits: [
+                (name: "Alice", role: "Lead Vocals"),
+                (name: "Bob", role: "Backing Vocals"),
+                (name: "Carol", role: "Backing Vocals"),
+            ]),
+        ])
+        let credits = RecordSides.from(detail.tracklist)[0].tracks[0].credits
+        #expect(credits.count == 2)
+        #expect(credits[0].role == "Lead vocals by")
+        #expect(credits[0].names == ["Alice"])
+        #expect(credits[1].role == "Backing vocals by")
+        #expect(credits[1].names == ["Bob", "Carol"])
+    }
+
+    @Test func bracketedBackingVocalsAlsoMaps() throws {
+        // Discogs sometimes uses "Vocals [Backing]" instead of "Backing Vocals".
+        let detail = try makeReleaseDetail(tracklist: [
+            track("A1", "Song", credits: [
+                (name: "Alice", role: "Vocals [Backing]"),
+            ]),
+        ])
+        let credits = RecordSides.from(detail.tracklist)[0].tracks[0].credits
+        #expect(credits == [TrackCredit(role: "Backing vocals by", names: ["Alice"])])
+    }
+
+    @Test func filtersOutNonTracklistRoles() throws {
+        let detail = try makeReleaseDetail(tracklist: [
+            track("A1", "Song", credits: [
+                (name: "Producer Name", role: "Producer"),
+                (name: "Engineer Name", role: "Engineer"),
+                (name: "Mixer Name", role: "Mixed By"),
+                (name: "Guitarist Name", role: "Guitar"),
+                (name: "Singer Name", role: "Vocals"),
+            ]),
+        ])
+        let credits = RecordSides.from(detail.tracklist)[0].tracks[0].credits
+        #expect(credits == [TrackCredit(role: "Vocals by", names: ["Singer Name"])])
+    }
+
+    @Test func multipleCreditTypesPreserveDiscogsOrder() throws {
+        let detail = try makeReleaseDetail(tracklist: [
+            track("A1", "Song", credits: [
+                (name: "Diana Krall", role: "Vocals"),
+                (name: "Cole Porter", role: "Composed By"),
+                (name: "Cole Porter", role: "Lyrics By"),
+            ]),
+        ])
+        let credits = RecordSides.from(detail.tracklist)[0].tracks[0].credits
+        #expect(credits.map(\.role) == ["Vocals by", "Composed by", "Lyrics by"])
+    }
+
+    @Test func writtenByAndWordsByBothMapToWritten() throws {
+        let detail = try makeReleaseDetail(tracklist: [
+            track("A1", "Song", credits: [
+                (name: "Author One", role: "Written-By"),
+                (name: "Author Two", role: "Words By"),
+            ]),
+        ])
+        let credits = RecordSides.from(detail.tracklist)[0].tracks[0].credits
+        #expect(credits == [TrackCredit(role: "Written by", names: ["Author One", "Author Two"])])
     }
 
     @Test func numericPositionsCollapseToSingleSide() throws {
