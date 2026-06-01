@@ -90,7 +90,11 @@ private struct VerifierView: View {
                 stepsList
                 TextField("Verification code", text: $verifier)
                     .textContentType(.oneTimeCode)
+                    .textFieldStyle(.plain)
+                    .foregroundStyle(.black)
                     .frame(maxWidth: 480)
+                    .padding(7)
+                    .background(Color.white, in: Capsule())
                 Button {
                     Task { await onSubmit(verifier) }
                 } label: {
