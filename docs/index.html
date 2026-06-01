@@ -23,6 +23,7 @@
       </a>
       <nav class="nav-links">
         <a href="#features">Features</a>
+        <a href="guide.html">Guide</a>
         <a href="support.html">Support</a>
         <a href="privacy.html">Privacy</a>
       </nav>
@@ -103,7 +104,7 @@
     <section class="container">
       <span class="section-eyebrow">Get started</span>
       <h2>Ready when you are.</h2>
-      <p class="lead">The app is in TestFlight beta now and headed to the App Store. Bring a Discogs account with at least a few records on the shelf — the app will do the rest.</p>
+      <p class="lead">Bring a Discogs account with at least a few records on the shelf — the app will do the rest.</p>
       <div class="cta-row" style="justify-content: flex-start; margin-top: 32px;">
         <a class="btn btn-primary" href="APP_STORE_URL_PLACEHOLDER">
           <span>Download on the App Store</span>
@@ -112,15 +113,103 @@
     </section>
   </main>
 
+  <div class="lightbox" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-label="Screenshot viewer">
+    <button class="lightbox-close" type="button" aria-label="Close">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6L18 18M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+    <div class="lightbox-stage">
+      <button class="lightbox-prev" type="button" aria-label="Previous screenshot">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14.5 6L8.5 12L14.5 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <img class="lightbox-img" alt="">
+      <button class="lightbox-next" type="button" aria-label="Next screenshot">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9.5 6L15.5 12L9.5 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    <div class="lightbox-caption"></div>
+  </div>
+
   <footer>
     <div class="container footer-inner">
       <div>Vinyl for Apple TV — made with care by Andrei Sudarikov.</div>
       <div class="footer-links">
+        <a href="guide.html">Guide</a>
         <a href="privacy.html">Privacy</a>
         <a href="support.html">Support</a>
         <a href="https://github.com/andreisudarikov19/vinyl-art-apple-tv">GitHub</a>
       </div>
     </div>
   </footer>
+
+  <script>
+    (function () {
+      const triggers = Array.from(document.querySelectorAll('.showcase-item img'));
+      const overlay = document.querySelector('.lightbox');
+      if (!triggers.length || !overlay) return;
+
+      const imgEl = overlay.querySelector('.lightbox-img');
+      const captionEl = overlay.querySelector('.lightbox-caption');
+      const closeBtn = overlay.querySelector('.lightbox-close');
+      const prevBtn = overlay.querySelector('.lightbox-prev');
+      const nextBtn = overlay.querySelector('.lightbox-next');
+
+      let currentIndex = -1;
+      let lastFocus = null;
+
+      function show(index) {
+        currentIndex = (index + triggers.length) % triggers.length;
+        const src = triggers[currentIndex];
+        imgEl.src = src.src;
+        imgEl.alt = src.alt || '';
+        const cap = src.closest('.showcase-item').querySelector('.caption h3');
+        captionEl.textContent = cap ? cap.textContent : (src.alt || '');
+      }
+
+      function open(index) {
+        lastFocus = document.activeElement;
+        show(index);
+        overlay.hidden = false;
+        overlay.setAttribute('aria-hidden', 'false');
+        requestAnimationFrame(() => overlay.classList.add('is-open'));
+        document.body.style.overflow = 'hidden';
+        closeBtn.focus();
+      }
+
+      function close() {
+        overlay.classList.remove('is-open');
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        setTimeout(() => { overlay.hidden = true; imgEl.src = ''; }, 200);
+        if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
+      }
+
+      triggers.forEach((img, i) => {
+        img.classList.add('zoomable');
+        img.tabIndex = 0;
+        img.setAttribute('role', 'button');
+        img.setAttribute('aria-label', 'View screenshot full size: ' + (img.alt || ''));
+        img.addEventListener('click', () => open(i));
+        img.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            open(i);
+          }
+        });
+      });
+
+      closeBtn.addEventListener('click', close);
+      prevBtn.addEventListener('click', () => show(currentIndex - 1));
+      nextBtn.addEventListener('click', () => show(currentIndex + 1));
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) close();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (overlay.hidden) return;
+        if (e.key === 'Escape') close();
+        else if (e.key === 'ArrowLeft') show(currentIndex - 1);
+        else if (e.key === 'ArrowRight') show(currentIndex + 1);
+      });
+    })();
+  </script>
 </body>
 </html>
