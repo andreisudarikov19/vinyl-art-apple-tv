@@ -31,7 +31,12 @@ private struct AuthenticatedRootView: View {
     init(credentials: DiscogsCredentials, authenticator: DiscogsAuthenticator) {
         self.credentials = credentials
         self.authenticator = authenticator
-        _client = State(initialValue: DiscogsClient(credentials: credentials))
+        // A 401 from any request (launch sync, refresh, tracklist, first-run
+        // build) means Discogs dropped this sign-in: back to onboarding.
+        _client = State(initialValue: DiscogsClient(
+            credentials: credentials,
+            onUnauthorized: { [authenticator] in await authenticator.signInExpired() }
+        ))
     }
 
     private var libraryReady: Bool {
@@ -49,7 +54,7 @@ private struct AuthenticatedRootView: View {
                 }
                 .task { await refreshOnLaunch() }
         } else {
-            BuildingLibraryView(credentials: credentials) {
+            BuildingLibraryView(client: client) {
                 didFinishBuild = true
             }
         }
@@ -57,7 +62,8 @@ private struct AuthenticatedRootView: View {
 
     /// Delta refresh on each launch: pulls newly-added releases since the last
     /// sync, then resolves any covers still pending. Silent — failures (e.g.
-    /// offline) leave the cached library untouched.
+    /// offline) leave the cached library untouched, and a revoked sign-in
+    /// returns to onboarding through the client's `onUnauthorized` hook.
     private func refreshOnLaunch() async {
         let container = modelContext.container
         let syncService = CollectionSyncService(modelContainer: container)

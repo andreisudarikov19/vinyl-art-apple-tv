@@ -39,6 +39,10 @@ final class DiscogsAuthenticator {
 
     private(set) var state: State = .loading
 
+    /// Why the user is back at the welcome screen, shown there until the
+    /// next sign-in starts. Set when Discogs stops accepting the stored token.
+    private(set) var notice: String?
+
     private var pendingRequestToken: OAuth1.Token?
     private let urlSession: URLSession
 
@@ -63,6 +67,7 @@ final class DiscogsAuthenticator {
             state = .failed(message: DiscogsAuthError.missingCredentials.localizedDescription)
             return
         }
+        notice = nil
         state = .requestingToken
         do {
             let token = try await requestRequestToken()
@@ -103,6 +108,16 @@ final class DiscogsAuthenticator {
         try? DiscogsCredentialsStore.clear()
         pendingRequestToken = nil
         state = .idle
+    }
+
+    /// Drops a sign-in Discogs no longer accepts (revoked or expired) and
+    /// returns to the welcome screen with a notice. The cached library stays,
+    /// so signing back in as the same account shows it at once. Ignored
+    /// unless signed in, so a late 401 can't cut into a new sign-in.
+    func signInExpired() async {
+        guard case .authenticated = state else { return }
+        notice = "Discogs no longer accepts this app's access. Sign in again to pick up where you left off."
+        await signOut()
     }
 
     func reset() {

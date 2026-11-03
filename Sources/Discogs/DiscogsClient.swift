@@ -1,8 +1,9 @@
 import Foundation
 
-enum DiscogsClientError: Error, LocalizedError, Sendable {
+enum DiscogsClientError: Error, LocalizedError, Sendable, Equatable {
     case invalidResponse
     case decodingFailed
+    case unauthorized
     case httpError(status: Int, body: String)
     case rateLimited
 
@@ -12,6 +13,8 @@ enum DiscogsClientError: Error, LocalizedError, Sendable {
             return "Discogs returned an unexpected response."
         case .decodingFailed:
             return "Couldn't read the data Discogs returned."
+        case .unauthorized:
+            return "Discogs no longer accepts this app's access. Sign in again."
         case .httpError(let status, _):
             return "Discogs error (HTTP \(status))."
         case .rateLimited:
@@ -35,9 +38,17 @@ actor DiscogsClient {
     private let credentials: OAuth1.Credentials
     private let token: OAuth1.Token
     private let urlSession: URLSession
+    private let onUnauthorized: (@Sendable () async -> Void)?
     private var rateLimitRemaining: Int?
 
-    init(credentials: DiscogsCredentials, urlSession: URLSession = .shared) {
+    /// - Parameter onUnauthorized: Called when Discogs answers 401, before
+    ///   the request throws `.unauthorized`, so one place can drop a revoked
+    ///   sign-in for every caller.
+    init(
+        credentials: DiscogsCredentials,
+        urlSession: URLSession = .shared,
+        onUnauthorized: (@Sendable () async -> Void)? = nil
+    ) {
         self.username = credentials.username
         self.credentials = OAuth1.Credentials(
             consumerKey: AppSecrets.discogsConsumerKey,
@@ -45,6 +56,7 @@ actor DiscogsClient {
         )
         self.token = credentials.oauthToken
         self.urlSession = urlSession
+        self.onUnauthorized = onUnauthorized
     }
 
     func collectionPage(
@@ -98,6 +110,10 @@ actor DiscogsClient {
             rateLimitRemaining = value
         }
         guard (200..<300).contains(http.statusCode) else {
+            if http.statusCode == 401 {
+                await onUnauthorized?()
+                throw DiscogsClientError.unauthorized
+            }
             if http.statusCode == 429 {
                 throw DiscogsClientError.rateLimited
             }

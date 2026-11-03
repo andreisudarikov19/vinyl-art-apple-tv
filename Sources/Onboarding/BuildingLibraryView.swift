@@ -4,7 +4,9 @@ import SwiftUI
 /// First-launch blocking screen: builds the local library from the Discogs
 /// collection, showing "Fetching 247/812 albums…". Not cancellable.
 struct BuildingLibraryView: View {
-    let credentials: DiscogsCredentials
+    /// The signed-in client, whose 401 hook returns a revoked sign-in to
+    /// onboarding mid-build.
+    let client: DiscogsClient
     var onFinished: () -> Void
 
     @Environment(\.modelContext) private var modelContext
@@ -63,7 +65,6 @@ struct BuildingLibraryView: View {
 
     private func build() async {
         let container = modelContext.container
-        let client = DiscogsClient(credentials: credentials)
         let service = CollectionSyncService(modelContainer: container)
         do {
             _ = try await service.sync(using: client) { update in
