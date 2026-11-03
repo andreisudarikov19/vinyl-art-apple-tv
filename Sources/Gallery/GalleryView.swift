@@ -242,12 +242,7 @@ struct GalleryView: View {
 
     private func signOut(erase: Bool) async {
         if erase {
-            try? modelContext.delete(model: CachedRelease.self)
-            if let prefs = preferences.first {
-                prefs.lastSyncDate = nil
-                prefs.discogsUsername = ""
-            }
-            try? modelContext.save()
+            try? modelContext.eraseLibrary()
         }
         await authenticator.signOut()
     }

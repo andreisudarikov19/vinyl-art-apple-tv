@@ -12,8 +12,9 @@ struct SyncProgress: Sendable, Equatable {
 
 struct SyncSummary: Sendable, Equatable {
     enum Mode: Sendable, Equatable {
-        /// First launch or a manual "Refresh collection": every page is read
-        /// and releases no longer in the collection are pruned.
+        /// First launch, a manual "Refresh collection", or signing in with a
+        /// different account: every page is read and releases no longer in
+        /// the collection are pruned.
         case fullBuild
         /// Subsequent launch: read newest pages until reaching already-synced
         /// releases, then stop.
@@ -38,6 +39,12 @@ actor CollectionSyncService {
     ) async throws -> SyncSummary {
         let startedAt = Date()
         let preferences = UserPreferences.current(in: modelContext)
+        // Another account's library, kept by "Sign out (keep library)", is
+        // erased before any network call so a failed build can't leave it
+        // behind. The run then becomes a full build.
+        if preferences.lastSyncDate != nil, !preferences.hasLibrary(for: client.username) {
+            try modelContext.eraseLibrary()
+        }
         let lastSync = preferences.lastSyncDate
         let mode: SyncSummary.Mode = (forceFullBuild || lastSync == nil) ? .fullBuild : .delta
 
