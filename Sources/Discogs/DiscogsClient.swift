@@ -39,15 +39,23 @@ actor DiscogsClient {
     private let token: OAuth1.Token
     private let urlSession: URLSession
     private let onUnauthorized: (@Sendable () async -> Void)?
+    private let sleep: @Sendable (Duration) async throws -> Void
     private var rateLimitRemaining: Int?
 
-    /// - Parameter onUnauthorized: Called when Discogs answers 401, before
-    ///   the request throws `.unauthorized`, so one place can drop a revoked
-    ///   sign-in for every caller.
+    /// Waits before each retry of a 429.
+    static let rateLimitBackoff: [Duration] = [.seconds(5), .seconds(15), .seconds(30)]
+
+    /// - Parameters:
+    ///   - onUnauthorized: Called when Discogs answers 401, before the
+    ///     request throws `.unauthorized`, so one place can drop a revoked
+    ///     sign-in for every caller.
+    ///   - sleep: How the client waits, both when pacing and before a 429
+    ///     retry. Tests pass one that returns at once.
     init(
         credentials: DiscogsCredentials,
         urlSession: URLSession = .shared,
-        onUnauthorized: (@Sendable () async -> Void)? = nil
+        onUnauthorized: (@Sendable () async -> Void)? = nil,
+        sleep: @escaping @Sendable (Duration) async throws -> Void = { try await Task.sleep(for: $0) }
     ) {
         self.username = credentials.username
         self.credentials = OAuth1.Credentials(
@@ -57,6 +65,7 @@ actor DiscogsClient {
         self.token = credentials.oauthToken
         self.urlSession = urlSession
         self.onUnauthorized = onUnauthorized
+        self.sleep = sleep
     }
 
     func collectionPage(
@@ -92,7 +101,20 @@ actor DiscogsClient {
         }
     }
 
+    /// Retries a 429 after each wait in `rateLimitBackoff` (50s in all, most
+    /// of Discogs' moving one-minute window) before throwing `.rateLimited`.
     private func get<T: Decodable & Sendable>(url: URL) async throws -> T {
+        for wait in Self.rateLimitBackoff {
+            do {
+                return try await getOnce(url: url)
+            } catch DiscogsClientError.rateLimited {
+                try await sleep(wait)
+            }
+        }
+        return try await getOnce(url: url)
+    }
+
+    private func getOnce<T: Decodable & Sendable>(url: URL) async throws -> T {
         await throttleIfNeeded()
         let request = OAuth1.signedRequest(
             method: "GET",
@@ -131,7 +153,7 @@ actor DiscogsClient {
     /// ceiling, pace requests ~1s apart to avoid a 429.
     private func throttleIfNeeded() async {
         if let remaining = rateLimitRemaining, remaining <= 5 {
-            try? await Task.sleep(for: .seconds(1))
+            try? await sleep(.seconds(1))
         }
     }
 }
