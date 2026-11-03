@@ -121,7 +121,7 @@ actor DiscogsClient {
             url: url,
             credentials: credentials,
             token: token,
-            additionalHeaders: ["User-Agent": AppSecrets.userAgent]
+            additionalHeaders: ["User-Agent": UserAgent.app]
         )
         let (data, response) = try await urlSession.data(for: request)
         guard let http = response as? HTTPURLResponse else {
