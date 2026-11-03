@@ -18,7 +18,7 @@ enum DiscogsAuthError: Error, LocalizedError, Sendable {
         case .serverError(let status, _):
             return "Discogs error (HTTP \(status))."
         case .verifierRejected:
-            return "Discogs didn't accept that code. Codes expire after a few minutes. Choose Try again to get a fresh one."
+            return "Discogs didn't accept that code. It may have been mistyped, or it has expired. Choose Try again to get a fresh one."
         case .noPendingAuthorization:
             return "No pending authorization. Start sign-in again."
         case .keychainFailure(let status):
@@ -121,11 +121,6 @@ final class DiscogsAuthenticator {
         guard case .authenticated = state else { return }
         notice = "Discogs no longer accepts this app's access. Sign in again to pick up where you left off."
         await signOut()
-    }
-
-    func reset() {
-        pendingRequestToken = nil
-        state = .idle
     }
 
     // MARK: - Network

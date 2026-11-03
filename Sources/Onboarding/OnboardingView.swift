@@ -28,7 +28,7 @@ struct OnboardingView: View {
                 await authenticator.submitVerifier(verifier)
             }
         case .failed(let message):
-            FailureView(message: message) { authenticator.reset() }
+            FailureView(message: message) { await authenticator.startAuthorization() }
         case .authenticated:
             // The root view swaps away from onboarding once authenticated;
             // show a brief confirmation in case of overlap.
@@ -131,7 +131,8 @@ private struct VerifierView: View {
 
 private struct FailureView: View {
     let message: String
-    var onRetry: () -> Void
+    /// Starts a new sign-in, so the user lands on a fresh code.
+    var onRetry: () async -> Void
 
     var body: some View {
         VStack(spacing: 28) {
@@ -145,8 +146,10 @@ private struct FailureView: View {
                 .font(.title3)
                 .foregroundStyle(.white.opacity(0.7))
                 .multilineTextAlignment(.center)
-            Button("Try again", action: onRetry)
-                .padding(.top, 12)
+            Button("Try again") {
+                Task { await onRetry() }
+            }
+            .padding(.top, 12)
         }
     }
 }
