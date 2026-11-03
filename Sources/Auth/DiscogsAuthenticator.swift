@@ -5,6 +5,7 @@ enum DiscogsAuthError: Error, LocalizedError, Sendable {
     case missingCredentials
     case invalidServerResponse
     case serverError(status: Int, body: String)
+    case verifierRejected
     case noPendingAuthorization
     case keychainFailure(OSStatus)
 
@@ -16,6 +17,8 @@ enum DiscogsAuthError: Error, LocalizedError, Sendable {
             return "Discogs returned an unexpected response."
         case .serverError(let status, _):
             return "Discogs error (HTTP \(status))."
+        case .verifierRejected:
+            return "Discogs didn't accept that code. Codes expire after a few minutes. Choose Try again to get a fresh one."
         case .noPendingAuthorization:
             return "No pending authorization. Start sign-in again."
         case .keychainFailure(let status):
@@ -154,7 +157,13 @@ final class DiscogsAuthenticator {
             extraOAuthParameters: ["oauth_verifier": verifier],
             additionalHeaders: ["User-Agent": AppSecrets.userAgent]
         )
-        let body = try await performText(request)
+        let body: [String: String]
+        do {
+            body = try await performText(request)
+        } catch DiscogsAuthError.serverError(status: 401, _) {
+            // A mistyped code, or one whose request token has expired.
+            throw DiscogsAuthError.verifierRejected
+        }
         guard let token = body["oauth_token"], let secret = body["oauth_token_secret"] else {
             throw DiscogsAuthError.invalidServerResponse
         }
