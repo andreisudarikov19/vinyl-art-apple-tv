@@ -5,6 +5,7 @@ enum DiscogsAuthError: Error, LocalizedError, Sendable {
     case missingCredentials
     case invalidServerResponse
     case serverError(status: Int, body: String)
+    case verifierRejected
     case noPendingAuthorization
     case keychainFailure(OSStatus)
 
@@ -16,6 +17,8 @@ enum DiscogsAuthError: Error, LocalizedError, Sendable {
             return "Discogs returned an unexpected response."
         case .serverError(let status, _):
             return "Discogs error (HTTP \(status))."
+        case .verifierRejected:
+            return "Discogs didn't accept that code. It may be mistyped or expired. Choose Try again to get a fresh one."
         case .noPendingAuthorization:
             return "No pending authorization. Start sign-in again."
         case .keychainFailure(let status):
@@ -38,6 +41,10 @@ final class DiscogsAuthenticator {
     }
 
     private(set) var state: State = .loading
+
+    /// Why the user is back at the welcome screen, shown there until the
+    /// next sign-in starts. Set when Discogs stops accepting the stored token.
+    private(set) var notice: String?
 
     private var pendingRequestToken: OAuth1.Token?
     private let urlSession: URLSession
@@ -63,6 +70,7 @@ final class DiscogsAuthenticator {
             state = .failed(message: DiscogsAuthError.missingCredentials.localizedDescription)
             return
         }
+        notice = nil
         state = .requestingToken
         do {
             let token = try await requestRequestToken()
@@ -105,9 +113,14 @@ final class DiscogsAuthenticator {
         state = .idle
     }
 
-    func reset() {
-        pendingRequestToken = nil
-        state = .idle
+    /// Drops a sign-in Discogs no longer accepts (revoked or expired) and
+    /// returns to the welcome screen with a notice. The cached library stays,
+    /// so signing back in as the same account shows it at once. Ignored
+    /// unless signed in, so a late 401 can't cut into a new sign-in.
+    func signInExpired() async {
+        guard case .authenticated = state else { return }
+        notice = "Discogs no longer accepts this app's access. Sign in again to pick up where you left off."
+        await signOut()
     }
 
     // MARK: - Network
@@ -139,7 +152,13 @@ final class DiscogsAuthenticator {
             extraOAuthParameters: ["oauth_verifier": verifier],
             additionalHeaders: ["User-Agent": AppSecrets.userAgent]
         )
-        let body = try await performText(request)
+        let body: [String: String]
+        do {
+            body = try await performText(request)
+        } catch DiscogsAuthError.serverError(status: 401, _) {
+            // A mistyped code, or one whose request token has expired.
+            throw DiscogsAuthError.verifierRejected
+        }
         guard let token = body["oauth_token"], let secret = body["oauth_token_secret"] else {
             throw DiscogsAuthError.invalidServerResponse
         }

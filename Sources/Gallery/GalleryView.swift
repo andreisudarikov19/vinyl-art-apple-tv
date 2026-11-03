@@ -22,7 +22,7 @@ struct GalleryView: View {
         case idle
         case running(processed: Int, total: Int)
         case done(stored: Int)
-        case failed
+        case failed(message: String)
     }
 
     private var arranged: [CachedRelease] {
@@ -201,8 +201,8 @@ struct GalleryView: View {
             hudPill(total > 0 ? "Refreshing… \(processed)/\(total)" : "Refreshing…", showsSpinner: true)
         case .done(let stored):
             hudPill("Updated \(stored)", showsSpinner: false)
-        case .failed:
-            hudPill("Refresh failed", showsSpinner: false)
+        case .failed(let message):
+            hudPill("Refresh failed. \(message)", showsSpinner: false)
         }
     }
 
@@ -234,8 +234,11 @@ struct GalleryView: View {
             try? await Task.sleep(for: .seconds(2))
             if case .done = refresh { withAnimation { refresh = .idle } }
         } catch {
-            withAnimation { refresh = .failed }
-            try? await Task.sleep(for: .seconds(2))
+            // A 401 never lands here for long: the client's hook has already
+            // sent the app back to onboarding.
+            withAnimation { refresh = .failed(message: error.localizedDescription) }
+            // Longer than the success pill, so the reason can be read.
+            try? await Task.sleep(for: .seconds(5))
             if case .failed = refresh { withAnimation { refresh = .idle } }
         }
     }

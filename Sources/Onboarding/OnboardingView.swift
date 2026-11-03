@@ -22,13 +22,13 @@ struct OnboardingView: View {
         case .exchangingToken:
             BusyView(message: "Signing you in…")
         case .idle:
-            WelcomeView { await authenticator.startAuthorization() }
+            WelcomeView(notice: authenticator.notice) { await authenticator.startAuthorization() }
         case .awaitingVerifier(let authorizeURL):
             VerifierView(authorizeURL: authorizeURL) { verifier in
                 await authenticator.submitVerifier(verifier)
             }
         case .failed(let message):
-            FailureView(message: message) { authenticator.reset() }
+            FailureView(message: message) { await authenticator.startAuthorization() }
         case .authenticated:
             // The root view swaps away from onboarding once authenticated;
             // show a brief confirmation in case of overlap.
@@ -38,6 +38,8 @@ struct OnboardingView: View {
 }
 
 private struct WelcomeView: View {
+    /// Why the user is back here, e.g. Discogs stopped accepting the sign-in.
+    var notice: String?
     var onSignIn: () async -> Void
 
     var body: some View {
@@ -49,6 +51,14 @@ private struct WelcomeView: View {
                 .font(.title3)
                 .foregroundStyle(.white.opacity(0.6))
                 .multilineTextAlignment(.center)
+            if let notice {
+                SwiftUI.Label(notice, systemImage: "exclamationmark.circle")
+                    .font(.title3)
+                    .foregroundStyle(.white.opacity(0.9))
+                    .padding(.horizontal, 32)
+                    .padding(.vertical, 20)
+                    .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 20))
+            }
             Button {
                 Task { await onSignIn() }
             } label: {
@@ -121,7 +131,8 @@ private struct VerifierView: View {
 
 private struct FailureView: View {
     let message: String
-    var onRetry: () -> Void
+    /// Starts a new sign-in, so the user lands on a fresh code.
+    var onRetry: () async -> Void
 
     var body: some View {
         VStack(spacing: 28) {
@@ -135,8 +146,10 @@ private struct FailureView: View {
                 .font(.title3)
                 .foregroundStyle(.white.opacity(0.7))
                 .multilineTextAlignment(.center)
-            Button("Try again", action: onRetry)
-                .padding(.top, 12)
+            Button("Try again") {
+                Task { await onRetry() }
+            }
+            .padding(.top, 12)
         }
     }
 }
