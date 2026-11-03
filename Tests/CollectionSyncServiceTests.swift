@@ -155,4 +155,65 @@ struct CollectionSyncServiceTests {
         let stored = try ModelContext(container).fetch(FetchDescriptor<CachedRelease>())
         #expect(Set(stored.map(\.releaseId)) == [1])
     }
+
+    /// A library kept by "Sign out (keep library)" for another Discogs
+    /// account, synced on 2024-02-01.
+    private func seedOtherAccountsLibrary(in container: ModelContainer) throws {
+        let context = ModelContext(container)
+        context.insert(UserPreferences(
+            discogsUsername: "previous",
+            lastSyncDate: CachedRelease.parseDate("2024-02-01T00:00:00-00:00")
+        ))
+        context.insert(CachedRelease(
+            releaseId: 99,
+            instanceId: 990,
+            title: "Not Yours",
+            artistDisplayName: "Artist",
+            year: 2000,
+            dateAdded: .distantPast,
+            discogsCoverURL: "https://example.com/x.jpg",
+            thumbURL: "https://example.com/thumb.jpg"
+        ))
+        try context.save()
+    }
+
+    @Test func syncForAnotherAccountRebuildsInsteadOfDelta() async throws {
+        let container = try makeContainer()
+        try seedOtherAccountsLibrary(in: container)
+
+        StubURLProtocol.responder = { request in
+            let data = collectionPageJSON(page: 1, pages: 1, items: 2, releases: [
+                releaseJSON(id: 1, dateAdded: "2024-03-01T00:00:00-00:00", format: "Vinyl"),
+                releaseJSON(id: 2, dateAdded: "2024-01-01T00:00:00-00:00", format: "Vinyl"),
+            ])
+            return (stubHTTPResponse(for: request), data)
+        }
+
+        let service = CollectionSyncService(modelContainer: container)
+        let summary = try await service.sync(using: makeClient())
+
+        #expect(summary.mode == .fullBuild)
+        let context = ModelContext(container)
+        let stored = try context.fetch(FetchDescriptor<CachedRelease>())
+        #expect(Set(stored.map(\.releaseId)) == [1, 2])
+        #expect(UserPreferences.current(in: context).discogsUsername == "tester")
+    }
+
+    @Test func failedSyncForAnotherAccountStillDropsTheirLibrary() async throws {
+        let container = try makeContainer()
+        try seedOtherAccountsLibrary(in: container)
+
+        StubURLProtocol.responder = { request in
+            (stubHTTPResponse(for: request, statusCode: 500), Data())
+        }
+
+        let service = CollectionSyncService(modelContainer: container)
+        await #expect(throws: DiscogsClientError.self) {
+            try await service.sync(using: makeClient())
+        }
+
+        let context = ModelContext(container)
+        #expect(try context.fetch(FetchDescriptor<CachedRelease>()).isEmpty)
+        #expect(UserPreferences.current(in: context).lastSyncDate == nil)
+    }
 }

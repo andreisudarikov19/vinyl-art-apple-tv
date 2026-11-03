@@ -22,8 +22,9 @@ enum GallerySort: String, Codable, CaseIterable, Sendable {
 final class UserPreferences {
     var discogsUsername: String
 
-    /// Timestamp of the last successful collection sync; nil means the
-    /// library has never been built. Drives delta refresh.
+    /// Timestamp of the last successful collection sync for
+    /// `discogsUsername`; nil means no library has been built since install
+    /// or the last erase. Drives delta refresh.
     var lastSyncDate: Date?
 
     var galleryLayout: GalleryLayout
@@ -59,5 +60,24 @@ extension UserPreferences {
         let prefs = UserPreferences()
         context.insert(prefs)
         return prefs
+    }
+
+    /// Whether the cached library was built for `username`. A library kept
+    /// by "Sign out (keep library)" belongs only to the account that built
+    /// it; any other account must rebuild from scratch.
+    func hasLibrary(for username: String) -> Bool {
+        lastSyncDate != nil && discogsUsername == username
+    }
+}
+
+extension ModelContext {
+    /// Deletes every cached release and forgets which account they belonged
+    /// to, keeping display settings such as layout and sort. Saves at once.
+    func eraseLibrary() throws {
+        try delete(model: CachedRelease.self)
+        let prefs = UserPreferences.current(in: self)
+        prefs.lastSyncDate = nil
+        prefs.discogsUsername = ""
+        try save()
     }
 }

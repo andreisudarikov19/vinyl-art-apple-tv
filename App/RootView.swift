@@ -35,7 +35,7 @@ private struct AuthenticatedRootView: View {
     }
 
     private var libraryReady: Bool {
-        didFinishBuild || preferences.first?.lastSyncDate != nil
+        didFinishBuild || preferences.first?.hasLibrary(for: credentials.username) == true
     }
 
     var body: some View {

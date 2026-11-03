@@ -30,10 +30,10 @@ enum StubSession {
     }
 }
 
-func stubHTTPResponse(for request: URLRequest) -> HTTPURLResponse {
+func stubHTTPResponse(for request: URLRequest, statusCode: Int = 200) -> HTTPURLResponse {
     HTTPURLResponse(
         url: request.url!,
-        statusCode: 200,
+        statusCode: statusCode,
         httpVersion: nil,
         headerFields: ["X-Discogs-Ratelimit-Remaining": "50"]
     )!
