@@ -38,7 +38,7 @@ actor MusicBrainzClient {
         await throttle()
 
         var request = URLRequest(url: url)
-        request.setValue(AppSecrets.userAgent, forHTTPHeaderField: "User-Agent")
+        request.setValue(UserAgent.app, forHTTPHeaderField: "User-Agent")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
 
         guard let (data, response) = try? await session.data(for: request),

@@ -133,7 +133,7 @@ final class DiscogsAuthenticator {
             credentials: oauthCredentials,
             token: .none,
             extraOAuthParameters: ["oauth_callback": "oob"],
-            additionalHeaders: ["User-Agent": AppSecrets.userAgent]
+            additionalHeaders: ["User-Agent": UserAgent.app]
         )
         let body = try await performText(request)
         guard let token = body["oauth_token"], let secret = body["oauth_token_secret"] else {
@@ -150,7 +150,7 @@ final class DiscogsAuthenticator {
             credentials: oauthCredentials,
             token: requestToken,
             extraOAuthParameters: ["oauth_verifier": verifier],
-            additionalHeaders: ["User-Agent": AppSecrets.userAgent]
+            additionalHeaders: ["User-Agent": UserAgent.app]
         )
         let body: [String: String]
         do {
@@ -172,7 +172,7 @@ final class DiscogsAuthenticator {
             url: url,
             credentials: oauthCredentials,
             token: accessToken,
-            additionalHeaders: ["User-Agent": AppSecrets.userAgent]
+            additionalHeaders: ["User-Agent": UserAgent.app]
         )
         let (data, response) = try await urlSession.data(for: request)
         try Self.validate(response: response, data: data)

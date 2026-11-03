@@ -14,8 +14,6 @@ enum AppSecrets {
     static let discogsConsumerKey = "YOUR_DISCOGS_CONSUMER_KEY"
     static let discogsConsumerSecret = "YOUR_DISCOGS_CONSUMER_SECRET"
 
-    static let userAgent = "VinylForAppleTV/0.1 +https://github.com/andreisudarikov19/vinyl-art-apple-tv"
-
     static var hasDiscogsCredentials: Bool {
         discogsConsumerKey != "YOUR_DISCOGS_CONSUMER_KEY" &&
         discogsConsumerSecret != "YOUR_DISCOGS_CONSUMER_SECRET" &&
