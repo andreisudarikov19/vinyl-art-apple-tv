@@ -111,10 +111,14 @@ struct TrackEntry: Decodable, Sendable {
     /// list of roles that are filtered out (producer, engineer, instrument
     /// credits — too much detail per row).
     let credits: [TrackCredit]
+    /// The parts of an index entry, a suite or medley, in order. Empty for
+    /// other entries.
+    let subTracks: [TrackEntry]
 
     enum CodingKeys: String, CodingKey {
         case position, title, duration, extraartists
         case type = "type_"
+        case subTracks = "sub_tracks"
     }
 
     private struct RawCredit: Decodable {
@@ -153,6 +157,7 @@ struct TrackEntry: Decodable, Sendable {
         credits = roleOrder.map { role in
             TrackCredit(role: role, names: namesByRole[role] ?? [])
         }
+        subTracks = try c.decodeIfPresent([TrackEntry].self, forKey: .subTracks) ?? []
     }
 }
 
@@ -173,6 +178,9 @@ extension BasicInformation {
 
 extension TrackEntry {
     var isHeading: Bool { type == "heading" }
+
+    /// A suite or medley, whose parts are in `subTracks`.
+    var isIndex: Bool { type == "index" }
 
     /// The vinyl side parsed from the Discogs position. Handles:
     ///   "A1"       → "A"   — single-disc, side letter at the start

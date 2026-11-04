@@ -567,7 +567,8 @@ struct RecordView: View {
                         HStack(alignment: .center, spacing: 24) {
                             sideTuner(model)
                                 .frame(maxWidth: .infinity)
-                            if let total = Self.totalDuration(of: side) {
+                            // Sums the rows, so a suite's parts aren't counted again.
+                            if let total = TrackDuration.total(of: side.tracks.map(\.duration)) {
                                 Text(total)
                                     .font(.system(size: 24))
                                     .foregroundStyle(.white.opacity(0.4))
@@ -667,33 +668,6 @@ struct RecordView: View {
             Capsule().fill(.regularMaterial).glassEffect()
         } else {
             Capsule().fill(.ultraThinMaterial)
-        }
-    }
-
-    /// Sum of a side's track durations, or nil if any track lacks a parseable
-    /// "m:ss" / "h:mm:ss" duration (so a partial total is never shown).
-    private static func totalDuration(of side: RecordSide) -> String? {
-        var total = 0
-        for track in side.tracks {
-            guard let secs = seconds(from: track.duration) else { return nil }
-            total += secs
-        }
-        guard total > 0 else { return nil }
-        return String(format: "%d:%02d", total / 60, total % 60)
-    }
-
-    private static func seconds(from duration: String) -> Int? {
-        let parts = duration.split(separator: ":")
-        guard !parts.isEmpty else { return nil }
-        var nums: [Int] = []
-        for part in parts {
-            guard let value = Int(part) else { return nil }
-            nums.append(value)
-        }
-        switch nums.count {
-        case 2: return nums[0] * 60 + nums[1]
-        case 3: return nums[0] * 3600 + nums[1] * 60 + nums[2]
-        default: return nil
         }
     }
 
