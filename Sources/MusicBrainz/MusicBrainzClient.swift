@@ -27,7 +27,13 @@ actor MusicBrainzClient {
         self.interval = interval
     }
 
-    func bestMatch(artist: String, title: String, catalogNumber: String?) async -> MusicBrainzMatch? {
+    /// Returns nil when MusicBrainz finds no matching release, and throws when
+    /// it couldn't answer this time.
+    func bestMatch(
+        artist: String,
+        title: String,
+        catalogNumber: String?
+    ) async throws(CoverLookup.Failure) -> MusicBrainzMatch? {
         guard !title.isEmpty else { return nil }
 
         var lucene = "release:\(quoted(title)) AND artist:\(quoted(artist))"
@@ -47,13 +53,7 @@ actor MusicBrainzClient {
 
         await throttle()
 
-        var request = URLRequest(url: url)
-        request.setValue(UserAgent.app, forHTTPHeaderField: "User-Agent")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
-
-        guard let (data, response) = try? await session.data(for: request),
-              let http = response as? HTTPURLResponse, http.statusCode == 200,
-              let result = try? JSONDecoder().decode(SearchResult.self, from: data),
+        guard let result = try await CoverLookup.fetch(SearchResult.self, from: url, session: session),
               let release = result.releases.first
         else { return nil }
 
