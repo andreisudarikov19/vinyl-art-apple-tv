@@ -14,6 +14,10 @@ actor MusicBrainzClient {
     /// screens' on-demand lookups keep to one rate limit between them.
     static let shared = MusicBrainzClient()
 
+    /// The least search score, out of 100, trusted as the same release, so a
+    /// common title doesn't pick up another record's cover.
+    static let minimumScore = 90
+
     private let session: URLSession
     private let interval: Duration
     /// When the latest request goes out; ahead of now while callers wait for
@@ -27,8 +31,9 @@ actor MusicBrainzClient {
         self.interval = interval
     }
 
-    /// Returns nil when MusicBrainz finds no matching release, and throws when
-    /// it couldn't answer this time.
+    /// Returns the highest-scoring release at or above `minimumScore`, nil
+    /// when there is none, and throws when MusicBrainz couldn't answer this
+    /// time.
     func bestMatch(
         artist: String,
         title: String,
@@ -53,9 +58,12 @@ actor MusicBrainzClient {
 
         await throttle()
 
-        guard let result = try await CoverLookup.fetch(SearchResult.self, from: url, session: session),
-              let release = result.releases.first
-        else { return nil }
+        guard let result = try await CoverLookup.fetch(SearchResult.self, from: url, session: session) else {
+            return nil
+        }
+        // A missing score counts as 0. Ties keep MusicBrainz' order.
+        let trusted = result.releases.filter { ($0.score ?? 0) >= Self.minimumScore }
+        guard let release = trusted.max(by: { ($0.score ?? 0) < ($1.score ?? 0) }) else { return nil }
 
         return MusicBrainzMatch(
             releaseMBID: release.id,
@@ -88,10 +96,13 @@ actor MusicBrainzClient {
 
         struct Release: Decodable {
             let id: String
+            /// How well the release matches the query, 0–100.
+            let score: Int?
             let releaseGroup: ReleaseGroup?
 
             enum CodingKeys: String, CodingKey {
                 case id
+                case score
                 case releaseGroup = "release-group"
             }
         }

@@ -5,6 +5,27 @@ import Testing
 
 @Suite(.serialized)
 struct MusicBrainzClientTests {
+    private func search(returning releases: [(id: String, score: Int?)]) async throws -> MusicBrainzMatch? {
+        StubURLProtocol.responder = { request in
+            (stubHTTPResponse(for: request), musicBrainzSearchJSON(releases: releases))
+        }
+        let client = MusicBrainzClient(session: StubSession.make(), interval: .zero)
+        return try await client.bestMatch(artist: "Artist", title: "Title", catalogNumber: nil)
+    }
+
+    @Test func resultsScoringBelowNinetyAreNoMatch() async throws {
+        let match = try await search(returning: [("close", 89), ("unscored", nil)])
+
+        #expect(match == nil)
+    }
+
+    @Test func highestScoringResultWins() async throws {
+        let match = try await search(returning: [("good", 92), ("best", 100), ("better", 95)])
+
+        #expect(match?.releaseMBID == "best")
+        #expect(match?.releaseGroupMBID == "best-group")
+    }
+
     @Test func concurrentLookupsGoOutOneIntervalApart() async throws {
         let requestTimes = OSAllocatedUnfairLock(initialState: [ContinuousClock.Instant]())
         StubURLProtocol.responder = { request in
