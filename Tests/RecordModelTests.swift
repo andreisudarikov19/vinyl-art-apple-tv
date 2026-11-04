@@ -171,6 +171,15 @@ struct RecordSidesTests {
         let sides = RecordSides.from(detail.tracklist)
         #expect(sides.map(\.name) == ["Side A", "Side C", "Side E"])
     }
+
+    /// Discogs writes the parts of a side-long piece as "Aa", "Ab" (Close To
+    /// The Edge, release 431005). The lowercase letter isn't part of the side.
+    @Test func subTrackLetterIsNotPartOfTheSide() throws {
+        let detail = try makeReleaseDetail(tracklist: [
+            track("Aa", "One"), track("Ab", "Two"), track("B1", "Three"),
+        ])
+        #expect(RecordSides.from(detail.tracklist).map(\.name) == ["Side A", "Side B"])
+    }
 }
 
 @MainActor
