@@ -578,7 +578,7 @@ struct RecordView: View {
                     }
                     .padding(.bottom, 18)
                     ForEach(Array(side.tracks.enumerated()), id: \.element.id) { index, track in
-                        TrackRow(number: index + 1, title: track.title, credits: track.credits, duration: track.duration)
+                        TrackRow(number: index + 1, title: track.title, credits: track.credits, duration: track.duration, parts: track.parts)
                     }
                 }
             } else {
@@ -732,11 +732,17 @@ private struct AmbientButtonStyle: ButtonStyle {
 /// lines (Composed by / Vocals by / Backing vocals by / Lyrics by / etc.)
 /// each get their own line beneath the title in the same subdued style,
 /// in the order they appear on Discogs.
+///
+/// A suite or medley is one row, so one number, with its parts listed
+/// beneath the credits, one line each with the part's duration. They're
+/// subdued like the credits, so they read as the piece's movements rather
+/// than as further tracks.
 private struct TrackRow: View {
     let number: Int
     let title: String
     let credits: [TrackCredit]
     let duration: String
+    let parts: [RecordTrack.Part]
 
     var body: some View {
         // First-text-baseline alignment so the number and duration sit on the
@@ -764,6 +770,26 @@ private struct TrackRow: View {
                         .multilineTextAlignment(.leading)
                         .fixedSize(horizontal: false, vertical: true)
                 }
+                if !parts.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        ForEach(Array(parts.enumerated()), id: \.offset) { _, part in
+                            HStack(alignment: .firstTextBaseline, spacing: 0) {
+                                Text(part.title)
+                                    .lineLimit(2)
+                                    .multilineTextAlignment(.leading)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                if !part.duration.isEmpty {
+                                    Spacer(minLength: 24)
+                                    Text(part.duration)
+                                        .monospacedDigit()
+                                }
+                            }
+                            .font(.system(size: 26))
+                            .foregroundStyle(.white.opacity(0.5))
+                        }
+                    }
+                    .padding(.top, 6)
+                }
             }
             .layoutPriority(1)
             Spacer(minLength: 24)
@@ -771,6 +797,9 @@ private struct TrackRow: View {
                 .font(.system(size: 28))
                 .foregroundStyle(.white.opacity(0.4))
                 .monospacedDigit()
+                // A suite's part lines stretch the title column, which
+                // would otherwise squeeze this to nothing.
+                .fixedSize()
         }
         .padding(.vertical, 16)
     }
