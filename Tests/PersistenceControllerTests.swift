@@ -44,4 +44,20 @@ struct PersistenceControllerTests {
         let stored = try ModelContext(reopened).fetch(FetchDescriptor<CachedRelease>())
         #expect(stored.map(\.releaseId) == [1])
     }
+
+    @Test func storeThatCantBeCreatedFallsBackToMemory() throws {
+        let directory = try makeTemporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: directory) }
+        // A regular file where the store's directory should be.
+        let file = directory.appending(path: "file")
+        try Data().write(to: file)
+
+        let container = PersistenceController.makeContainer(at: file.appending(path: "x.store"))
+        #expect(container.configurations.first?.isStoredInMemoryOnly == true)
+
+        let context = ModelContext(container)
+        context.insert(makeRelease())
+        try context.save()
+        #expect(try context.fetch(FetchDescriptor<CachedRelease>()).map(\.releaseId) == [1])
+    }
 }

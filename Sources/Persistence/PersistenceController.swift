@@ -28,6 +28,8 @@ enum PersistenceController {
     /// app then builds the library as on first run, and the Discogs sign-in
     /// in the Keychain is untouched. This also resets `UserPreferences`, such
     /// as layout, sort and halo settings, since they live in the same store.
+    /// If even a fresh store can't be created, e.g. for lack of space or
+    /// permission, the library is kept in memory and rebuilt on each launch.
     static func makeContainer(at url: URL) -> ModelContainer {
         let configuration = ModelConfiguration(schema: schema, url: url)
         do {
@@ -39,7 +41,8 @@ enum PersistenceController {
         do {
             return try ModelContainer(for: schema, configurations: [configuration])
         } catch {
-            fatalError("Failed to create ModelContainer: \(error)")
+            logger.error("Couldn't create a fresh store, keeping the library in memory: \(String(describing: error), privacy: .public)")
+            return makeInMemoryContainer()
         }
     }
 
