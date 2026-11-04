@@ -111,10 +111,14 @@ struct TrackEntry: Decodable, Sendable {
     /// list of roles that are filtered out (producer, engineer, instrument
     /// credits — too much detail per row).
     let credits: [TrackCredit]
+    /// The parts of an index entry, a suite or medley, in order. Empty for
+    /// other entries.
+    let subTracks: [TrackEntry]
 
     enum CodingKeys: String, CodingKey {
         case position, title, duration, extraartists
         case type = "type_"
+        case subTracks = "sub_tracks"
     }
 
     private struct RawCredit: Decodable {
@@ -153,6 +157,7 @@ struct TrackEntry: Decodable, Sendable {
         credits = roleOrder.map { role in
             TrackCredit(role: role, names: namesByRole[role] ?? [])
         }
+        subTracks = try c.decodeIfPresent([TrackEntry].self, forKey: .subTracks) ?? []
     }
 }
 
@@ -174,6 +179,9 @@ extension BasicInformation {
 extension TrackEntry {
     var isHeading: Bool { type == "heading" }
 
+    /// A suite or medley, whose parts are in `subTracks`.
+    var isIndex: Bool { type == "index" }
+
     /// The vinyl side parsed from the Discogs position. Handles:
     ///   "A1"       → "A"   — single-disc, side letter at the start
     ///   "C1"/"D1"  → "C"/"D" — multi-disc with continuous lettering
@@ -181,6 +189,7 @@ extension TrackEntry {
     ///   "2-A1"     → "C"   — disc 2 maps onto continuous lettering
     ///   "1.A1"     → "A"   — disc-prefixed (dot separator)
     ///   "1A1"      → "A"   — disc-prefixed (no separator)
+    ///   "Aa"       → "A"   — sub-track a of Side A
     /// For disc-prefixed positions we shift the letter by `(disc - 1) * 2`
     /// so a 2xLP's "1-A" and "2-A" become Side A and Side C — the convention
     /// vinyl box sets use universally. Without this mapping a 2xLP's disc 2
@@ -210,7 +219,7 @@ extension TrackEntry {
 /// Splits a Discogs position string into (disc number, side letters).
 /// Returns `(disc: 1, letters: "")` for a position with no recognisable side.
 /// Examples: "A1" → (1, "A"), "1-A1" → (1, "A"), "2-A1" → (2, "A"),
-/// "1.B3" → (1, "B"), "12" → (1, ""), "1" → (1, "").
+/// "1.B3" → (1, "B"), "Aa" → (1, "A"), "12" → (1, ""), "1" → (1, "").
 private func splitDiscAndLetters(_ position: String) -> (disc: Int, letters: String) {
     var idx = position.startIndex
     var digits = ""
@@ -223,6 +232,9 @@ private func splitDiscAndLetters(_ position: String) -> (disc: Int, letters: Str
     }
     var letters = ""
     while idx < position.endIndex, position[idx].isLetter {
+        // A letter in the other case starts a sub-track: "Aa" is part a of
+        // Side A, where "AA" is a side of its own.
+        if let first = letters.first, first.isUppercase != position[idx].isUppercase { break }
         letters.append(position[idx])
         idx = position.index(after: idx)
     }

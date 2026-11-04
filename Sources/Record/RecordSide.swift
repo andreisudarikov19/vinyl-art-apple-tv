@@ -26,6 +26,46 @@ struct RecordTrack: Identifiable, Equatable, Sendable {
     /// credits are filtered out upstream — too much detail per row.
     let credits: [TrackCredit]
     let duration: String
+    /// The movements of a suite or medley, which Discogs lists as an index
+    /// entry's sub-tracks. Empty for a plain track.
+    let parts: [Part]
+
+    /// One movement of a suite. Discogs' credits on parts are dropped; the
+    /// row shows the index's own.
+    struct Part: Equatable, Sendable {
+        let title: String
+        let duration: String
+    }
+}
+
+/// Discogs durations, written "m:ss" or "h:mm:ss".
+enum TrackDuration {
+    /// The sum of `durations` as "m:ss", or nil if any of them doesn't parse
+    /// (so a partial total is never shown) or they add up to nothing.
+    static func total(of durations: [String]) -> String? {
+        var total = 0
+        for duration in durations {
+            guard let secs = seconds(from: duration) else { return nil }
+            total += secs
+        }
+        guard total > 0 else { return nil }
+        return String(format: "%d:%02d", total / 60, total % 60)
+    }
+
+    private static func seconds(from duration: String) -> Int? {
+        let parts = duration.split(separator: ":")
+        guard !parts.isEmpty else { return nil }
+        var nums: [Int] = []
+        for part in parts {
+            guard let value = Int(part) else { return nil }
+            nums.append(value)
+        }
+        switch nums.count {
+        case 2: return nums[0] * 60 + nums[1]
+        case 3: return nums[0] * 3600 + nums[1] * 60 + nums[2]
+        default: return nil
+        }
+    }
 }
 
 /// Maps a Discogs `extraartists` role string to a sentence-case display
@@ -74,31 +114,80 @@ struct RecordSide: Identifiable, Equatable, Sendable {
 }
 
 /// Groups a Discogs tracklist into vinyl sides (A, B, C, …) in order of
-/// appearance. Headings are dropped; releases without side letters collapse
-/// into a single "Tracklist" side.
+/// appearance. Headings are dropped. An entry whose position names no side
+/// joins the side of the nearest entry before it, or the first side; only
+/// a release without any side letters collapses into a single "Tracklist"
+/// side. An index entry, a suite or medley, is one row with its parts
+/// beneath it.
 enum RecordSides {
     static func from(_ tracklist: [TrackEntry]) -> [RecordSide] {
+        var rows: [(side: String?, track: RecordTrack)] = []
+        for entry in tracklist where !entry.isHeading {
+            let runs = sideRuns(of: entry)
+            for run in runs {
+                rows.append((run.side, track(for: entry, id: rows.count + 1, parts: run.parts, isWhole: runs.count == 1)))
+            }
+        }
+
         var order: [String] = []
         var grouped: [String: [RecordTrack]] = [:]
-        var ordinal = 0
-
-        for entry in tracklist where !entry.isHeading {
-            ordinal += 1
-            let key = entry.side ?? noSideKey
+        for (side, track) in zip(fillingGaps(rows.map(\.side)), rows.map(\.track)) {
+            let key = side ?? noSideKey
             if grouped[key] == nil { order.append(key) }
-            grouped[key, default: []].append(
-                RecordTrack(
-                    id: "\(ordinal)",
-                    position: entry.position,
-                    title: entry.title,
-                    credits: entry.credits,
-                    duration: entry.duration
-                )
-            )
+            grouped[key, default: []].append(track)
         }
 
         return order.map { key in
             RecordSide(id: key, name: name(for: key), tracks: grouped[key] ?? [])
+        }
+    }
+
+    /// The sides an entry's rows go on, each with the sub-tracks it shows
+    /// there; nil where the position names no side. A plain track, or an
+    /// index with its own side, is one row on that side. Its parts'
+    /// positions aren't read, since Discogs may letter them just "a", "b",
+    /// which would read as Sides A and B. An index without a side takes its
+    /// parts' sides, with a row on each side they cover.
+    private static func sideRuns(of entry: TrackEntry) -> [(side: String?, parts: [TrackEntry])] {
+        guard entry.isIndex, entry.side == nil, !entry.subTracks.isEmpty else {
+            return [(entry.side, entry.subTracks)]
+        }
+        var runs: [(side: String?, parts: [TrackEntry])] = []
+        for (part, side) in zip(entry.subTracks, fillingGaps(entry.subTracks.map(\.side))) {
+            if let last = runs.last, last.side == side {
+                runs[runs.count - 1].parts.append(part)
+            } else {
+                runs.append((side, [part]))
+            }
+        }
+        return runs
+    }
+
+    /// The row for `entry`, with `parts` beneath it. A row with all of an
+    /// index's parts takes the index's duration when Discogs gives one.
+    /// Otherwise, and on each side of an index split across two, since the
+    /// index's duration covers both, it's the sum of the row's parts.
+    private static func track(for entry: TrackEntry, id: Int, parts: [TrackEntry], isWhole: Bool) -> RecordTrack {
+        let duration = isWhole && !entry.duration.isEmpty
+            ? entry.duration
+            : TrackDuration.total(of: parts.map(\.duration)) ?? ""
+        return RecordTrack(
+            id: "\(id)",
+            position: entry.position,
+            title: entry.title,
+            credits: entry.credits,
+            duration: duration,
+            parts: parts.map { RecordTrack.Part(title: $0.title, duration: $0.duration) }
+        )
+    }
+
+    /// Gives each nil side the nearest side before it, or the first side
+    /// when none comes before. All stay nil when there's no side at all.
+    private static func fillingGaps(_ sides: [String?]) -> [String?] {
+        var current = sides.lazy.compactMap { $0 }.first
+        return sides.map { side in
+            if let side { current = side }
+            return current
         }
     }
 

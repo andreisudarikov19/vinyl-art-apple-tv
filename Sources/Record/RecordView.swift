@@ -567,7 +567,8 @@ struct RecordView: View {
                         HStack(alignment: .center, spacing: 24) {
                             sideTuner(model)
                                 .frame(maxWidth: .infinity)
-                            if let total = Self.totalDuration(of: side) {
+                            // Sums the rows, so a suite's parts aren't counted again.
+                            if let total = TrackDuration.total(of: side.tracks.map(\.duration)) {
                                 Text(total)
                                     .font(.system(size: 24))
                                     .foregroundStyle(.white.opacity(0.4))
@@ -577,7 +578,7 @@ struct RecordView: View {
                     }
                     .padding(.bottom, 18)
                     ForEach(Array(side.tracks.enumerated()), id: \.element.id) { index, track in
-                        TrackRow(number: index + 1, title: track.title, credits: track.credits, duration: track.duration)
+                        TrackRow(number: index + 1, title: track.title, credits: track.credits, duration: track.duration, parts: track.parts)
                     }
                 }
             } else {
@@ -670,33 +671,6 @@ struct RecordView: View {
         }
     }
 
-    /// Sum of a side's track durations, or nil if any track lacks a parseable
-    /// "m:ss" / "h:mm:ss" duration (so a partial total is never shown).
-    private static func totalDuration(of side: RecordSide) -> String? {
-        var total = 0
-        for track in side.tracks {
-            guard let secs = seconds(from: track.duration) else { return nil }
-            total += secs
-        }
-        guard total > 0 else { return nil }
-        return String(format: "%d:%02d", total / 60, total % 60)
-    }
-
-    private static func seconds(from duration: String) -> Int? {
-        let parts = duration.split(separator: ":")
-        guard !parts.isEmpty else { return nil }
-        var nums: [Int] = []
-        for part in parts {
-            guard let value = Int(part) else { return nil }
-            nums.append(value)
-        }
-        switch nums.count {
-        case 2: return nums[0] * 60 + nums[1]
-        case 3: return nums[0] * 3600 + nums[1] * 60 + nums[2]
-        default: return nil
-        }
-    }
-
     @ViewBuilder
     private var toastOverlay: some View {
         if let toast {
@@ -758,11 +732,17 @@ private struct AmbientButtonStyle: ButtonStyle {
 /// lines (Composed by / Vocals by / Backing vocals by / Lyrics by / etc.)
 /// each get their own line beneath the title in the same subdued style,
 /// in the order they appear on Discogs.
+///
+/// A suite or medley is one row, so one number, with its parts listed
+/// beneath the credits, one line each with the part's duration. They're
+/// subdued like the credits, so they read as the piece's movements rather
+/// than as further tracks.
 private struct TrackRow: View {
     let number: Int
     let title: String
     let credits: [TrackCredit]
     let duration: String
+    let parts: [RecordTrack.Part]
 
     var body: some View {
         // First-text-baseline alignment so the number and duration sit on the
@@ -790,6 +770,26 @@ private struct TrackRow: View {
                         .multilineTextAlignment(.leading)
                         .fixedSize(horizontal: false, vertical: true)
                 }
+                if !parts.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        ForEach(Array(parts.enumerated()), id: \.offset) { _, part in
+                            HStack(alignment: .firstTextBaseline, spacing: 0) {
+                                Text(part.title)
+                                    .lineLimit(2)
+                                    .multilineTextAlignment(.leading)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                if !part.duration.isEmpty {
+                                    Spacer(minLength: 24)
+                                    Text(part.duration)
+                                        .monospacedDigit()
+                                }
+                            }
+                            .font(.system(size: 26))
+                            .foregroundStyle(.white.opacity(0.5))
+                        }
+                    }
+                    .padding(.top, 6)
+                }
             }
             .layoutPriority(1)
             Spacer(minLength: 24)
@@ -797,6 +797,9 @@ private struct TrackRow: View {
                 .font(.system(size: 28))
                 .foregroundStyle(.white.opacity(0.4))
                 .monospacedDigit()
+                // A suite's part lines stretch the title column, which
+                // would otherwise squeeze this to nothing.
+                .fixedSize()
         }
         .padding(.vertical, 16)
     }

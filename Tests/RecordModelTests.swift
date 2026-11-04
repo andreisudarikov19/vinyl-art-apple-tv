@@ -8,10 +8,13 @@ private func makeReleaseDetail(tracklist: [[String: Any]]) throws -> ReleaseDeta
     return try JSONDecoder().decode(ReleaseDetail.self, from: data)
 }
 
-private func track(_ position: String, _ title: String, duration: String = "3:00", type: String = "track", credits: [(name: String, role: String)] = []) -> [String: Any] {
+private func track(_ position: String, _ title: String, duration: String = "3:00", type: String = "track", credits: [(name: String, role: String)] = [], subTracks: [[String: Any]] = []) -> [String: Any] {
     var entry: [String: Any] = ["position": position, "title": title, "duration": duration, "type_": type]
     if !credits.isEmpty {
         entry["extraartists"] = credits.map { ["name": $0.name, "role": $0.role] }
+    }
+    if !subTracks.isEmpty {
+        entry["sub_tracks"] = subTracks
     }
     return entry
 }
@@ -170,6 +173,145 @@ struct RecordSidesTests {
         ])
         let sides = RecordSides.from(detail.tracklist)
         #expect(sides.map(\.name) == ["Side A", "Side C", "Side E"])
+    }
+
+    /// Discogs writes the parts of a side-long piece as "Aa", "Ab" (Close To
+    /// The Edge, release 431005). The lowercase letter isn't part of the side.
+    @Test func subTrackLetterIsNotPartOfTheSide() throws {
+        let detail = try makeReleaseDetail(tracklist: [
+            track("Aa", "One"), track("Ab", "Two"), track("B1", "Three"),
+        ])
+        #expect(RecordSides.from(detail.tracklist).map(\.name) == ["Side A", "Side B"])
+    }
+
+    /// Shaped like Discogs' Close To The Edge (release 431005): each suite
+    /// is an index entry with an empty position, its own duration and
+    /// credits, and parts positioned on the side.
+    @Test func indexWithoutPositionGoesOnItsPartsSide() throws {
+        let detail = try makeReleaseDetail(tracklist: [
+            track("", "Close To The Edge", duration: "18:12", type: "index", subTracks: [
+                track("Aa", "(i) The Solid Time Of Change", duration: ""),
+                track("Ab", "(ii) Total Mass Retain", duration: ""),
+            ]),
+            track("", "And You And I", duration: "10:40", type: "index", credits: [
+                (name: "Jon Anderson", role: "Songwriter [Song], Words By [Words]"),
+            ], subTracks: [
+                track("B1a", "(i) Cord Of Life", duration: ""),
+                track("B1b", "(ii) Eclipse", duration: ""),
+            ]),
+            track("B2", "Siberian Khatru", duration: "9:50"),
+        ])
+        let sides = RecordSides.from(detail.tracklist)
+        try #require(sides.map(\.name) == ["Side A", "Side B"])
+        #expect(sides[0].tracks.map(\.title) == ["Close To The Edge"])
+        #expect(sides[1].tracks.map(\.title) == ["And You And I", "Siberian Khatru"])
+        let suite = sides[1].tracks[0]
+        #expect(suite.parts.map(\.title) == ["(i) Cord Of Life", "(ii) Eclipse"])
+        #expect(suite.duration == "10:40")
+        #expect(suite.credits == [TrackCredit(role: "Written by", names: ["Jon Anderson"])])
+    }
+
+    /// When the index carries the position, Discogs may letter its parts
+    /// just "a", "b", which must not read as Sides A and B.
+    @Test func indexWithPositionKeepsItsPartsOnItsSide() throws {
+        let detail = try makeReleaseDetail(tracklist: [
+            track("A1", "One"),
+            track("B1", "Two"),
+            track("B2", "Suite", duration: "12:00", type: "index", subTracks: [
+                track("a", "Overture", duration: "5:00"),
+                track("b", "Finale", duration: "7:00"),
+            ]),
+        ])
+        let sides = RecordSides.from(detail.tracklist)
+        try #require(sides.map(\.name) == ["Side A", "Side B"])
+        #expect(sides[1].tracks.map(\.title) == ["Two", "Suite"])
+        #expect(sides[1].tracks[1].parts == [
+            RecordTrack.Part(title: "Overture", duration: "5:00"),
+            RecordTrack.Part(title: "Finale", duration: "7:00"),
+        ])
+    }
+
+    @Test func indexSpanningTwoSidesAppearsOnEach() throws {
+        let detail = try makeReleaseDetail(tracklist: [
+            track("A1", "One"),
+            track("", "Suite", duration: "15:00", type: "index", subTracks: [
+                track("B1a", "Part One", duration: "5:00"),
+                track("B1b", "Part Two", duration: "6:00"),
+                track("C1a", "Part Three", duration: "4:00"),
+            ]),
+            track("C2", "Two"),
+        ])
+        let sides = RecordSides.from(detail.tracklist)
+        try #require(sides.map(\.name) == ["Side A", "Side B", "Side C"])
+        #expect(sides[1].tracks.map(\.title) == ["Suite"])
+        #expect(sides[1].tracks[0].parts.map(\.title) == ["Part One", "Part Two"])
+        #expect(sides[2].tracks.map(\.title) == ["Suite", "Two"])
+        #expect(sides[2].tracks[0].parts.map(\.title) == ["Part Three"])
+        // The index's 15:00 covers both sides, so each row sums its own parts.
+        #expect(sides[1].tracks[0].duration == "11:00")
+        #expect(sides[2].tracks[0].duration == "4:00")
+    }
+
+    /// Shaped like Discogs' 2112 (release 814617): the index has no
+    /// duration, but each part has one.
+    @Test func indexDurationSumsItsPartsWhenDiscogsGivesNone() throws {
+        let detail = try makeReleaseDetail(tracklist: [
+            track("", "2112", duration: "", type: "index", subTracks: [
+                track("A-I", "Overture", duration: "4:32"),
+                track("A-II", "The Temples Of Syrinx", duration: "2:13"),
+            ]),
+            track("B1", "A Passage To Bangkok", duration: "3:30"),
+        ])
+        let sides = RecordSides.from(detail.tracklist)
+        try #require(sides.map(\.name) == ["Side A", "Side B"])
+        #expect(sides[0].tracks.map(\.duration) == ["6:45"])
+    }
+
+    @Test func indexDurationIsEmptyWhenAPartDoesNotParse() throws {
+        let detail = try makeReleaseDetail(tracklist: [
+            track("", "2112", duration: "", type: "index", subTracks: [
+                track("A-I", "Overture", duration: "4:32"),
+                track("A-II", "The Temples Of Syrinx", duration: ""),
+            ]),
+        ])
+        let sides = RecordSides.from(detail.tracklist)
+        try #require(sides.map(\.name) == ["Side A"])
+        #expect(sides[0].tracks.map(\.duration) == [""])
+    }
+
+    /// A track with an empty or number-only position, such as a hidden
+    /// track, stays on the side it's heard on.
+    @Test func sidelessTrackJoinsTheSideBeforeIt() throws {
+        let detail = try makeReleaseDetail(tracklist: [
+            track("A1", "One"), track("A2", "Two"), track("", "Hidden"),
+            track("B1", "Three"), track("7", "Bonus"),
+        ])
+        let sides = RecordSides.from(detail.tracklist)
+        try #require(sides.map(\.name) == ["Side A", "Side B"])
+        #expect(sides[0].tracks.map(\.title) == ["One", "Two", "Hidden"])
+        #expect(sides[1].tracks.map(\.title) == ["Three", "Bonus"])
+    }
+
+    @Test func leadingSidelessTrackJoinsTheFirstSide() throws {
+        let detail = try makeReleaseDetail(tracklist: [
+            track("", "Intro"), track("A1", "One"), track("B1", "Two"),
+        ])
+        let sides = RecordSides.from(detail.tracklist)
+        try #require(sides.map(\.name) == ["Side A", "Side B"])
+        #expect(sides[0].tracks.map(\.title) == ["Intro", "One"])
+    }
+
+    @Test func indexWithoutAnySideStaysInTheTracklistSide() throws {
+        let detail = try makeReleaseDetail(tracklist: [
+            track("1", "One"),
+            track("", "Suite", type: "index", subTracks: [
+                track("2.1", "Part One"), track("2.2", "Part Two"),
+            ]),
+        ])
+        let sides = RecordSides.from(detail.tracklist)
+        try #require(sides.map(\.name) == ["Tracklist"])
+        #expect(sides[0].tracks.map(\.title) == ["One", "Suite"])
+        #expect(sides[0].tracks[1].parts.map(\.title) == ["Part One", "Part Two"])
     }
 }
 
