@@ -34,9 +34,16 @@ final class CachedRelease {
     /// pipeline. Nil until resolved; callers fall back to `discogsCoverURL`.
     var resolvedCoverURL: String?
 
-    /// Set once the cover pipeline has tried this release, so an 800-album
-    /// collection isn't re-queried against MusicBrainz on every launch.
+    /// Set once the cover pipeline is done with this release, so an 800-album
+    /// collection isn't re-queried against MusicBrainz on every launch. A
+    /// lookup that fails for a transient reason leaves it unset.
     var coverLookupAttempted: Bool
+
+    /// Lookups that MusicBrainz or the Cover Art Archive answered with a 429
+    /// or 5xx. At `CoverArtService.maxLookupFailures` the release is marked
+    /// attempted and keeps its Discogs cover. The default in the declaration
+    /// lets SwiftData's lightweight migration fill it for existing stores.
+    var coverLookupFailures: Int = 0
 
     init(
         releaseId: Int,
@@ -53,7 +60,8 @@ final class CachedRelease {
         discogsCoverURL: String,
         thumbURL: String,
         resolvedCoverURL: String? = nil,
-        coverLookupAttempted: Bool = false
+        coverLookupAttempted: Bool = false,
+        coverLookupFailures: Int = 0
     ) {
         self.releaseId = releaseId
         self.instanceId = instanceId
@@ -70,6 +78,7 @@ final class CachedRelease {
         self.thumbURL = thumbURL
         self.resolvedCoverURL = resolvedCoverURL
         self.coverLookupAttempted = coverLookupAttempted
+        self.coverLookupFailures = coverLookupFailures
     }
 }
 
@@ -102,8 +111,9 @@ extension CachedRelease {
     }
 
     /// Refreshes the Discogs-sourced fields from a collection entry on
-    /// re-sync, deliberately preserving `resolvedCoverURL` and
-    /// `coverLookupAttempted`, which are owned by the cover-art pipeline.
+    /// re-sync, deliberately preserving `resolvedCoverURL`,
+    /// `coverLookupAttempted` and `coverLookupFailures`, which are owned by
+    /// the cover-art pipeline.
     func apply(_ release: CollectionRelease) {
         let info = release.basicInformation
         instanceId = release.instanceId

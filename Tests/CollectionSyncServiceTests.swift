@@ -95,7 +95,8 @@ struct CollectionSyncServiceTests {
                 discogsCoverURL: "https://example.com/old.jpg",
                 thumbURL: "https://example.com/thumb.jpg",
                 resolvedCoverURL: "https://archive.example.com/resolved.jpg",
-                coverLookupAttempted: true
+                coverLookupAttempted: true,
+                coverLookupFailures: 2
             ))
             try context.save()
         }
@@ -123,6 +124,7 @@ struct CollectionSyncServiceTests {
         #expect(release.discogsCoverURL == "https://example.com/new.jpg")
         #expect(release.resolvedCoverURL == "https://archive.example.com/resolved.jpg")
         #expect(release.coverLookupAttempted == true)
+        #expect(release.coverLookupFailures == 2)
     }
 
     @Test func fullBuildPrunesReleasesNoLongerInCollection() async throws {
