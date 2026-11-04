@@ -18,7 +18,7 @@ actor CoverArtService {
             return
         }
 
-        let musicBrainz = MusicBrainzClient()
+        let musicBrainz = MusicBrainzClient.shared
         var processed = 0
 
         for release in pending {
@@ -40,7 +40,7 @@ actor CoverArtService {
         )
         guard let release = try? modelContext.fetch(descriptor).first else { return }
 
-        release.resolvedCoverURL = await resolvedCover(for: release, using: MusicBrainzClient())
+        release.resolvedCoverURL = await resolvedCover(for: release, using: .shared)
         release.coverLookupAttempted = true
         try? modelContext.save()
     }

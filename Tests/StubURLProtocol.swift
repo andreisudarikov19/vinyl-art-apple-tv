@@ -57,6 +57,24 @@ func collectionPageJSON(page: Int, pages: Int, items: Int, releases: [[String: A
     return try! JSONSerialization.data(withJSONObject: object)
 }
 
+/// Builds a MusicBrainz release-search payload. Each release is in a release
+/// group whose MBID is the release's plus "-group"; a nil score is left out.
+func musicBrainzSearchJSON(releases: [(id: String, score: Int?)]) -> Data {
+    let object: [String: Any] = [
+        "created": "2026-11-04T00:00:00.000Z",
+        "count": releases.count,
+        "offset": 0,
+        "releases": releases.map { release -> [String: Any] in
+            var json: [String: Any] = ["id": release.id, "release-group": ["id": "\(release.id)-group"]]
+            if let score = release.score {
+                json["score"] = score
+            }
+            return json
+        },
+    ]
+    return try! JSONSerialization.data(withJSONObject: object)
+}
+
 /// Builds a single collection release entry.
 func releaseJSON(
     id: Int,

@@ -10,11 +10,21 @@ struct MusicBrainzMatch: Sendable {
 /// release. MusicBrainz asks clients to stay under 1 request/second and to
 /// send a descriptive User-Agent, both of which this actor enforces.
 actor MusicBrainzClient {
-    private let session: URLSession
-    private var lastRequestAt: Date?
+    /// The client every cover lookup uses, so the launch sweep and the record
+    /// screens' on-demand lookups keep to one rate limit between them.
+    static let shared = MusicBrainzClient()
 
-    init(session: URLSession = .shared) {
+    private let session: URLSession
+    private let interval: Duration
+    /// When the latest request goes out; ahead of now while callers wait for
+    /// their slots.
+    private var lastRequestAt: ContinuousClock.Instant?
+
+    /// - Parameter interval: The least time between requests. Tests pass a
+    ///   short one.
+    init(session: URLSession = .shared, interval: Duration = .seconds(1.1)) {
         self.session = session
+        self.interval = interval
     }
 
     func bestMatch(artist: String, title: String, catalogNumber: String?) async -> MusicBrainzMatch? {
@@ -53,16 +63,15 @@ actor MusicBrainzClient {
         )
     }
 
-    /// Spaces requests at least 1.1s apart to respect the MusicBrainz rate
-    /// limit. Serialized by actor isolation.
+    /// Spaces requests at least `interval` apart to respect the MusicBrainz
+    /// rate limit. Each caller reserves its slot before sleeping, so one that
+    /// enters the actor while another sleeps queues behind it instead of
+    /// reading the same last request time and going out at once.
     private func throttle() async {
-        if let last = lastRequestAt {
-            let elapsed = Date().timeIntervalSince(last)
-            if elapsed < 1.1 {
-                try? await Task.sleep(for: .seconds(1.1 - elapsed))
-            }
-        }
-        lastRequestAt = Date()
+        let now = ContinuousClock.now
+        let slot = lastRequestAt.map { max(now, $0 + interval) } ?? now
+        lastRequestAt = slot
+        try? await Task.sleep(until: slot, clock: .continuous)
     }
 
     /// Wraps a value as a Lucene phrase, escaping the only characters that are
