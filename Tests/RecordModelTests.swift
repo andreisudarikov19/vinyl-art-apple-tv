@@ -278,6 +278,41 @@ struct RecordSidesTests {
         try #require(sides.map(\.name) == ["Side A"])
         #expect(sides[0].tracks.map(\.duration) == [""])
     }
+
+    /// A track with an empty or number-only position, such as a hidden
+    /// track, stays on the side it's heard on.
+    @Test func sidelessTrackJoinsTheSideBeforeIt() throws {
+        let detail = try makeReleaseDetail(tracklist: [
+            track("A1", "One"), track("A2", "Two"), track("", "Hidden"),
+            track("B1", "Three"), track("7", "Bonus"),
+        ])
+        let sides = RecordSides.from(detail.tracklist)
+        try #require(sides.map(\.name) == ["Side A", "Side B"])
+        #expect(sides[0].tracks.map(\.title) == ["One", "Two", "Hidden"])
+        #expect(sides[1].tracks.map(\.title) == ["Three", "Bonus"])
+    }
+
+    @Test func leadingSidelessTrackJoinsTheFirstSide() throws {
+        let detail = try makeReleaseDetail(tracklist: [
+            track("", "Intro"), track("A1", "One"), track("B1", "Two"),
+        ])
+        let sides = RecordSides.from(detail.tracklist)
+        try #require(sides.map(\.name) == ["Side A", "Side B"])
+        #expect(sides[0].tracks.map(\.title) == ["Intro", "One"])
+    }
+
+    @Test func indexWithoutAnySideStaysInTheTracklistSide() throws {
+        let detail = try makeReleaseDetail(tracklist: [
+            track("1", "One"),
+            track("", "Suite", type: "index", subTracks: [
+                track("2.1", "Part One"), track("2.2", "Part Two"),
+            ]),
+        ])
+        let sides = RecordSides.from(detail.tracklist)
+        try #require(sides.map(\.name) == ["Tracklist"])
+        #expect(sides[0].tracks.map(\.title) == ["One", "Suite"])
+        #expect(sides[0].tracks[1].parts.map(\.title) == ["Part One", "Part Two"])
+    }
 }
 
 @MainActor

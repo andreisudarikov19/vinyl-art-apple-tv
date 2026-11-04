@@ -114,9 +114,11 @@ struct RecordSide: Identifiable, Equatable, Sendable {
 }
 
 /// Groups a Discogs tracklist into vinyl sides (A, B, C, …) in order of
-/// appearance. Headings are dropped; releases without side letters collapse
-/// into a single "Tracklist" side. An index entry, a suite or medley, is one
-/// row with its parts beneath it.
+/// appearance. Headings are dropped. An entry whose position names no side
+/// joins the side of the nearest entry before it, or the first side; only
+/// a release without any side letters collapses into a single "Tracklist"
+/// side. An index entry, a suite or medley, is one row with its parts
+/// beneath it.
 enum RecordSides {
     static func from(_ tracklist: [TrackEntry]) -> [RecordSide] {
         var rows: [(side: String?, track: RecordTrack)] = []
@@ -129,10 +131,10 @@ enum RecordSides {
 
         var order: [String] = []
         var grouped: [String: [RecordTrack]] = [:]
-        for row in rows {
-            let key = row.side ?? noSideKey
+        for (side, track) in zip(fillingGaps(rows.map(\.side)), rows.map(\.track)) {
+            let key = side ?? noSideKey
             if grouped[key] == nil { order.append(key) }
-            grouped[key, default: []].append(row.track)
+            grouped[key, default: []].append(track)
         }
 
         return order.map { key in
