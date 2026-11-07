@@ -16,6 +16,6 @@ struct UserAgentTests {
     }
 
     @Test func appBundleSuppliesAVersion() {
-        #expect(!UserAgent.app.hasPrefix("VinylForAppleTV/"))
+        #expect(UserAgent.app.hasPrefix("VinylForAppleTV/"))
     }
 }
