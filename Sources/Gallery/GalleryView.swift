@@ -16,6 +16,7 @@ struct GalleryView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var selected: CachedRelease?
     @State private var refresh: RefreshState = .idle
+    @State private var showingAbout = false
     @FocusState private var toolbarFocused: Bool
 
     private enum RefreshState: Equatable {
@@ -41,6 +42,8 @@ struct GalleryView: View {
             }
             .overlay(alignment: .bottom) { refreshHUD }
         }
+        // Menu on the remote dismisses the cover and returns to the gallery.
+        .fullScreenCover(isPresented: $showingAbout) { AboutView() }
         .task {
             if let stored = preferences.first {
                 layout = stored.galleryLayout
@@ -159,6 +162,15 @@ struct GalleryView: View {
                     Task { await signOut(erase: true) }
                 } label: {
                     SwiftUI.Label("Sign out & erase library", systemImage: "trash")
+                }
+            }
+            // Like the account line: plain text, so it reads as information.
+            Section {
+                Text(AppVersion.current)
+                Button {
+                    showingAbout = true
+                } label: {
+                    SwiftUI.Label("About", systemImage: "info.circle")
                 }
             }
         } label: {
