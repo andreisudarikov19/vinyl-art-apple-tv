@@ -6,8 +6,11 @@ import SwiftUI
 /// as the focused colour changes.
 struct CollectionGlowBackground: View {
     var glowColor: Color
-    /// Reference size that sets the glow radius — defaults to the CoverFlow
-    /// cover size so the glow geometry is identical across both modes.
+    /// Reference size that scales the glow: strongest within 0.4× this size,
+    /// fading to nothing at 2.2×. CoverFlow passes its cover size (620 pt) and
+    /// AboutView passes 700. The mosaic grid takes this 460 pt default, which
+    /// was CoverFlow's cover size before the covers grew to 620 pt, so the
+    /// mosaic's glow is now about three-quarters the size of CoverFlow's.
     var reference: CGFloat = 460
 
     var body: some View {

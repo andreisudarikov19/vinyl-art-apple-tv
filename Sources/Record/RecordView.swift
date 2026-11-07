@@ -395,13 +395,13 @@ struct RecordView: View {
     /// the informative stage. Fills the whole screen; `dark` scrim keeps
     /// foreground legible.
     ///
-    /// The backdrop drifts: a slow ken-burns zoom (~90 s cycle), an elliptical
-    /// pan (~120 s) and a gentle saturation breath (~50 s). The three cycles
-    /// are out of phase so the combined motion doesn't visibly repeat for
-    /// several minutes — rewards the user for lingering on the tracklist
-    /// with a quiet "the cover is alive" reading without ever competing for
-    /// attention with the title / artist / tracks. Reduce Motion freezes all
-    /// three.
+    /// The backdrop drifts: a slow ken-burns zoom (60 s cycle), a wandering
+    /// pan (75 s side to side, ~107 s up and down) and a gentle saturation
+    /// breath (40 s). The cycles are out of phase so the combined motion
+    /// doesn't visibly repeat for several minutes — rewards the user for
+    /// lingering on the tracklist with a quiet "the cover is alive" reading
+    /// without ever competing for attention with the title / artist / tracks.
+    /// Reduce Motion freezes all three.
     private func blurredBackdrop(dark: Double) -> some View {
         TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { context in
             // Virtual time: accrued time the motion has been engaged across
@@ -427,8 +427,9 @@ struct RecordView: View {
             let panX: CGFloat = reduceMotion
                 ? 0
                 : CGFloat(sin(virtualT * 2 * .pi / 75.0) * 80 * fade)
-            // Cosine with a 0.7x frequency offset traces an ellipse rather
-            // than a straight line, so the pan never just wobbles left-right.
+            // A cosine at 0.7× the horizontal frequency: the two axes never
+            // line up, so the pan wanders in a Lissajous-style path rather
+            // than tracing an ellipse or just wobbling left-right.
             let panY: CGFloat = reduceMotion
                 ? 0
                 : CGFloat(cos(virtualT * 2 * .pi / 75.0 * 0.7) * 80 * fade)

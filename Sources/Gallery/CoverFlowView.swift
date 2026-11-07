@@ -74,6 +74,9 @@ struct CoverFlowView: View {
         .buttonStyle(PlainNoFocusStyle())
         .focusEffectDisabled()
         .focused($focused)
+        // One control for the whole carousel, so it takes the centred
+        // record's name, worded as the mosaic words its tiles.
+        .accessibilityLabel(current?.galleryAccessibilityLabel ?? String(localized: "No matches"))
         .onMoveCommand { direction in
             switch direction {
             case .left:
