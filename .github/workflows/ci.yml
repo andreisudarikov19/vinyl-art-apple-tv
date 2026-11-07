@@ -52,14 +52,15 @@ jobs:
           unzip -q xcodegen.zip
           echo "$RUNNER_TEMP/xcodegen/bin" >> "$GITHUB_PATH"
 
+      - name: Use the example secrets
+        # Placeholder keys only; the real AppSecrets.swift is gitignored. This
+        # runs before XcodeGen, which only adds the files that exist when it runs.
+        run: cp Sources/Auth/AppSecrets.example.swift Sources/Auth/AppSecrets.swift
+
       - name: Generate the Xcode project
         run: |
           xcodegen --version
           xcodegen generate
-
-      - name: Use the example secrets
-        # Placeholder keys only; the real AppSecrets.swift is gitignored.
-        run: cp Sources/Auth/AppSecrets.example.swift Sources/Auth/AppSecrets.swift
 
       - name: Pick a tvOS simulator
         id: simulator
