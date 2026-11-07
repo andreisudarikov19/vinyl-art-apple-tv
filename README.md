@@ -35,6 +35,8 @@ You need Xcode 26 or later and [XcodeGen](https://github.com/yonaskolb/XcodeGen)
    ```
    The project is generated from `project.yml` and isn't committed. Run
    `xcodegen generate` again after editing `project.yml` or adding files.
+   Swift package versions are pinned in `project.yml`: to update one, change
+   its version there and run `xcodegen generate`.
 
 ## Running the tests
 

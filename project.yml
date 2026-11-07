@@ -19,7 +19,7 @@ settings:
 packages:
   Nuke:
     url: https://github.com/kean/Nuke
-    from: "12.8.0"
+    exactVersion: "12.9.0"
 
 targets:
   VinylForAppleTV:
