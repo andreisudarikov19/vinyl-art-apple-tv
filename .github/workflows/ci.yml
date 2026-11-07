@@ -97,13 +97,14 @@ jobs:
           set -o pipefail
           mkdir -p build
           # Six suites share the global StubURLProtocol.responder, so tests must not run in parallel (#78).
+          # xcbeautify prints warnings, errors and test results; the full log is uploaded on failure.
           xcodebuild test \
             -project VinylForAppleTV.xcodeproj \
             -scheme VinylForAppleTV \
             -destination "platform=tvOS Simulator,id=$SIMULATOR_UDID" \
             -parallel-testing-enabled NO \
             -resultBundlePath build/TestResults.xcresult \
-            2>&1 | tee build/xcodebuild.log | xcbeautify --renderer github-actions
+            2>&1 | tee build/xcodebuild.log | xcbeautify --quiet --is-ci --renderer github-actions
 
       - name: Upload test results
         if: failure()
