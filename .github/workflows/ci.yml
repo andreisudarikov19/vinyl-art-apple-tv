@@ -63,7 +63,6 @@ jobs:
           xcodegen generate
 
       - name: Pick a tvOS simulator
-        id: simulator
         run: |
           runtimes=$(xcrun simctl list runtimes --json)
           runtime=$(jq -r '[.runtimes[] | select(.platform == "tvOS" and .isAvailable)]
@@ -88,23 +87,30 @@ jobs:
 
           echo "Runtime: $runtime"
           xcrun simctl list devices | grep "$udid"
-          echo "udid=$udid" >> "$GITHUB_OUTPUT"
+          echo "SIMULATOR_UDID=$udid" >> "$GITHUB_ENV"
 
-      - name: Build and test
-        env:
-          SIMULATOR_UDID: ${{ steps.simulator.outputs.udid }}
+      - name: Build
         run: |
           set -o pipefail
           mkdir -p build
+          # xcbeautify shows only warnings and errors; the full build log is uploaded on failure.
+          xcodebuild build-for-testing \
+            -project VinylForAppleTV.xcodeproj \
+            -scheme VinylForAppleTV \
+            -destination "platform=tvOS Simulator,id=$SIMULATOR_UDID" \
+            2>&1 | tee build/build.log | xcbeautify --quiet --renderer github-actions
+
+      - name: Test
+        # Raw output: xcbeautify drops Swift Testing's summary line and turns the
+        # Core Data errors that PersistenceControllerTests log on purpose into annotations.
+        run: |
           # Six suites share the global StubURLProtocol.responder, so tests must not run in parallel (#78).
-          # xcbeautify prints warnings, errors and test results; the full log is uploaded on failure.
-          xcodebuild test \
+          xcodebuild test-without-building \
             -project VinylForAppleTV.xcodeproj \
             -scheme VinylForAppleTV \
             -destination "platform=tvOS Simulator,id=$SIMULATOR_UDID" \
             -parallel-testing-enabled NO \
-            -resultBundlePath build/TestResults.xcresult \
-            2>&1 | tee build/xcodebuild.log | xcbeautify --quiet --is-ci --renderer github-actions
+            -resultBundlePath build/TestResults.xcresult
 
       - name: Upload test results
         if: failure()
@@ -113,6 +119,6 @@ jobs:
           name: test-results
           path: |
             build/TestResults.xcresult
-            build/xcodebuild.log
+            build/build.log
           retention-days: 7
           if-no-files-found: ignore
