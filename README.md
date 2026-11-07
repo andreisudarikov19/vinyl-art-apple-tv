@@ -47,6 +47,8 @@ Any tvOS simulator will do; `xcrun simctl list devices tvOS` lists the ones you 
 
 The tests need no real Discogs keys. `AppSecrets.swift` has to exist for the project to build, but the template's placeholders are enough: copy it as in step 2 and leave them in. Every request in the tests goes to a stub, so they make no network calls.
 
+CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) builds the app and runs the same tests on every pull request and every push to `main`. The tests run one at a time, because several suites share one stub.
+
 ## Versioning
 
 The version and build number are set in `project.yml`, as `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION`. When they change:
