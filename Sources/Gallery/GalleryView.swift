@@ -299,9 +299,8 @@ private struct SettingsMenu: View, Equatable {
                 SwiftUI.Label("Refresh collection", systemImage: "arrow.clockwise")
             }
             .disabled(isRefreshing)
-            Toggle(isOn: Binding(get: { haloAutoEngage }, set: setHaloAutoEngage)) {
-                SwiftUI.Label("Engage halo automatically", systemImage: "circle.dotted")
-            }
+            // Plain text: tvOS draws a tick beside it when it's on.
+            Toggle("Engage halo automatically", isOn: Binding(get: { haloAutoEngage }, set: setHaloAutoEngage))
             Section {
                 Text("Account: \(accountName)")
                 Button {
