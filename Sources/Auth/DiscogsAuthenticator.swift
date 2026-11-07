@@ -48,14 +48,36 @@ final class DiscogsAuthenticator {
 
     private var pendingRequestToken: OAuth1.Token?
     private let urlSession: URLSession
+    private let consumerCredentials: OAuth1.Credentials?
+    private let credentialsStore: DiscogsCredentialsStore
 
-    init(urlSession: URLSession = .shared) {
+    /// - Parameters:
+    ///   - consumerCredentials: The app's Discogs consumer key and secret,
+    ///     nil when they aren't configured.
+    ///   - credentialsStore: Where the sign-in is kept.
+    init(
+        urlSession: URLSession = .shared,
+        consumerCredentials: OAuth1.Credentials? = DiscogsAuthenticator.appConsumerCredentials,
+        credentialsStore: DiscogsCredentialsStore = .standard
+    ) {
         self.urlSession = urlSession
+        self.consumerCredentials = consumerCredentials
+        self.credentialsStore = credentialsStore
+    }
+
+    /// The consumer key and secret from AppSecrets.swift, or nil while it
+    /// still has the template's placeholders.
+    static var appConsumerCredentials: OAuth1.Credentials? {
+        guard AppSecrets.hasDiscogsCredentials else { return nil }
+        return OAuth1.Credentials(
+            consumerKey: AppSecrets.discogsConsumerKey,
+            consumerSecret: AppSecrets.discogsConsumerSecret
+        )
     }
 
     func bootstrap() async {
         do {
-            if let credentials = try DiscogsCredentialsStore.load() {
+            if let credentials = try credentialsStore.load() {
                 state = .authenticated(credentials)
             } else {
                 state = .idle
@@ -66,14 +88,14 @@ final class DiscogsAuthenticator {
     }
 
     func startAuthorization() async {
-        guard AppSecrets.hasDiscogsCredentials else {
+        guard let consumerCredentials else {
             state = .failed(message: DiscogsAuthError.missingCredentials.localizedDescription)
             return
         }
         notice = nil
         state = .requestingToken
         do {
-            let token = try await requestRequestToken()
+            let token = try await requestRequestToken(consumer: consumerCredentials)
             pendingRequestToken = token
             let authorizeURL = URL(
                 string: "https://www.discogs.com/oauth/authorize?oauth_token=\(token.token)"
@@ -86,20 +108,24 @@ final class DiscogsAuthenticator {
 
     func submitVerifier(_ rawVerifier: String) async {
         let verifier = rawVerifier.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard let requestToken = pendingRequestToken else {
+        guard let requestToken = pendingRequestToken, let consumerCredentials else {
             state = .failed(message: DiscogsAuthError.noPendingAuthorization.localizedDescription)
             return
         }
         state = .exchangingToken
         do {
-            let accessToken = try await exchangeAccessToken(verifier: verifier, requestToken: requestToken)
-            let username = try await fetchUsername(accessToken: accessToken)
+            let accessToken = try await exchangeAccessToken(
+                consumer: consumerCredentials,
+                verifier: verifier,
+                requestToken: requestToken
+            )
+            let username = try await fetchUsername(consumer: consumerCredentials, accessToken: accessToken)
             let credentials = DiscogsCredentials(
                 username: username,
                 accessToken: accessToken.token,
                 accessTokenSecret: accessToken.tokenSecret
             )
-            try DiscogsCredentialsStore.save(credentials)
+            try credentialsStore.save(credentials)
             pendingRequestToken = nil
             state = .authenticated(credentials)
         } catch {
@@ -108,7 +134,7 @@ final class DiscogsAuthenticator {
     }
 
     func signOut() async {
-        try? DiscogsCredentialsStore.clear()
+        try? credentialsStore.clear()
         pendingRequestToken = nil
         state = .idle
     }
@@ -125,12 +151,12 @@ final class DiscogsAuthenticator {
 
     // MARK: - Network
 
-    private func requestRequestToken() async throws -> OAuth1.Token {
+    private func requestRequestToken(consumer: OAuth1.Credentials) async throws -> OAuth1.Token {
         let url = URL(string: "https://api.discogs.com/oauth/request_token")!
         let request = OAuth1.signedRequest(
             method: "GET",
             url: url,
-            credentials: oauthCredentials,
+            credentials: consumer,
             token: .none,
             extraOAuthParameters: ["oauth_callback": "oob"],
             additionalHeaders: ["User-Agent": UserAgent.app]
@@ -142,12 +168,16 @@ final class DiscogsAuthenticator {
         return OAuth1.Token(token: token, tokenSecret: secret)
     }
 
-    private func exchangeAccessToken(verifier: String, requestToken: OAuth1.Token) async throws -> OAuth1.Token {
+    private func exchangeAccessToken(
+        consumer: OAuth1.Credentials,
+        verifier: String,
+        requestToken: OAuth1.Token
+    ) async throws -> OAuth1.Token {
         let url = URL(string: "https://api.discogs.com/oauth/access_token")!
         let request = OAuth1.signedRequest(
             method: "POST",
             url: url,
-            credentials: oauthCredentials,
+            credentials: consumer,
             token: requestToken,
             extraOAuthParameters: ["oauth_verifier": verifier],
             additionalHeaders: ["User-Agent": UserAgent.app]
@@ -165,12 +195,12 @@ final class DiscogsAuthenticator {
         return OAuth1.Token(token: token, tokenSecret: secret)
     }
 
-    private func fetchUsername(accessToken: OAuth1.Token) async throws -> String {
+    private func fetchUsername(consumer: OAuth1.Credentials, accessToken: OAuth1.Token) async throws -> String {
         let url = URL(string: "https://api.discogs.com/oauth/identity")!
         let request = OAuth1.signedRequest(
             method: "GET",
             url: url,
-            credentials: oauthCredentials,
+            credentials: consumer,
             token: accessToken,
             additionalHeaders: ["User-Agent": UserAgent.app]
         )
@@ -211,12 +241,5 @@ final class DiscogsAuthenticator {
             }
         }
         return result
-    }
-
-    private var oauthCredentials: OAuth1.Credentials {
-        OAuth1.Credentials(
-            consumerKey: AppSecrets.discogsConsumerKey,
-            consumerSecret: AppSecrets.discogsConsumerSecret
-        )
     }
 }

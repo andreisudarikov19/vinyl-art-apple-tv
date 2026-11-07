@@ -10,23 +10,31 @@ struct DiscogsCredentials: Codable, Sendable, Equatable {
     }
 }
 
-enum DiscogsCredentialsStore {
-    private static let service = "com.andreisudarikov.VinylForAppleTV.discogs"
-    private static let account = "oauth-credentials"
+/// Keeps the sign-in in the keychain under `service`. The app uses
+/// `standard`; tests pass a throwaway service so they never touch it.
+struct DiscogsCredentialsStore: Sendable {
+    static let standard = DiscogsCredentialsStore(service: "com.andreisudarikov.VinylForAppleTV.discogs")
 
-    static func save(_ credentials: DiscogsCredentials) throws {
+    let service: String
+    private let account = "oauth-credentials"
+
+    init(service: String) {
+        self.service = service
+    }
+
+    func save(_ credentials: DiscogsCredentials) throws {
         let data = try JSONEncoder().encode(credentials)
         try KeychainStore.save(data, account: account, service: service)
     }
 
-    static func load() throws -> DiscogsCredentials? {
+    func load() throws -> DiscogsCredentials? {
         guard let data = try KeychainStore.load(account: account, service: service) else {
             return nil
         }
         return try JSONDecoder().decode(DiscogsCredentials.self, from: data)
     }
 
-    static func clear() throws {
+    func clear() throws {
         try KeychainStore.remove(account: account, service: service)
     }
 }
