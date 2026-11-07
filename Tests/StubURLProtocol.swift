@@ -55,6 +55,20 @@ func requestedPage(_ request: URLRequest) -> Int {
     return page
 }
 
+/// The parameters of a request's OAuth Authorization header, decoded.
+func authorizationParameters(_ request: URLRequest) -> [String: String] {
+    guard let header = request.value(forHTTPHeaderField: "Authorization"), header.hasPrefix("OAuth ") else {
+        return [:]
+    }
+    var parameters: [String: String] = [:]
+    for pair in header.dropFirst("OAuth ".count).components(separatedBy: ", ") {
+        guard let equals = pair.firstIndex(of: "=") else { continue }
+        let quoted = pair[pair.index(after: equals)...].trimmingCharacters(in: CharacterSet(charactersIn: "\""))
+        parameters[String(pair[..<equals])] = quoted.removingPercentEncoding ?? quoted
+    }
+    return parameters
+}
+
 /// Builds a Discogs collection-page JSON payload.
 func collectionPageJSON(page: Int, pages: Int, items: Int, releases: [[String: Any]]) -> Data {
     let object: [String: Any] = [
