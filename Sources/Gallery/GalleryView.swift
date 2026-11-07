@@ -92,32 +92,15 @@ struct GalleryView: View {
     }
 
     private var sortMenu: some View {
-        Menu {
-            Picker("Sort", selection: $sort) {
-                ForEach(GallerySort.allCases, id: \.self) { option in
-                    Text(option.displayName).tag(option)
-                }
-            }
-        } label: {
-            SwiftUI.Label("Sort: \(sort.displayName)", systemImage: "arrow.up.arrow.down")
-        }
-        .focused($toolbarFocused) // target for swipe-up from the CoverFlow
+        SortMenu(sort: $sort)
+            .focused($toolbarFocused) // target for swipe-up from the CoverFlow
     }
 
     @ViewBuilder
     private var genreMenu: some View {
         let tags = GalleryArranger.filterTags(releases)
         if !tags.isEmpty {
-            Menu {
-                Picker("Genre", selection: $tag) {
-                    Text("All genres").tag(String?.none)
-                    ForEach(tags, id: \.self) { name in
-                        Text(name).tag(Optional(name))
-                    }
-                }
-            } label: {
-                SwiftUI.Label(tag ?? "All genres", systemImage: "line.3.horizontal.decrease.circle")
-            }
+            GenreMenu(tags: tags, tag: $tag)
         }
     }
 
@@ -141,55 +124,17 @@ struct GalleryView: View {
     }
 
     private var settingsMenu: some View {
-        Menu {
-            Button {
-                Task { await runRefresh() }
-            } label: {
-                SwiftUI.Label("Refresh collection", systemImage: "arrow.clockwise")
-            }
-            .disabled(isRefreshing)
-            Toggle(isOn: haloAutoEngageBinding) {
-                SwiftUI.Label("Engage halo automatically", systemImage: "circle.dotted")
-            }
-            Section {
-                Text("Account: \(accountName)")
-                Button {
-                    Task { await signOut(erase: false) }
-                } label: {
-                    SwiftUI.Label("Sign out (keep library)", systemImage: "rectangle.portrait.and.arrow.right")
-                }
-                Button(role: .destructive) {
-                    Task { await signOut(erase: true) }
-                } label: {
-                    SwiftUI.Label("Sign out & erase library", systemImage: "trash")
-                }
-            }
-            // Like the account line: plain text, so it reads as information.
-            Section {
-                Text(AppVersion.current)
-                Button {
-                    showingAbout = true
-                } label: {
-                    SwiftUI.Label("About", systemImage: "info.circle")
-                }
-            }
-        } label: {
-            Image(systemName: "gearshape")
-        }
-        .accessibilityLabel("Settings")
-    }
-
-    /// Binds the Toggle to the persisted preference, creating the
-    /// preferences row on first read if it's missing.
-    private var haloAutoEngageBinding: Binding<Bool> {
-        Binding(
-            get: { preferences.first?.haloAutoEngage ?? true },
-            set: { newValue in
-                let prefs = preferences.first ?? UserPreferences()
-                if preferences.first == nil { modelContext.insert(prefs) }
-                prefs.haloAutoEngage = newValue
-            }
+        SettingsMenu(
+            accountName: accountName,
+            isRefreshing: isRefreshing,
+            haloAutoEngage: preferences.first?.haloAutoEngage ?? true,
+            // Creates the preferences row if it's missing.
+            setHaloAutoEngage: { UserPreferences.current(in: modelContext).haloAutoEngage = $0 },
+            refresh: { Task { await runRefresh() } },
+            signOut: { erase in Task { await signOut(erase: erase) } },
+            showAbout: { showingAbout = true }
         )
+        .equatable()
     }
 
     private var isRefreshing: Bool {
@@ -285,6 +230,102 @@ struct GalleryView: View {
                 )
             }
         }
+    }
+}
+
+// MARK: - Toolbar menus
+
+// The menus are views of their own so they update only when what they show
+// changes. The gallery's body runs again on every save the cover sweep
+// makes, and rebuilding an open menu's content makes tvOS reload it: the
+// menu blanks for a moment and comes back.
+
+private struct SortMenu: View {
+    @Binding var sort: GallerySort
+
+    var body: some View {
+        Menu {
+            Picker("Sort", selection: $sort) {
+                ForEach(GallerySort.allCases, id: \.self) { option in
+                    Text(option.displayName).tag(option)
+                }
+            }
+        } label: {
+            SwiftUI.Label("Sort: \(sort.displayName)", systemImage: "arrow.up.arrow.down")
+        }
+    }
+}
+
+private struct GenreMenu: View {
+    let tags: [String]
+    @Binding var tag: String?
+
+    var body: some View {
+        Menu {
+            Picker("Genre", selection: $tag) {
+                Text("All genres").tag(String?.none)
+                ForEach(tags, id: \.self) { name in
+                    Text(name).tag(Optional(name))
+                }
+            }
+        } label: {
+            SwiftUI.Label(tag ?? "All genres", systemImage: "line.3.horizontal.decrease.circle")
+        }
+    }
+}
+
+/// Equal when what it shows is equal. Its actions are new closures on every
+/// gallery update, so SwiftUI would always see it as changed, but they do
+/// the same thing each time. The halo setting comes in as a value: reading
+/// the preferences row here would update the menu on every save as well.
+private struct SettingsMenu: View, Equatable {
+    let accountName: String
+    let isRefreshing: Bool
+    let haloAutoEngage: Bool
+    let setHaloAutoEngage: (Bool) -> Void
+    let refresh: () -> Void
+    let signOut: (_ erase: Bool) -> Void
+    let showAbout: () -> Void
+
+    nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.accountName == rhs.accountName
+            && lhs.isRefreshing == rhs.isRefreshing
+            && lhs.haloAutoEngage == rhs.haloAutoEngage
+    }
+
+    var body: some View {
+        Menu {
+            Button(action: refresh) {
+                SwiftUI.Label("Refresh collection", systemImage: "arrow.clockwise")
+            }
+            .disabled(isRefreshing)
+            Toggle(isOn: Binding(get: { haloAutoEngage }, set: setHaloAutoEngage)) {
+                SwiftUI.Label("Engage halo automatically", systemImage: "circle.dotted")
+            }
+            Section {
+                Text("Account: \(accountName)")
+                Button {
+                    signOut(false)
+                } label: {
+                    SwiftUI.Label("Sign out (keep library)", systemImage: "rectangle.portrait.and.arrow.right")
+                }
+                Button(role: .destructive) {
+                    signOut(true)
+                } label: {
+                    SwiftUI.Label("Sign out & erase library", systemImage: "trash")
+                }
+            }
+            // Like the account line: plain text, so it reads as information.
+            Section {
+                Text(AppVersion.current)
+                Button(action: showAbout) {
+                    SwiftUI.Label("About", systemImage: "info.circle")
+                }
+            }
+        } label: {
+            Image(systemName: "gearshape")
+        }
+        .accessibilityLabel("Settings")
     }
 }
 
