@@ -23,3 +23,8 @@ Package.resolved
 
 # Local secrets — copy AppSecrets.example.swift to AppSecrets.swift and fill in
 Sources/Auth/AppSecrets.swift
+
+# Claude Code's local settings and agents' temporary worktrees. Not all of
+# .claude/, so shared project settings can be committed one day.
+.claude/settings.local.json
+.claude/worktrees/

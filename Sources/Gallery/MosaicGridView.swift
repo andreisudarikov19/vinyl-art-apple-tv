@@ -123,7 +123,7 @@ struct MosaicGridView: View {
         .buttonStyle(BareButtonStyle())
         .focusEffectDisabled()
         .focused($focusedID, equals: release.releaseId)
-        .accessibilityLabel("\(release.artistDisplayName) – \(release.title)")
+        .accessibilityLabel(release.galleryAccessibilityLabel)
         // The focus engine doesn't reliably step focus out of these tiles to
         // the toolbar above, and onMoveCommand consumes all directions, so
         // each tile drives its own navigation: arithmetic for in-grid moves,

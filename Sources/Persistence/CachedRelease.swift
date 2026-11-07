@@ -89,6 +89,12 @@ extension CachedRelease {
         URL(string: resolvedCoverURL ?? discogsCoverURL)
     }
 
+    /// What VoiceOver reads for this record in the gallery, the same in both
+    /// browse modes: a mosaic tile and CoverFlow's centred cover.
+    var galleryAccessibilityLabel: String {
+        String(localized: "\(artistDisplayName) – \(title)")
+    }
+
     /// Builds a cached release from a Discogs collection entry. Callers are
     /// responsible for filtering to vinyl formats before persisting.
     convenience init(from release: CollectionRelease) {

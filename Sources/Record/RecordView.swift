@@ -395,13 +395,13 @@ struct RecordView: View {
     /// the informative stage. Fills the whole screen; `dark` scrim keeps
     /// foreground legible.
     ///
-    /// The backdrop drifts: a slow ken-burns zoom (~90 s cycle), an elliptical
-    /// pan (~120 s) and a gentle saturation breath (~50 s). The three cycles
-    /// are out of phase so the combined motion doesn't visibly repeat for
-    /// several minutes — rewards the user for lingering on the tracklist
-    /// with a quiet "the cover is alive" reading without ever competing for
-    /// attention with the title / artist / tracks. Reduce Motion freezes all
-    /// three.
+    /// The backdrop drifts: a slow ken-burns zoom (60 s cycle), a wandering
+    /// pan (75 s side to side, ~107 s up and down) and a gentle saturation
+    /// breath (40 s). The cycles are out of phase so the combined motion
+    /// doesn't visibly repeat for several minutes — rewards the user for
+    /// lingering on the tracklist with a quiet "the cover is alive" reading
+    /// without ever competing for attention with the title / artist / tracks.
+    /// Reduce Motion freezes all three.
     private func blurredBackdrop(dark: Double) -> some View {
         TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { context in
             // Virtual time: accrued time the motion has been engaged across

@@ -21,6 +21,20 @@ struct CachedReleaseTests {
         #expect(CachedRelease.parseDate("last Tuesday") == .distantPast)
         #expect(CachedRelease.parseDate("") == .distantPast)
     }
+
+    @Test func galleryAccessibilityLabelReadsArtistThenTitle() {
+        let release = CachedRelease(
+            releaseId: 1,
+            instanceId: 10,
+            title: "My Spanish Heart",
+            artistDisplayName: "Chick Corea",
+            year: 1976,
+            dateAdded: .distantPast,
+            discogsCoverURL: "",
+            thumbURL: ""
+        )
+        #expect(release.galleryAccessibilityLabel == "Chick Corea – My Spanish Heart")
+    }
 }
 
 struct BasicInformationTests {
