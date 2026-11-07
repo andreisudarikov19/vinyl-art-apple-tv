@@ -1,11 +1,17 @@
 name: CI
 
-# No paths filter: this check is meant to be required, and a pull request the
-# filter skipped could never merge.
+# Skipped when a change touches only the website (docs/), README, LICENSE or
+# NOTICE, which can't affect the app. A change to any other file still runs CI.
 on:
   pull_request:
+    paths-ignore: &no-ci-paths
+      - 'docs/**'
+      - 'README.md'
+      - 'LICENSE'
+      - 'NOTICE'
   push:
     branches: [main]
+    paths-ignore: *no-ci-paths
 
 permissions:
   contents: read
