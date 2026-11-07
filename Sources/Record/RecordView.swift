@@ -427,8 +427,9 @@ struct RecordView: View {
             let panX: CGFloat = reduceMotion
                 ? 0
                 : CGFloat(sin(virtualT * 2 * .pi / 75.0) * 80 * fade)
-            // Cosine with a 0.7x frequency offset traces an ellipse rather
-            // than a straight line, so the pan never just wobbles left-right.
+            // A cosine at 0.7× the horizontal frequency: the two axes never
+            // line up, so the pan wanders in a Lissajous-style path rather
+            // than tracing an ellipse or just wobbling left-right.
             let panY: CGFloat = reduceMotion
                 ? 0
                 : CGFloat(cos(virtualT * 2 * .pi / 75.0 * 0.7) * 80 * fade)
