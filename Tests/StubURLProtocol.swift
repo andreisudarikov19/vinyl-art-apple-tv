@@ -97,9 +97,15 @@ func musicBrainzSearchJSON(releases: [(id: String, score: Int?)]) -> Data {
 }
 
 /// Builds a Cover Art Archive listing with one front image.
-func coverArtListingJSON(image: String) -> Data {
+func coverArtListingJSON(image: String, thumbnails: [String: String] = [:]) -> Data {
+    coverArtListingJSON(images: [(image: image, front: true, thumbnails: thumbnails)])
+}
+
+/// Builds a Cover Art Archive listing of these images, in order. Thumbnails
+/// are keyed by size, e.g. "1200".
+func coverArtListingJSON(images: [(image: String, front: Bool, thumbnails: [String: String])]) -> Data {
     let object: [String: Any] = [
-        "images": [["front": true, "image": image, "thumbnails": [String: String]()]],
+        "images": images.map { ["front": $0.front, "image": $0.image, "thumbnails": $0.thumbnails] },
     ]
     return try! JSONSerialization.data(withJSONObject: object)
 }
