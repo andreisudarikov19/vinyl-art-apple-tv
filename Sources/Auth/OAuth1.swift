@@ -21,13 +21,15 @@ enum OAuth1 {
         token: Token,
         extraOAuthParameters: [String: String] = [:],
         bodyParameters: [String: String] = [:],
-        additionalHeaders: [String: String] = [:]
+        additionalHeaders: [String: String] = [:],
+        nonce: String = UUID().uuidString.replacingOccurrences(of: "-", with: ""),
+        timestamp: Date = Date()
     ) -> URLRequest {
         var oauthParameters: [String: String] = [
             "oauth_consumer_key": credentials.consumerKey,
-            "oauth_nonce": UUID().uuidString.replacingOccurrences(of: "-", with: ""),
+            "oauth_nonce": nonce,
             "oauth_signature_method": "HMAC-SHA1",
-            "oauth_timestamp": String(Int(Date().timeIntervalSince1970)),
+            "oauth_timestamp": String(Int(timestamp.timeIntervalSince1970)),
             "oauth_version": "1.0",
         ]
         if !token.token.isEmpty {
@@ -37,33 +39,12 @@ enum OAuth1 {
             oauthParameters[key] = value
         }
 
-        var allParameters: [(String, String)] = oauthParameters.map { ($0.key, $0.value) }
-        if let queryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems {
-            for item in queryItems {
-                allParameters.append((item.name, item.value ?? ""))
-            }
-        }
-        for (key, value) in bodyParameters {
-            allParameters.append((key, value))
-        }
-
-        let encoded: [(String, String)] = allParameters.map { pair in
-            (pair.0.oauthEncoded, pair.1.oauthEncoded)
-        }
-        let sorted: [(String, String)] = encoded.sorted { lhs, rhs in
-            if lhs.0 != rhs.0 { return lhs.0 < rhs.0 }
-            return lhs.1 < rhs.1
-        }
-        let normalized: String = sorted
-            .map { "\($0.0)=\($0.1)" }
-            .joined(separator: "&")
-
-        var baseComponents = URLComponents(url: url, resolvingAgainstBaseURL: false)
-        baseComponents?.query = nil
-        baseComponents?.fragment = nil
-        let baseURLString = baseComponents?.string ?? url.absoluteString
-
-        let baseString = "\(method)&\(baseURLString.oauthEncoded)&\(normalized.oauthEncoded)"
+        let baseString = signatureBaseString(
+            method: method,
+            url: url,
+            oauthParameters: oauthParameters,
+            bodyParameters: bodyParameters
+        )
         let signingKey = "\(credentials.consumerSecret.oauthEncoded)&\(token.tokenSecret.oauthEncoded)"
 
         let mac = HMAC<Insecure.SHA1>.authenticationCode(
@@ -91,6 +72,44 @@ enum OAuth1 {
             request.httpBody = Data(body.utf8)
         }
         return request
+    }
+
+    /// The text that gets signed (RFC 5849 §3.4.1): the method, the URL
+    /// without its query, and every OAuth, query and body parameter,
+    /// encoded and sorted.
+    static func signatureBaseString(
+        method: String,
+        url: URL,
+        oauthParameters: [String: String],
+        bodyParameters: [String: String]
+    ) -> String {
+        var allParameters: [(String, String)] = oauthParameters.map { ($0.key, $0.value) }
+        if let queryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems {
+            for item in queryItems {
+                allParameters.append((item.name, item.value ?? ""))
+            }
+        }
+        for (key, value) in bodyParameters {
+            allParameters.append((key, value))
+        }
+
+        let encoded: [(String, String)] = allParameters.map { pair in
+            (pair.0.oauthEncoded, pair.1.oauthEncoded)
+        }
+        let sorted: [(String, String)] = encoded.sorted { lhs, rhs in
+            if lhs.0 != rhs.0 { return lhs.0 < rhs.0 }
+            return lhs.1 < rhs.1
+        }
+        let normalized: String = sorted
+            .map { "\($0.0)=\($0.1)" }
+            .joined(separator: "&")
+
+        var baseComponents = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        baseComponents?.query = nil
+        baseComponents?.fragment = nil
+        let baseURLString = baseComponents?.string ?? url.absoluteString
+
+        return "\(method)&\(baseURLString.oauthEncoded)&\(normalized.oauthEncoded)"
     }
 }
 

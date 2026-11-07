@@ -22,6 +22,8 @@ struct DiscogsClientTests {
         )
     }
 
+    private static let releaseDetail = Data(#"{"id": 7, "title": "Album", "tracklist": []}"#.utf8)
+
     @Test func unauthorizedThrowsAndCallsTheHook() async {
         StubURLProtocol.responder = { request in
             (stubHTTPResponse(for: request, statusCode: 401), Data())
@@ -71,5 +73,62 @@ struct DiscogsClientTests {
         }
         #expect(attempts.withLock { $0 } == DiscogsClient.rateLimitBackoff.count + 1)
         #expect(waits.withLock { $0 } == DiscogsClient.rateLimitBackoff)
+    }
+
+    @Test func timedOutReleaseSucceedsAfterOneRetry() async throws {
+        let attempts = OSAllocatedUnfairLock(initialState: 0)
+        StubURLProtocol.responder = { request in
+            let attempt = attempts.withLock { $0 += 1; return $0 }
+            if attempt == 1 {
+                throw URLError(.timedOut)
+            }
+            return (stubHTTPResponse(for: request), Self.releaseDetail)
+        }
+
+        let detail = try await makeClient().release(id: 7)
+
+        #expect(detail.id == 7)
+        #expect(attempts.withLock { $0 } == 2)
+    }
+
+    @Test func secondTimeoutThrows() async {
+        let attempts = OSAllocatedUnfairLock(initialState: 0)
+        StubURLProtocol.responder = { _ in
+            attempts.withLock { $0 += 1 }
+            throw URLError(.timedOut)
+        }
+
+        let error = await #expect(throws: URLError.self) {
+            try await makeClient().release(id: 7)
+        }
+        #expect(error?.code == .timedOut)
+        #expect(attempts.withLock { $0 } == 2)
+    }
+
+    @Test func requestAfterFiveOrFewerRemainingWaitsASecond() async throws {
+        StubURLProtocol.responder = { request in
+            (stubHTTPResponse(for: request, rateLimitRemaining: 5), Self.releaseDetail)
+        }
+        let waits = OSAllocatedUnfairLock(initialState: [Duration]())
+        let client = makeClient(waits: waits)
+
+        _ = try await client.release(id: 7)
+        #expect(waits.withLock { $0 }.isEmpty)
+        _ = try await client.release(id: 7)
+
+        #expect(waits.withLock { $0 } == [.seconds(1)])
+    }
+
+    @Test func requestAfterMoreThanFiveRemainingDoesNotWait() async throws {
+        StubURLProtocol.responder = { request in
+            (stubHTTPResponse(for: request, rateLimitRemaining: 6), Self.releaseDetail)
+        }
+        let waits = OSAllocatedUnfairLock(initialState: [Duration]())
+        let client = makeClient(waits: waits)
+
+        _ = try await client.release(id: 7)
+        _ = try await client.release(id: 7)
+
+        #expect(waits.withLock { $0 }.isEmpty)
     }
 }

@@ -37,12 +37,12 @@ enum StubSession {
     }
 }
 
-func stubHTTPResponse(for request: URLRequest, statusCode: Int = 200) -> HTTPURLResponse {
+func stubHTTPResponse(for request: URLRequest, statusCode: Int = 200, rateLimitRemaining: Int = 50) -> HTTPURLResponse {
     HTTPURLResponse(
         url: request.url!,
         statusCode: statusCode,
         httpVersion: nil,
-        headerFields: ["X-Discogs-Ratelimit-Remaining": "50"]
+        headerFields: ["X-Discogs-Ratelimit-Remaining": String(rateLimitRemaining)]
     )!
 }
 
@@ -53,6 +53,20 @@ func requestedPage(_ request: URLRequest) -> Int {
           let page = Int(value)
     else { return 1 }
     return page
+}
+
+/// The parameters of a request's OAuth Authorization header, decoded.
+func authorizationParameters(_ request: URLRequest) -> [String: String] {
+    guard let header = request.value(forHTTPHeaderField: "Authorization"), header.hasPrefix("OAuth ") else {
+        return [:]
+    }
+    var parameters: [String: String] = [:]
+    for pair in header.dropFirst("OAuth ".count).components(separatedBy: ", ") {
+        guard let equals = pair.firstIndex(of: "=") else { continue }
+        let quoted = pair[pair.index(after: equals)...].trimmingCharacters(in: CharacterSet(charactersIn: "\""))
+        parameters[String(pair[..<equals])] = quoted.removingPercentEncoding ?? quoted
+    }
+    return parameters
 }
 
 /// Builds a Discogs collection-page JSON payload.
@@ -83,9 +97,15 @@ func musicBrainzSearchJSON(releases: [(id: String, score: Int?)]) -> Data {
 }
 
 /// Builds a Cover Art Archive listing with one front image.
-func coverArtListingJSON(image: String) -> Data {
+func coverArtListingJSON(image: String, thumbnails: [String: String] = [:]) -> Data {
+    coverArtListingJSON(images: [(image: image, front: true, thumbnails: thumbnails)])
+}
+
+/// Builds a Cover Art Archive listing of these images, in order. Thumbnails
+/// are keyed by size, e.g. "1200".
+func coverArtListingJSON(images: [(image: String, front: Bool, thumbnails: [String: String])]) -> Data {
     let object: [String: Any] = [
-        "images": [["front": true, "image": image, "thumbnails": [String: String]()]],
+        "images": images.map { ["front": $0.front, "image": $0.image, "thumbnails": $0.thumbnails] },
     ]
     return try! JSONSerialization.data(withJSONObject: object)
 }
