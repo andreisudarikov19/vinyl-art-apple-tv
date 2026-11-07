@@ -1,0 +1,124 @@
+name: CI
+
+# No paths filter: this check is meant to be required, and a pull request the
+# filter skipped could never merge.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  # A new push to a pull request cancels its older run; every push to main runs.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build-and-test:
+    name: Build and test
+    # The macOS 26 Arm64 image ships Xcode 26 with tvOS simulator runtimes
+    # and Apple TV 4K simulators already installed.
+    runs-on: macos-26
+    timeout-minutes: 30
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+      XCODEGEN_VERSION: 2.46.0
+      XCODEGEN_SHA256: 4d9e34b62172d645eed6457cac13fc222569974098ef4ee9c3368bedf0196806
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Show Xcode and tvOS runtimes
+        run: |
+          xcodebuild -version
+          xcrun simctl list runtimes | grep tvOS || echo "No tvOS simulator runtime installed"
+          echo "xcbeautify $(xcbeautify --version)"
+
+      - name: Install XcodeGen ${{ env.XCODEGEN_VERSION }}
+        run: |
+          cd "$RUNNER_TEMP"
+          curl -sSfL -o xcodegen.zip \
+            "https://github.com/yonaskolb/XcodeGen/releases/download/$XCODEGEN_VERSION/xcodegen.zip"
+          echo "$XCODEGEN_SHA256  xcodegen.zip" | shasum -a 256 -c -
+          unzip -q xcodegen.zip
+          echo "$RUNNER_TEMP/xcodegen/bin" >> "$GITHUB_PATH"
+
+      - name: Use the example secrets
+        # Placeholder keys only; the real AppSecrets.swift is gitignored. This
+        # runs before XcodeGen, which only adds the files that exist when it runs.
+        run: cp Sources/Auth/AppSecrets.example.swift Sources/Auth/AppSecrets.swift
+
+      - name: Generate the Xcode project
+        run: |
+          xcodegen --version
+          xcodegen generate
+
+      - name: Pick a tvOS simulator
+        run: |
+          runtimes=$(xcrun simctl list runtimes --json)
+          runtime=$(jq -r '[.runtimes[] | select(.platform == "tvOS" and .isAvailable)]
+            | sort_by(.version | split(".") | map(tonumber)) | last | .identifier // empty' <<<"$runtimes")
+          if [ -z "$runtime" ]; then
+            echo "::error::No available tvOS simulator runtime"
+            exit 1
+          fi
+
+          udid=$(xcrun simctl list devices available --json | jq -r --arg rt "$runtime" '
+            [.devices[$rt][]? | select((.name | startswith("Apple TV 4K")) and (.name | contains("1080p") | not))]
+            | sort_by(.name) | last | .udid // empty')
+          if [ -z "$udid" ]; then
+            device_type=$(jq -r --arg rt "$runtime" '.runtimes[] | select(.identifier == $rt)
+              | [.supportedDeviceTypes[] | select(.name | startswith("Apple TV 4K"))] | first | .identifier // empty' <<<"$runtimes")
+            if [ -z "$device_type" ]; then
+              echo "::error::$runtime supports no Apple TV 4K device type"
+              exit 1
+            fi
+            udid=$(xcrun simctl create "CI Apple TV 4K" "$device_type" "$runtime")
+          fi
+
+          echo "Runtime: $runtime"
+          xcrun simctl list devices | grep "$udid"
+          echo "SIMULATOR_UDID=$udid" >> "$GITHUB_ENV"
+
+      - name: Build
+        run: |
+          set -o pipefail
+          mkdir -p build
+          # xcbeautify shows only warnings and errors; the full build log is uploaded on failure.
+          xcodebuild build-for-testing \
+            -project VinylForAppleTV.xcodeproj \
+            -scheme VinylForAppleTV \
+            -destination "platform=tvOS Simulator,id=$SIMULATOR_UDID" \
+            2>&1 | tee build/build.log | xcbeautify --quiet --renderer github-actions
+
+      - name: Test
+        # Raw output: xcbeautify drops Swift Testing's summary line and turns the
+        # Core Data errors that PersistenceControllerTests log on purpose into annotations.
+        run: |
+          # Six suites share the global StubURLProtocol.responder, so tests must not run in parallel (#78).
+          xcodebuild test-without-building \
+            -project VinylForAppleTV.xcodeproj \
+            -scheme VinylForAppleTV \
+            -destination "platform=tvOS Simulator,id=$SIMULATOR_UDID" \
+            -parallel-testing-enabled NO \
+            -resultBundlePath build/TestResults.xcresult
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: test-results
+          path: |
+            build/TestResults.xcresult
+            build/build.log
+          retention-days: 7
+          if-no-files-found: ignore
