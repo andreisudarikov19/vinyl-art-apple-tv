@@ -1,5 +1,6 @@
 import Foundation
 import os
+import Security
 import Testing
 @testable import VinylForAppleTV
 
@@ -156,6 +157,16 @@ final class DiscogsAuthenticatorTests {
         #expect(authenticator.state == .idle)
     }
 
+    @Test func bootstrapCarriesOverASignInSyncedByAnEarlierBuild() async throws {
+        try store.saveSynced(signedIn)
+        let authenticator = makeAuthenticator()
+
+        await authenticator.bootstrap()
+
+        #expect(authenticator.state == .authenticated(signedIn))
+        #expect(try store.storedItems() == [.thisDeviceOnly])
+    }
+
     @Test func signOutForgetsTheStoredSignIn() async throws {
         try store.save(signedIn)
         let authenticator = makeAuthenticator()
@@ -165,6 +176,17 @@ final class DiscogsAuthenticatorTests {
 
         #expect(authenticator.state == .idle)
         #expect(try store.load() == nil)
+    }
+
+    @Test func signOutForgetsASyncedCopyToo() async throws {
+        try store.save(signedIn)
+        try store.saveSynced(signedIn)
+        let authenticator = makeAuthenticator()
+        await authenticator.bootstrap()
+
+        await authenticator.signOut()
+
+        #expect(try store.storedItems().isEmpty)
     }
 
     @Test func expiredSignInSignsOutWithANoticeUntilTheNextSignIn() async throws {
@@ -204,5 +226,129 @@ final class DiscogsAuthenticatorTests {
         await authenticator.submitVerifier("WRONG")
 
         #expect(authenticator.state == .failed(message: DiscogsAuthError.verifierRejected.localizedDescription))
+    }
+}
+
+/// Each test keeps its sign-in under a keychain service of its own and its
+/// launch marker in a defaults suite of its own, both removed afterwards.
+final class DiscogsCredentialsStoreTests {
+    private let store = DiscogsCredentialsStore(service: "com.andreisudarikov.VinylForAppleTV.tests.\(UUID().uuidString)")
+    private let suiteName = "com.andreisudarikov.VinylForAppleTV.tests.\(UUID().uuidString)"
+    private let defaults: UserDefaults
+    private let signedIn = DiscogsCredentials(username: "tester", accessToken: "access", accessTokenSecret: "accessSecret")
+
+    init() {
+        defaults = UserDefaults(suiteName: suiteName)!
+    }
+
+    deinit {
+        store.removeEveryItem()
+        defaults.removePersistentDomain(forName: suiteName)
+    }
+
+    @Test func signInIsSavedOnThisDeviceOnly() throws {
+        try store.save(signedIn)
+
+        #expect(try store.storedItems() == [.thisDeviceOnly])
+        #expect(try store.load() == signedIn)
+    }
+
+    @Test func syncedSignInIsCarriedOverToThisDeviceOnly() throws {
+        try store.saveSynced(signedIn)
+
+        #expect(try store.load() == signedIn)
+        #expect(try store.storedItems() == [.thisDeviceOnly])
+        #expect(try store.load() == signedIn)
+    }
+
+    @Test func freshInstallRemovesASignInLeftByAnEarlierInstall() throws {
+        try store.save(signedIn)
+        try store.saveSynced(signedIn)
+
+        try store.removeSignInLeftByAnEarlierInstall(defaults: defaults, appDataExists: false)
+
+        #expect(try store.storedItems().isEmpty)
+    }
+
+    @Test func updateFromABuildWithoutTheMarkerKeepsTheSignIn() throws {
+        try store.saveSynced(signedIn)
+
+        try store.removeSignInLeftByAnEarlierInstall(defaults: defaults, appDataExists: true)
+
+        #expect(try store.load() == signedIn)
+    }
+
+    /// The app's data on tvOS lives in Caches, which the system may empty
+    /// between launches; only the first launch of an install may remove.
+    @Test func laterLaunchesKeepTheSignIn() throws {
+        try store.removeSignInLeftByAnEarlierInstall(defaults: defaults, appDataExists: false)
+        try store.save(signedIn)
+
+        try store.removeSignInLeftByAnEarlierInstall(defaults: defaults, appDataExists: false)
+        try store.removeSignInLeftByAnEarlierInstall(defaults: defaults, appDataExists: true)
+
+        #expect(try store.load() == signedIn)
+    }
+}
+
+/// One keychain item under a test's service, as `storedItems()` reads it.
+fileprivate struct StoredKeychainItem: Equatable {
+    let synced: Bool
+    let accessible: String?
+
+    static let thisDeviceOnly = StoredKeychainItem(
+        synced: false,
+        accessible: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly as String
+    )
+}
+
+/// Reaches the keychain directly, so tests can set up a sign-in as builds up
+/// to 0.20.0 saved it and check what's stored without going through the
+/// code under test.
+fileprivate extension DiscogsCredentialsStore {
+    /// Saves `credentials` synced through iCloud Keychain, as 0.20.0 did.
+    func saveSynced(_ credentials: DiscogsCredentials) throws {
+        let add: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: "oauth-credentials",
+            kSecAttrSynchronizable as String: kCFBooleanTrue!,
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock,
+            kSecValueData as String: try JSONEncoder().encode(credentials),
+        ]
+        let status = SecItemAdd(add as CFDictionary, nil)
+        guard status == errSecSuccess else { throw KeychainError.unexpectedStatus(status) }
+    }
+
+    /// Every item under the service, synced or not.
+    func storedItems() throws -> [StoredKeychainItem] {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrSynchronizable as String: kSecAttrSynchronizableAny,
+            kSecReturnAttributes as String: kCFBooleanTrue!,
+            kSecMatchLimit as String: kSecMatchLimitAll,
+        ]
+        var result: CFTypeRef?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+        if status == errSecItemNotFound { return [] }
+        guard status == errSecSuccess, let items = result as? [[String: Any]] else {
+            throw KeychainError.unexpectedStatus(status)
+        }
+        return items.map { item in
+            StoredKeychainItem(
+                synced: item[kSecAttrSynchronizable as String] as? Bool ?? false,
+                accessible: item[kSecAttrAccessible as String] as? String
+            )
+        }
+    }
+
+    func removeEveryItem() {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrSynchronizable as String: kSecAttrSynchronizableAny,
+        ]
+        SecItemDelete(query as CFDictionary)
     }
 }
