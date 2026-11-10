@@ -32,13 +32,13 @@
 
       <p>This guide walks you through signing into the app for the first time. It is written for anyone who has not connected an app to a music service like Discogs before. There are seven small steps. The whole thing takes about five minutes.</p>
 
-      <p>You will use your Apple TV the whole time. During one step you will look at your phone (or a computer) briefly to confirm that the app may read your record collection.</p>
+      <p>You will use your Apple TV the whole time. During one step you will look at your phone (or a tablet) briefly to confirm that the app may read your record collection.</p>
 
       <h2>Before you begin</h2>
       <ul>
         <li>
           <p>An Apple TV running tvOS 18 or later.</p>
-          <p>To check, on your Apple TV go to <strong>Settings</strong> → <strong>System</strong> → <strong>About</strong>.</p>
+          <p>To check, on your Apple TV go to <strong>Settings</strong> → <strong>General</strong> → <strong>About</strong>.</p>
         </li>
         <li>
           <p>A free <a href="https://www.discogs.com">Discogs</a> account.</p>
@@ -49,15 +49,10 @@
           <p>The app shows what is on your shelf, so it needs something to show. New to Discogs? Their <a href="https://support.discogs.com">help centre</a> has step-by-step articles on adding records.</p>
         </li>
         <li>
-          <p>Your phone or a computer within reach.</p>
+          <p>Your phone or a tablet within reach, with a camera that can scan a QR code.</p>
           <p>You will use it briefly during sign-in.</p>
         </li>
       </ul>
-
-      <div class="callout warning">
-        <p><strong>Your Discogs collection has to be public.</strong> The app reads your records through Discogs's public API, so a private collection cannot be loaded.</p>
-        <p>On the Discogs website, open <strong>Settings</strong> → <strong>Privacy</strong> and make sure your collection is set to public.</p>
-      </div>
 
       <h2>Step 1. Open the app</h2>
       <ol>
@@ -85,7 +80,7 @@
         </li>
         <li>
           <p>Tap the link banner that appears on your phone.</p>
-          <p>If no banner appears (or you would rather use a computer), type the website address printed under the QR code into a browser instead. Both routes lead to the same place.</p>
+          <p>If no banner appears, move a little closer to the TV and hold the phone steady until one does.</p>
         </li>
       </ol>
 
@@ -97,7 +92,7 @@
         </li>
         <li>
           <p>Read the short page Discogs shows you.</p>
-          <p>It explains what Vinyl for Apple TV is asking permission to do: it only wants to read your collection.</p>
+          <p>It asks you to authorise Vinyl for Apple TV to use your Discogs account. The app only reads your collection.</p>
         </li>
         <li>
           <p>Press the <strong>Authorize</strong> button on the Discogs page.</p>
@@ -142,13 +137,13 @@
       <p>If your iPhone is signed in to the same Apple ID as your Apple TV, you can use it as a keyboard. A notification appears on the iPhone offering to type on the Apple TV — tap it and enter the code on your phone instead. This is usually much faster than tapping each character with the Siri Remote.</p>
 
       <div class="callout tip">
-        <p><strong>If the code is rejected, the most likely reason is that it expired.</strong> Discogs codes only live for a few minutes for security.</p>
-        <p>Press <strong>Back</strong> on the Siri Remote and start again from Step 2. You will get a fresh code each time.</p>
+        <p><strong>If the code is rejected, the TV shows <code>Couldn't sign in</code>.</strong> The code may be mistyped, or it may have expired: Discogs codes stop working 15 minutes after the QR code appears.</p>
+        <p>Choose <strong>Try again</strong> on the TV and start again from Step 2. You will get a fresh code each time. (Pressing <strong>Back</strong> on the Siri Remote here takes you out of the app.)</p>
       </div>
 
       <h2>Step 7. Wait while your library is built</h2>
-      <p>The TV now shows <code>Building your library</code> with a counter, like <code>Fetching 247 of 812 albums</code>. This is the app downloading your record list and cover art from Discogs. Depending on the size of your collection, it takes anywhere from a few seconds to a few minutes. This only happens the first time you sign in — afterwards the app remembers your collection and only checks for new records.</p>
-      <p>Some covers may load twice. The app first shows the image Discogs has on file, then checks the Cover Art Archive (a free, open image database) for a higher-quality scan and swaps it in when one is available. After this initial upgrade, the better cover stays cached on your Apple TV.</p>
+      <p>The TV now shows <code>Building your library</code> with a counter, like <code>Fetching 247/812 albums…</code>. This is the app downloading your record list from Discogs. Depending on the size of your collection, it takes anywhere from a few seconds to a few minutes. This only happens the first time you sign in — afterwards the app remembers your collection and only checks for new records.</p>
+      <p>Some covers may load twice. The app first shows the image Discogs has on file, then looks each record up on MusicBrainz and, when the Cover Art Archive (a free, open image database) has a cover for it, swaps that one in. The app does this once for each record, and the cover it settles on stays cached on your Apple TV.</p>
       <p>When the count finishes, the gallery opens automatically. You are in.</p>
 
       <h2>What to do next</h2>
@@ -174,22 +169,22 @@
       <div class="faq">
         <details>
           <summary>I cannot see any of my records.</summary>
-          <p>Two things to check on the Discogs website. First, that your collection is set to public: on Discogs open <strong>Settings</strong> → <strong>Privacy</strong> and make sure the collection is visible. Second, that the records on your shelf are tagged as <code>Vinyl</code> — the app only shows vinyl releases, so CDs, cassettes and digital releases will be hidden by design.</p>
+          <p>Check on the Discogs website that the records on your shelf are tagged as <code>Vinyl</code> — the app only shows vinyl releases, so CDs, cassettes and digital releases will be hidden by design. Your collection can be public or private: the app reads it signed in as you.</p>
         </details>
 
         <details>
           <summary>Only some of my records appeared.</summary>
-          <p>The app reads your main collection folder (the one Discogs calls <code>Uncategorized</code> or <code>All</code>). Records you moved into your own custom folders are not synced in this version. If broader folder support would help you, please let us know.</p>
+          <p>The app reads the folder Discogs calls <code>All</code>, which holds your whole collection, records in your own custom folders included. Records you add on Discogs later appear the next time the app starts, or straight away when you choose <strong>Refresh collection</strong> in the Settings menu (the gear at the top of the gallery). If a genre is picked in the gallery's genre menu, only that genre shows; choose <strong>All genres</strong> to see everything.</p>
         </details>
 
         <details>
           <summary>The QR code will not scan.</summary>
-          <p>The simplest fix is to sit closer to the TV so the camera can see the pattern clearly, or to turn up the room lights. If it still will not scan, type the website address printed below the QR code into a browser by hand. The result is identical.</p>
+          <p>The simplest fix is to sit closer to the TV so the camera can see the pattern clearly, or to turn up the room lights. If your phone's camera cannot scan QR codes, use another phone or tablet that can, and sign in to Discogs on that one.</p>
         </details>
 
         <details>
           <summary>A cover is missing or blurry.</summary>
-          <p>Discogs allows community-submitted images, and not every release has a high-quality one. The app falls back to a second free image database when Discogs comes up short. If neither has a usable image, uploading a better cover to Discogs is the lasting fix; it shows up in the app on the next refresh.</p>
+          <p>The app shows the cover the Cover Art Archive (a free, open image database) has for a record, and the image on Discogs when it has none. Discogs allows community-submitted images, and not every release has a high-quality one. For a record the Cover Art Archive has no cover for, uploading a better cover to Discogs is the lasting fix; it shows up in the app after you choose <strong>Refresh collection</strong> in the Settings menu.</p>
         </details>
 
         <details>
@@ -209,6 +204,7 @@
         <a href="support.html">Support</a>
         <a href="https://github.com/andreisudarikov19/vinyl-art-apple-tv">GitHub</a>
       </div>
+      <p class="footer-notice">This application uses Discogs’ API but is not affiliated with, sponsored or endorsed by Discogs. ‘Discogs’ is a trademark of Zink Media, LLC.</p>
     </div>
   </footer>
 </body>
