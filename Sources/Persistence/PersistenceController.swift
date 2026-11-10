@@ -10,9 +10,11 @@ enum PersistenceController {
         UserPreferences.self,
     ])
 
-    /// The on-disk container backing the running app, at SwiftData's default
-    /// store location.
-    static let shared: ModelContainer = makeContainer(at: ModelConfiguration(schema: schema).url)
+    /// SwiftData's default store location, in Caches on tvOS.
+    static let storeURL = ModelConfiguration(schema: schema).url
+
+    /// The on-disk container backing the running app, at `storeURL`.
+    static let shared: ModelContainer = makeContainer(at: storeURL)
 
     /// An ephemeral container for SwiftUI previews and tests.
     static let preview: ModelContainer = makeInMemoryContainer()
