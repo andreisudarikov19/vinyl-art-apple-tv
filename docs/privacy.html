@@ -28,7 +28,7 @@
   <main>
     <article class="container content">
       <h1>Privacy Policy</h1>
-      <p class="updated">Last updated: 31 May 2026.</p>
+      <p class="updated">Last updated: 10 November 2026.</p>
 
       <p>Vinyl for Apple TV (“the app”) is designed to do as little with your data as possible. It is a viewer for a Discogs collection you already own — nothing more. This policy describes, in plain language, what the app accesses, what it stores, and what it never does.</p>
 
@@ -37,21 +37,21 @@
 
       <h2>What the app accesses</h2>
       <ul>
-        <li><strong>Your Discogs account.</strong> When you sign in, the app uses Discogs's OAuth flow so you can authorise it to read your collection. The app receives an access token that lets it list the records you own and read their public metadata (artist, title, tracklist, year, catalog number). It does not have permission to make changes to your Discogs account.</li>
-        <li><strong>Cover-art lookups.</strong> When Discogs does not return a high-resolution cover for a release, the app may query the public Cover Art Archive and MusicBrainz APIs by release metadata (artist + album + catalog number) to find a better image. These are anonymous queries — no account information is sent.</li>
+        <li><strong>Your Discogs account.</strong> When you sign in, the app uses Discogs's OAuth flow so you can authorise it to read your collection. The app receives an access token, which it uses to read your Discogs username, list the records you own and read their public metadata (artist, title, tracklist, year, catalog number). The app only reads: it never makes changes to your Discogs account.</li>
+        <li><strong>Cover-art lookups.</strong> For every record in your collection, the app queries the public MusicBrainz API by release metadata (artist + album + catalog number) to find the matching release, then asks the public Cover Art Archive for its front cover. When the Cover Art Archive has one, the app shows it in place of the Discogs cover. These are anonymous queries — no account information is sent.</li>
       </ul>
 
       <h2>What the app stores</h2>
       <ul>
-        <li><strong>On your Apple TV, locally only.</strong> Your Discogs collection is cached on-device using SwiftData (Apple's standard local-storage framework). Cover images are cached using the Nuke image library. Your access token is stored in the device keychain. None of this leaves the Apple TV.</li>
-        <li><strong>Through iCloud, if you have it enabled.</strong> Like any tvOS app, the system may back up the app's local data to your personal iCloud account under Apple's standard backup mechanisms. The developer does not have access to this data — it is governed by <a href="https://www.apple.com/legal/privacy/">Apple's privacy policy</a>.</li>
+        <li><strong>On your Apple TV, locally only.</strong> Your Discogs collection is cached on-device using SwiftData (Apple's standard local-storage framework). Cover images are cached using the Nuke image library. Your access token is stored in the Apple TV's keychain, on this device only: it is never synced through iCloud Keychain. None of this leaves the Apple TV.</li>
+        <li><strong>Not in iCloud.</strong> The app stores nothing in iCloud, and tvOS does not back the app's data up there: iCloud Backup covers iPhone, iPad and Apple Vision Pro, not Apple TV.</li>
       </ul>
 
       <h2>What the app does <em>not</em> do</h2>
       <ul>
         <li><strong>No analytics.</strong> The app does not include Google Analytics, Firebase, Mixpanel, Segment, Sentry, Crashlytics, or any other telemetry SDK. Crash logs that you choose to share with Apple via the system-level "Share with App Developers" setting are the only signal the developer ever receives, and they contain no personal information beyond what Apple itself anonymises.</li>
         <li><strong>No advertising.</strong> The app shows no ads and contains no advertising SDKs. There is no tracker that follows you between apps or websites.</li>
-        <li><strong>No third-party servers.</strong> The app talks directly to <a href="https://www.discogs.com">Discogs</a>, <a href="https://coverartarchive.org">Cover Art Archive</a>, and <a href="https://musicbrainz.org">MusicBrainz</a> over HTTPS. There is no backend operated by the developer.</li>
+        <li><strong>No third-party servers.</strong> The app talks directly to <a href="https://www.discogs.com">Discogs</a>, <a href="https://coverartarchive.org">Cover Art Archive</a>, and <a href="https://musicbrainz.org">MusicBrainz</a> over HTTPS. The Cover Art Archive is a joint project of MusicBrainz and the Internet Archive, so its images download from the Internet Archive's servers. There is no backend operated by the developer.</li>
         <li><strong>No data sale.</strong> The developer never sells, shares, or transmits any personal information about you, because the developer never receives any to begin with.</li>
       </ul>
 
@@ -60,7 +60,7 @@
       <ul>
         <li><a href="https://www.discogs.com/privacy">Discogs Privacy Policy</a></li>
         <li><a href="https://metabrainz.org/privacy">MusicBrainz / Cover Art Archive Privacy Policy</a></li>
-        <li><a href="https://www.apple.com/legal/privacy/">Apple Privacy Policy</a> (iCloud, App Store)</li>
+        <li><a href="https://www.apple.com/legal/privacy/">Apple Privacy Policy</a> (App Store)</li>
       </ul>
 
       <h2>Children's privacy</h2>
@@ -68,8 +68,8 @@
 
       <h2>Your choices</h2>
       <ul>
-        <li><strong>Revoking access.</strong> You can disconnect the app from your Discogs account at any time from <a href="https://www.discogs.com/settings/applications">your Discogs application settings</a>. Doing so immediately invalidates the access token; the next time the app launches, it will prompt you to sign in again.</li>
-        <li><strong>Deleting data.</strong> Uninstalling the app from your Apple TV removes all locally cached data (collection, cover images, access token). If iCloud backup is enabled, you can also delete the app's backup data via the Apple TV's system Settings.</li>
+        <li><strong>Revoking access.</strong> You can disconnect the app from your Discogs account at any time from <a href="https://www.discogs.com/settings/applications">your Discogs application settings</a>. Doing so immediately invalidates the access token. The next time the app reaches Discogs (it does each time it starts, and when you open a record), it returns to the welcome screen and asks you to sign in again. Your library stays on the Apple TV, so signing back in to the same account shows it at once.</li>
+        <li><strong>Deleting data.</strong> Deleting the app from your Apple TV (choose Delete, not Offload, which keeps the app's data) removes the cached collection and cover images at once. It does not remove the access token: keychain items outlive the app, so the token stays on the Apple TV until you install the app again, and the first launch of that install removes it. You then sign in afresh. To remove the token straight away, sign out in the app's Settings menu before deleting the app. You can also revoke access from your Discogs application settings at any time.</li>
       </ul>
 
       <h2>Changes to this policy</h2>
@@ -89,6 +89,7 @@
         <a href="support.html">Support</a>
         <a href="https://github.com/andreisudarikov19/vinyl-art-apple-tv">GitHub</a>
       </div>
+      <p class="footer-notice">This application uses Discogs’ API but is not affiliated with, sponsored or endorsed by Discogs. ‘Discogs’ is a trademark of Zink Media, LLC.</p>
     </div>
   </footer>
 </body>

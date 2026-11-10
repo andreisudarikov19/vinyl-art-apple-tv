@@ -34,8 +34,8 @@
 
       <p>When reporting an issue, including the following helps a lot:</p>
       <ul>
-        <li>Your Apple TV model and tvOS version (Settings → System → About).</li>
-        <li>The app version, shown in the in-app settings menu.</li>
+        <li>Your Apple TV model and tvOS version (Settings → General → About).</li>
+        <li>The app version, shown in the app's Settings menu (the gear at the top of the gallery) and on its About screen.</li>
         <li>A short description of what you were doing when the problem appeared.</li>
         <li>If it concerns a specific record, the Discogs release ID (the number in the release URL).</li>
       </ul>
@@ -50,12 +50,12 @@
 
         <details>
           <summary>How do I sign in?</summary>
-          <p>The first time you open the app, it shows a Discogs authorisation code on the TV. Open the URL on your phone or computer, log in to Discogs, paste the code, and approve. From then on the Apple TV stays signed in until you uninstall the app or revoke access from <a href="https://www.discogs.com/settings/applications">your Discogs settings</a>.</p>
+          <p>The first time you open the app, choose <strong>Sign in with Discogs</strong> and the TV shows a QR code. Scan it with your phone, log in to Discogs, and approve. Discogs then shows you a code: type it into the TV and choose <strong>Continue</strong>. The <a href="guide.html">quick start guide</a> walks through each step. From then on the Apple TV stays signed in until you sign out in the app's Settings menu or revoke access from <a href="https://www.discogs.com/settings/applications">your Discogs settings</a>. If you delete the app and install it again, you sign in afresh.</p>
         </details>
 
         <details>
           <summary>Why is one of my covers missing or low-resolution?</summary>
-          <p>Discogs allows community-submitted images and not every release has a hi-res one uploaded. The app falls back to the Cover Art Archive (a free, open image database run alongside MusicBrainz) when Discogs comes up short. If neither has a usable image, the cover stays blank — uploading a better cover to Discogs is the fix, and it propagates back to the app on the next sync.</p>
+          <p>The app looks every record up on MusicBrainz and shows the front cover the Cover Art Archive (a free, open image database run alongside MusicBrainz) has for it. When the Cover Art Archive has none, the app shows the Discogs image instead; Discogs allows community-submitted images and not every release has a hi-res one uploaded. If neither has a usable image, the cover stays blank. For a record the Cover Art Archive has no cover for, uploading a better one to Discogs is the fix: it reaches the app when you choose <strong>Refresh collection</strong> in the Settings menu. The check the app makes each time it starts only picks up newly added records.</p>
         </details>
 
         <details>
@@ -65,22 +65,22 @@
 
         <details>
           <summary>How does the halo / screensaver-suppression mode work?</summary>
-          <p>When you open a record and switch to ambient mode, the app paints the screen with cover-derived colour blobs. While ambient mode is on, the app tells tvOS to keep the screen awake — handy if you want to sit with a record for an hour without the screensaver kicking in. Pressing any button on the Siri Remote re-engages the controls; leaving it alone for a few seconds returns to ambient mode.</p>
+          <p>When you open a record and swipe up, the cover takes over the screen and, after a few seconds, the app paints a halo of cover-derived colour blobs around it. While the halo shows, the app tells tvOS to keep the screen awake — handy if you want to sit with a record for an hour without the screensaver kicking in. Swiping on the Siri Remote's clickpad turns the halo off; leaving it alone for a few seconds brings it back. If you turn off <strong>Engage halo automatically</strong> in the Settings menu, a <strong>Halo</strong> button under the cover switches it on and off instead.</p>
         </details>
 
         <details>
           <summary>How does the app handle multi-disc releases?</summary>
-          <p>Double LPs, triple LPs, and box sets appear with one side selector per side (A, B, C, D, and so on). The slider at the bottom of the record screen lets you scroll between them; Discogs's disc-prefixed track positions (1-A1, 2-A1, etc.) are parsed automatically so nothing goes missing.</p>
+          <p>Double LPs, triple LPs, and box sets appear with one position per side (A, B, C, D, and so on) on the side selector, the slider at the top of the tracklist. Swipe left or right on the record screen to move between sides; Discogs's disc-prefixed track positions (1-A1, 2-A1, etc.) are parsed automatically so nothing goes missing.</p>
         </details>
 
         <details>
           <summary>Where is my data stored?</summary>
-          <p>Locally on your Apple TV. Your collection metadata is cached in SwiftData; cover images live in the Nuke image cache; your Discogs access token is in the device keychain. Nothing leaves the device except the requests the app makes to Discogs and the Cover Art Archive. See the <a href="privacy.html">privacy policy</a> for the full story.</p>
+          <p>Locally on your Apple TV. Your collection metadata is cached in SwiftData; cover images live in the Nuke image cache; your Discogs access token is in the Apple TV's keychain, on this device only, and is never synced through iCloud Keychain. Nothing is backed up to iCloud. Nothing leaves the device except the requests the app makes to Discogs, MusicBrainz and the Cover Art Archive. See the <a href="privacy.html">privacy policy</a> for the full story.</p>
         </details>
 
         <details>
           <summary>How do I remove the app and its data?</summary>
-          <p>Uninstall the app from the Apple TV home screen (focus the icon, hold the Siri Remote's centre button, choose Delete). All local data is removed with the app. If iCloud backup is enabled, you can also clear the app's backup via Settings → Users and Accounts → iCloud → Manage Storage.</p>
+          <p>Delete the app from the Apple TV home screen (focus the icon, press and hold the Siri Remote's clickpad, choose Delete App, then Delete; Offload keeps the app's data). That removes your library and the cached covers at once. Your Discogs sign-in stays in the Apple TV's keychain, which outlives the app; if you install the app again, its first launch removes that sign-in and you sign in afresh. To remove the sign-in straight away, sign out in the app's Settings menu before deleting the app. You can also revoke access at any time from <a href="https://www.discogs.com/settings/applications">your Discogs settings</a>. There is no iCloud backup to clear.</p>
         </details>
 
       </div>
@@ -99,6 +99,7 @@
         <a href="support.html">Support</a>
         <a href="https://github.com/andreisudarikov19/vinyl-art-apple-tv">GitHub</a>
       </div>
+      <p class="footer-notice">This application uses Discogs’ API but is not affiliated with, sponsored or endorsed by Discogs. ‘Discogs’ is a trademark of Zink Media, LLC.</p>
     </div>
   </footer>
 </body>
