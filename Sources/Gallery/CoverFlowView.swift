@@ -36,7 +36,10 @@ struct CoverFlowView: View {
     // Cover size is ~57% of a 1080p TV's vertical resolution so the centered
     // cover reads as the room's focal point on a real screen (460pt looked
     // small on hardware even though it filled the simulator nicely).
-    private let coverSize: CGFloat = 620
+    private let coverSize: CGFloat = 580
+    // The glow keeps the size it had with the 620 pt cover, so shrinking the
+    // cover to fit the Discogs caption leaves the backdrop unchanged.
+    private let glowReference: CGFloat = 620
     private let windowRadius = 6
     private let sideAngle: Double = 58
     private let sideScale: CGFloat = 0.84
@@ -53,13 +56,13 @@ struct CoverFlowView: View {
             // edge, so the bar reads as balanced), and the metadata flows
             // directly underneath the cover instead of being pinned to the
             // bottom of the screen. The Discogs notice sits under the title.
-            VStack(spacing: 10) {
+            VStack(spacing: 8) {
                 carousel
                 if !releases.isEmpty {
                     discogsNotice
                 }
             }
-            .padding(.top, releases.isEmpty ? 0 : 138)
+            .padding(.top, releases.isEmpty ? 0 : 124)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -98,7 +101,7 @@ struct CoverFlowView: View {
                         .font(.title3)
                         .foregroundStyle(.white.opacity(0.5))
                 } else {
-                    VStack(spacing: 28) {
+                    VStack(spacing: 20) {
                         flow
                         metadata
                     }
@@ -165,7 +168,7 @@ struct CoverFlowView: View {
     // MARK: - Pieces
 
     private var background: some View {
-        CollectionGlowBackground(glowColor: glowColor, reference: coverSize)
+        CollectionGlowBackground(glowColor: glowColor, reference: glowReference)
     }
 
     private var flow: some View {
