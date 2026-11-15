@@ -11,6 +11,15 @@ enum DiscogsNotice {
     }
 }
 
+/// Renders only the notice's label. tvOS draws a focus platter behind a
+/// `.plain` button, which would frame the label in a large white block; the
+/// label's own glass pill is the only focus cue the notice should show.
+struct DiscogsNoticeButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+    }
+}
+
 /// The notice's label, in the tag family: a QR glyph and the text, in the
 /// tag pill's shape and padding. At rest it is quiet with no fill; when the
 /// remote focuses it, the tag pill's glass appears, so it reveals itself as
