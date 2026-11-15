@@ -53,6 +53,15 @@ struct HaloStyle {
     )
 }
 
+/// Entry ramp for a halo engaged for `elapsed` seconds: 0 at the moment it
+/// engages, rising linearly to 1 over `fadeIn` seconds and holding there.
+/// Clamped to 0...1, so a negative elapsed time reads as "not yet" and a
+/// zero fade reads as "already in" rather than dividing by zero.
+func haloEntryRamp(elapsed: TimeInterval, fadeIn: TimeInterval) -> Double {
+    guard fadeIn > 0 else { return 1 }
+    return min(1, max(0, elapsed / fadeIn))
+}
+
 /// Cover-derived ambient halo. Heavily-blurred colour blobs anchored at the
 /// view's centre (behind the album cover), drifting outward in staggered
 /// directions and composited with `.plusLighter` so overlaps bloom. The
@@ -88,16 +97,22 @@ struct HaloView: View {
             TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { context in
                 let t = context.date.timeIntervalSinceReferenceDate
                 let elapsedEngaged = engagedAt.map { context.date.timeIntervalSince($0) } ?? 0
+                // Centre blobs ease in with the engagement. With no engagement
+                // start (disengaged, so fading out) the ramp holds at 1 and
+                // renderedOpacity alone takes the halo down over fadeOutSeconds.
+                let entry = engagedAt == nil
+                    ? 1
+                    : haloEntryRamp(elapsed: elapsedEngaged, fadeIn: fadeInSeconds)
                 ZStack {
                     if style.ambientBase {
                         ambientBase(time: t)
                     }
                     ForEach(0..<style.blobCount, id: \.self) { index in
-                        centerBlob(at: index, time: t, center: center)
+                        centerBlob(at: index, time: t, center: center, entry: entry)
                     }
                     if let edgeStart = style.edgeBlobsAfter,
                        elapsedEngaged >= edgeStart {
-                        let fadeIn = min(1.0, (elapsedEngaged - edgeStart) / edgeFadeInSeconds)
+                        let fadeIn = haloEntryRamp(elapsed: elapsedEngaged - edgeStart, fadeIn: edgeFadeInSeconds)
                         ForEach(0..<style.edgeBlobCount, id: \.self) { index in
                             edgeBlob(at: index, time: t, center: center, fadeIn: fadeIn)
                         }
@@ -108,8 +123,16 @@ struct HaloView: View {
         .opacity(renderedOpacity)
         .allowsHitTesting(false)
         .onAppear {
-            renderedOpacity = isEngaged ? 1 : 0
-            if isEngaged { engagedAt = Date() }
+            if isEngaged {
+                engagedAt = Date()
+                // Mounted already engaged: fade in from the initial 0, the same
+                // as an engagement that starts while the view is on screen.
+                withAnimation(.easeInOut(duration: fadeInSeconds)) {
+                    renderedOpacity = 1
+                }
+            } else {
+                renderedOpacity = 0
+            }
         }
         .onChange(of: isEngaged) { _, new in
             engagedAt = new ? Date() : nil
@@ -152,7 +175,7 @@ struct HaloView: View {
     /// rich style also varies each blob's diameter so the wall of blobs
     /// reads organic rather than uniform.
     @ViewBuilder
-    private func centerBlob(at index: Int, time: TimeInterval, center: CGPoint) -> some View {
+    private func centerBlob(at index: Int, time: TimeInterval, center: CGPoint, entry: Double) -> some View {
         let lifetime = reduceMotion ? reducedLifetime : liveLifetime
         let phaseOffset = Double(index) * (lifetime / Double(style.blobCount))
         let cycleTime = (time + phaseOffset).truncatingRemainder(dividingBy: lifetime)
@@ -169,7 +192,7 @@ struct HaloView: View {
         let pulse = reduceMotion ? 0 : sin(time * 1.3 + Double(index) * 0.7) * 0.10
         let scale = scaleBase + pulse
 
-        let blobOpacity = sin(progress * .pi) * 0.85
+        let blobOpacity = sin(progress * .pi) * 0.85 * entry
 
         // Direction-matched colour (rich style only): start = the cover-edge
         // tint matching the blob's emergence angle, end = one of the 3
