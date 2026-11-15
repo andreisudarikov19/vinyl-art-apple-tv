@@ -21,10 +21,12 @@ struct MosaicGridView: View {
     @FocusState private var trampolineFocused: Bool
     @State private var glowColor: Color = Color(white: 0.15)
     @State private var trampolineArmed: Bool = true
+    @State private var viewportSize: CGSize = .zero
 
     // Tuning knobs
     private let columnCount = 7
     private let gutter: CGFloat = 2
+    private let topInset: CGFloat = 150 // clears the floating toolbar
     private let bezel: CGFloat = 14
     private let titleGap: CGFloat = 8
     private let titleAreaHeight: CGFloat = 56
@@ -38,6 +40,29 @@ struct MosaicGridView: View {
         return releases.first { $0.releaseId == focusedID }
     }
 
+    /// Empty positions of the mosaic, out to the bottom of the screen. Each is
+    /// filled by a placeholder cell the size of a cover. They are not in
+    /// `releases`, so focus movement, which steps through `releases`, skips them.
+    private var placeholders: [MosaicPlaceholderLayout.Position] {
+        // Cover side as the flexible columns lay it out: the width less the
+        // gutters between columns, divided by the column count.
+        let side = viewportSize.width > 0
+            ? (viewportSize.width - gutter * CGFloat(columnCount - 1)) / CGFloat(columnCount)
+            : 0
+        let rows = MosaicPlaceholderLayout.rowCountFillingViewport(
+            albumCount: releases.count,
+            columnCount: columnCount,
+            pitch: side > 0 ? side + gutter : 0,
+            viewportHeight: viewportSize.height,
+            topInset: topInset
+        )
+        return MosaicPlaceholderLayout.emptyPositions(
+            albumCount: releases.count,
+            columnCount: columnCount,
+            rowCount: rows
+        )
+    }
+
     var body: some View {
         ZStack(alignment: .top) {
             // Same backdrop as CoverFlow: black with a soft glow tinted by the
@@ -48,9 +73,17 @@ struct MosaicGridView: View {
                     ForEach(Array(releases.enumerated()), id: \.element.releaseId) { index, release in
                         tile(release, at: index)
                     }
+                    ForEach(placeholders, id: \.self) { position in
+                        placeholder(at: position)
+                    }
                 }
-                .padding(.top, 150) // clear the floating toolbar
+                .padding(.top, topInset)
                 .padding(.bottom, 140)
+                // Lines beneath the covers: they show through the gutters and
+                // the placeholders. The overlay repeats them above the covers.
+                // Both live in the scroll content, so they move with the grid.
+                .background(MosaicLines(columnCount: columnCount, gutter: gutter, topInset: topInset))
+                .overlay(MosaicLines(columnCount: columnCount, gutter: gutter, topInset: topInset))
                 .overlayPreferenceValue(FocusedTileBounds.self) { anchor in
                     GeometryReader { proxy in
                         if let anchor, let release = focusedRelease {
@@ -99,6 +132,7 @@ struct MosaicGridView: View {
         // Edge-to-edge: drop the safe-area (overscan) inset so the wall fills
         // the full screen width.
         .ignoresSafeArea(.container, edges: .horizontal)
+        .onGeometryChange(for: CGSize.self, of: { $0.size }, action: { viewportSize = $0 })
         .task(id: focusedID) { await updateGlow() }
     }
 
@@ -158,6 +192,24 @@ struct MosaicGridView: View {
         }
     }
 
+    /// An empty position: a cover-sized cell that takes no input and no focus.
+    /// Its tick, in the tuner's style, sits on the gutter below it, alternating
+    /// by grid position so the placeholders read as a checkerboard.
+    private func placeholder(at position: MosaicPlaceholderLayout.Position) -> some View {
+        Color.clear
+            .aspectRatio(1, contentMode: .fit)
+            .overlay(alignment: .bottom) {
+                if (position.row + position.column).isMultiple(of: 2) {
+                    Rectangle()
+                        .fill(.white.opacity(0.25))
+                        .frame(width: 1, height: 8)
+                        .offset(y: 5)
+                }
+            }
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+    }
+
     private func cover(_ release: CachedRelease) -> some View {
         LazyImage(url: release.preferredCoverURL) { state in
             if let image = state.image {
@@ -192,6 +244,38 @@ struct MosaicGridView: View {
         .padding(bezel)
         .glassBezel()
         .shadow(color: .black.opacity(0.6), radius: 30, y: 16)
+    }
+}
+
+/// The mosaic's hairlines in the radio tuner's style: white at 18% opacity,
+/// 1 pt, running down the gutters between the cover cells. The gutter is 2 pt,
+/// so a 1 pt line sits centred in it.
+private struct MosaicLines: View {
+    let columnCount: Int
+    let gutter: CGFloat
+    let topInset: CGFloat
+
+    var body: some View {
+        Canvas { context, size in
+            let side = (size.width - gutter * CGFloat(columnCount - 1)) / CGFloat(columnCount)
+            let pitch = side + gutter
+            guard pitch > 0 else { return }
+            var path = Path()
+            for column in 1..<columnCount {
+                let x = CGFloat(column) * pitch - gutter / 2
+                path.move(to: CGPoint(x: x, y: topInset))
+                path.addLine(to: CGPoint(x: x, y: size.height))
+            }
+            let rows = Int((size.height - topInset) / pitch) + 1
+            for row in stride(from: 1, through: max(rows, 1), by: 1) {
+                let y = topInset + CGFloat(row) * pitch - gutter / 2
+                guard y < size.height else { break }
+                path.move(to: CGPoint(x: 0, y: y))
+                path.addLine(to: CGPoint(x: size.width, y: y))
+            }
+            context.stroke(path, with: .color(.white.opacity(0.18)), lineWidth: 1)
+        }
+        .allowsHitTesting(false)
     }
 }
 
