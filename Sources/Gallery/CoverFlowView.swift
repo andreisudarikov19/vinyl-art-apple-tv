@@ -34,42 +34,69 @@ struct CoverFlowView: View {
     // Cover size is ~57% of a 1080p TV's vertical resolution so the centered
     // cover reads as the room's focal point on a real screen (460pt looked
     // small on hardware even though it filled the simulator nicely).
-    private let coverSize: CGFloat = 620
+    private let coverSize: CGFloat = 580
+    // The glow keeps the size it had with the 620 pt cover, so the backdrop
+    // is unchanged by the cover's size.
+    private let glowReference: CGFloat = 620
     private let windowRadius = 6
     private let sideAngle: Double = 58
     private let sideScale: CGFloat = 0.84
 
     var body: some View {
+        ZStack(alignment: .top) {
+            background
+            // Halo blobs sit between the static radial glow and the cover
+            // row — they originate behind the cover and bloom outward.
+            HaloView(palette: palette, isEngaged: haloEngaged)
+                .ignoresSafeArea()
+            // Explicit vertical layout: cover row sits a fixed inset below the
+            // safe area (the same gap the toolbar sits below the screen's top
+            // edge, so the bar reads as balanced), and the metadata flows
+            // directly underneath the cover instead of being pinned to the
+            // bottom of the screen.
+            VStack(spacing: 8) {
+                carousel
+            }
+            .padding(.top, releases.isEmpty ? 0 : 124)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .task(id: selectedIndex) { await refreshBackdrop() }
+        .onChange(of: focused) { _, isFocused in
+            // When focus leaves CoverFlow (e.g. up to the toolbar), the user
+            // is no longer browsing here; cancel the idle timer so the halo
+            // doesn't engage behind the scenes. When focus returns, re-arm.
+            if isFocused {
+                restartHaloIdleTimer()
+            } else {
+                cancelHaloIdleTimer()
+            }
+        }
+        .suppressesScreensaver(haloEngaged)
+    }
+
+    /// The focusable carousel: the cover row and the centred record's title
+    /// block. Left and right move through covers, centre-click opens the
+    /// record.
+    private var carousel: some View {
         Button {
             if releases.indices.contains(selectedIndex) {
                 onOpen(releases[selectedIndex])
             }
         } label: {
-            ZStack(alignment: .top) {
-                background
-                // Halo blobs sit between the static radial glow and the cover
-                // row — they originate behind the cover and bloom outward.
-                HaloView(palette: palette, isEngaged: haloEngaged)
-                    .ignoresSafeArea()
+            Group {
                 if releases.isEmpty {
                     Text("No matches")
                         .font(.title3)
                         .foregroundStyle(.white.opacity(0.5))
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-                    // Explicit vertical layout: cover row sits a fixed inset
-                    // below the safe area (the same gap the toolbar sits below
-                    // the screen's top edge, so the bar reads as balanced), and
-                    // the metadata flows directly underneath the cover instead
-                    // of being pinned to the bottom of the screen.
-                    VStack(spacing: 28) {
+                    VStack(spacing: 20) {
                         flow
                         metadata
                     }
-                    .padding(.top, 138)
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .frame(maxWidth: .infinity, maxHeight: releases.isEmpty ? .infinity : nil)
         }
         .buttonStyle(PlainNoFocusStyle())
         .focusEffectDisabled()
@@ -97,24 +124,12 @@ struct CoverFlowView: View {
             didGrabInitialFocus = true
             focused = true
         }
-        .task(id: selectedIndex) { await refreshBackdrop() }
-        .onChange(of: focused) { _, isFocused in
-            // When focus leaves CoverFlow (e.g. up to the toolbar), the user
-            // is no longer browsing here; cancel the idle timer so the halo
-            // doesn't engage behind the scenes. When focus returns, re-arm.
-            if isFocused {
-                restartHaloIdleTimer()
-            } else {
-                cancelHaloIdleTimer()
-            }
-        }
-        .suppressesScreensaver(haloEngaged)
     }
 
     // MARK: - Pieces
 
     private var background: some View {
-        CollectionGlowBackground(glowColor: glowColor, reference: coverSize)
+        CollectionGlowBackground(glowColor: glowColor, reference: glowReference)
     }
 
     private var flow: some View {
