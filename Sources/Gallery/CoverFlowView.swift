@@ -20,6 +20,8 @@ struct CoverFlowView: View {
     @State private var glowColor: Color = Color(white: 0.15)
     @State private var didGrabInitialFocus = false
     @FocusState private var focused: Bool
+    @FocusState private var discogsNoticeFocused: Bool
+    @State private var showingDiscogsQR = false
 
     @Query private var preferences: [UserPreferences]
     @State private var palette: CoverPalette = .placeholder
@@ -34,42 +36,78 @@ struct CoverFlowView: View {
     // Cover size is ~57% of a 1080p TV's vertical resolution so the centered
     // cover reads as the room's focal point on a real screen (460pt looked
     // small on hardware even though it filled the simulator nicely).
-    private let coverSize: CGFloat = 620
+    private let coverSize: CGFloat = 580
+    // The glow keeps the size it had with the 620 pt cover, so shrinking the
+    // cover to fit the Discogs caption leaves the backdrop unchanged.
+    private let glowReference: CGFloat = 620
     private let windowRadius = 6
     private let sideAngle: Double = 58
     private let sideScale: CGFloat = 0.84
 
     var body: some View {
+        ZStack(alignment: .top) {
+            background
+            // Halo blobs sit between the static radial glow and the cover
+            // row — they originate behind the cover and bloom outward.
+            HaloView(palette: palette, isEngaged: haloEngaged)
+                .ignoresSafeArea()
+            // Explicit vertical layout: cover row sits a fixed inset below the
+            // safe area (the same gap the toolbar sits below the screen's top
+            // edge, so the bar reads as balanced), and the metadata flows
+            // directly underneath the cover instead of being pinned to the
+            // bottom of the screen. The Discogs notice sits under the title.
+            VStack(spacing: 8) {
+                carousel
+                if !releases.isEmpty {
+                    discogsNotice
+                }
+            }
+            .padding(.top, releases.isEmpty ? 0 : 124)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        // Menu on the remote dismisses the cover; focus goes back to the notice.
+        .fullScreenCover(isPresented: $showingDiscogsQR, onDismiss: { discogsNoticeFocused = true }) {
+            if let url = currentDiscogsURL {
+                DiscogsReleaseQRView(url: url)
+            }
+        }
+        .task(id: selectedIndex) { await refreshBackdrop() }
+        .onChange(of: focused) { _, isFocused in
+            // When focus leaves CoverFlow (e.g. up to the toolbar), the user
+            // is no longer browsing here; cancel the idle timer so the halo
+            // doesn't engage behind the scenes. When focus returns, re-arm.
+            if isFocused {
+                restartHaloIdleTimer()
+            } else {
+                cancelHaloIdleTimer()
+            }
+        }
+        .suppressesScreensaver(haloEngaged)
+    }
+
+    /// The focusable carousel: the cover row and the centred record's title
+    /// block. Left and right move through covers, centre-click opens the
+    /// record, and down moves focus to the Discogs notice beneath it.
+    private var carousel: some View {
         Button {
             if releases.indices.contains(selectedIndex) {
                 onOpen(releases[selectedIndex])
             }
         } label: {
-            ZStack(alignment: .top) {
-                background
-                // Halo blobs sit between the static radial glow and the cover
-                // row — they originate behind the cover and bloom outward.
-                HaloView(palette: palette, isEngaged: haloEngaged)
-                    .ignoresSafeArea()
+            Group {
                 if releases.isEmpty {
                     Text("No matches")
                         .font(.title3)
                         .foregroundStyle(.white.opacity(0.5))
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-                    // Explicit vertical layout: cover row sits a fixed inset
-                    // below the safe area (the same gap the toolbar sits below
-                    // the screen's top edge, so the bar reads as balanced), and
-                    // the metadata flows directly underneath the cover instead
-                    // of being pinned to the bottom of the screen.
-                    VStack(spacing: 28) {
+                    VStack(spacing: 20) {
                         flow
                         metadata
                     }
-                    .padding(.top, 138)
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .frame(maxWidth: .infinity, maxHeight: releases.isEmpty ? .infinity : nil)
         }
         .buttonStyle(PlainNoFocusStyle())
         .focusEffectDisabled()
@@ -86,6 +124,9 @@ struct CoverFlowView: View {
                 move(1)
                 restartHaloIdleTimer()
             case .up: onMoveUp() // onMoveCommand consumes up; hand focus to the toolbar
+            case .down:
+                // onMoveCommand consumes down too, so hand focus to the notice.
+                if !releases.isEmpty { discogsNoticeFocused = true }
             default: break
             }
         }
@@ -97,24 +138,39 @@ struct CoverFlowView: View {
             didGrabInitialFocus = true
             focused = true
         }
-        .task(id: selectedIndex) { await refreshBackdrop() }
-        .onChange(of: focused) { _, isFocused in
-            // When focus leaves CoverFlow (e.g. up to the toolbar), the user
-            // is no longer browsing here; cancel the idle timer so the halo
-            // doesn't engage behind the scenes. When focus returns, re-arm.
-            if isFocused {
-                restartHaloIdleTimer()
-            } else {
-                cancelHaloIdleTimer()
+    }
+
+    /// The Discogs attribution, a quiet caption under the title block. Discogs'
+    /// API terms require it beside its data. Selecting it shows a QR code of
+    /// the focused release's discogs.com page, as tvOS cannot open links.
+    private var discogsNotice: some View {
+        Button {
+            showingDiscogsQR = true
+        } label: {
+            DiscogsNoticeLabel()
+        }
+        .buttonStyle(DiscogsNoticeButtonStyle())
+        // Turns off tvOS's system focus block so only the label's own pill shows.
+        .focusEffectDisabled()
+        .focused($discogsNoticeFocused)
+        // Up returns to the covers. Other directions are consumed so focus
+        // stays on the caption rather than wandering off the screen.
+        .onMoveCommand { direction in
+            if direction == .up {
+                focused = true
             }
         }
-        .suppressesScreensaver(haloEngaged)
+        .accessibilityHint("Shows a QR code for this release on discogs.com.")
+    }
+
+    private var currentDiscogsURL: String? {
+        current.map { DiscogsNotice.releasePageURL(releaseId: $0.releaseId) }
     }
 
     // MARK: - Pieces
 
     private var background: some View {
-        CollectionGlowBackground(glowColor: glowColor, reference: coverSize)
+        CollectionGlowBackground(glowColor: glowColor, reference: glowReference)
     }
 
     private var flow: some View {
