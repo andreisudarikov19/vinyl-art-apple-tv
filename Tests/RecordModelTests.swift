@@ -375,3 +375,13 @@ struct RecordViewModelTests {
         }
     }
 }
+
+struct DiscogsNoticeTests {
+    @Test func noticeReadsExactly() {
+        #expect(DiscogsNotice.text == "Data provided by Discogs")
+    }
+
+    @Test func linksToTheReleasePageNotTheAPIResource() {
+        #expect(DiscogsNotice.releasePageURL(releaseId: 249504) == "https://www.discogs.com/release/249504")
+    }
+}
