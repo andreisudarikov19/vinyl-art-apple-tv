@@ -26,14 +26,16 @@ struct DiscogsNoticeButtonStyle: ButtonStyle {
 /// selectable like the pills beside it.
 struct DiscogsNoticeLabel: View {
     @Environment(\.isFocused) private var isFocused
+    /// The text size. The glyph keeps its 16:20 ratio to it.
+    var textSize: CGFloat = 20
 
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: "qrcode")
-                .font(.system(size: 16, weight: .medium))
+                .font(.system(size: textSize * 0.8, weight: .medium))
                 .accessibilityHidden(true)
             Text(DiscogsNotice.text)
-                .font(.system(size: 20, weight: .medium))
+                .font(.system(size: textSize, weight: .medium))
         }
         .foregroundStyle(.white.opacity(isFocused ? 0.88 : 0.5))
         .padding(.horizontal, 16)

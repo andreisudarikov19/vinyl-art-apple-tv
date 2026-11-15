@@ -34,6 +34,8 @@ struct MosaicGridView: View {
     private let titleGap: CGFloat = 8
     private let titleAreaHeight: CGFloat = 56
     private let captionAreaHeight: CGFloat = 40
+    /// The album name's size in the lens. The Discogs caption uses the same size.
+    private let albumNameSize: CGFloat = 15
 
     private var columns: [GridItem] {
         Array(repeating: GridItem(.flexible(), spacing: gutter), count: columnCount)
@@ -215,7 +217,7 @@ struct MosaicGridView: View {
                     .foregroundStyle(.white)
                     .lineLimit(1)
                 Text(release.title)
-                    .font(.system(size: 15))
+                    .font(.system(size: albumNameSize))
                     .foregroundStyle(.white.opacity(0.75))
                     .lineLimit(1)
             }
@@ -237,7 +239,7 @@ struct MosaicGridView: View {
         Button {
             showingDiscogsQR = true
         } label: {
-            DiscogsNoticeLabel()
+            DiscogsNoticeLabel(textSize: albumNameSize)
         }
         .buttonStyle(DiscogsNoticeButtonStyle())
         // Turns off tvOS's system focus block so only the label's own pill shows.
