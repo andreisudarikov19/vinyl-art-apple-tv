@@ -33,7 +33,7 @@ You need Xcode 26 or later and [XcodeGen](https://github.com/yonaskolb/XcodeGen)
    xcodegen generate
    open VinylForAppleTV.xcodeproj
    ```
-   The project is generated from `project.yml` and isn't committed. Run
+   The project is generated from `project.yml` and isn’t committed. Run
    `xcodegen generate` again after editing `project.yml` or adding files.
    Swift package versions are pinned in `project.yml`: to update one, change
    its version there and run `xcodegen generate`.
@@ -47,9 +47,9 @@ xcodebuild test -scheme VinylForAppleTV -destination 'platform=tvOS Simulator,na
 
 Any tvOS simulator will do; `xcrun simctl list devices tvOS` lists the ones you have.
 
-The tests need no real Discogs keys. `AppSecrets.swift` has to exist for the project to build, but the template's placeholders are enough: copy it as in step 2 and leave them in. Every request in the tests goes to a stub, so they make no network calls.
+The tests need no real Discogs keys. `AppSecrets.swift` has to exist for the project to build, but the template’s placeholders are enough: copy it as in step 2 and leave them in. Every request in the tests goes to a stub, so they make no network calls.
 
-CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) builds the app and runs the same tests on every pull request and every push to `main`. The tests run one at a time, because several suites share one stub.
+CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) builds the app and runs the same tests on every pull request and every push to `main`, except changes that touch only `docs/`, `README.md`, `LICENSE` or `NOTICE`. The tests run one at a time, because several suites share one stub.
 
 ## Versioning
 
@@ -65,7 +65,7 @@ Run `xcodegen generate` after editing them.
 
 The app talks to three services and has no server of its own.
 
-- [Discogs](https://www.discogs.com), through the [Discogs API](https://www.discogs.com/developers/): sign-in, your collection, each record's tracklist and credits, and the cover shown when the Cover Art Archive has none.
+- [Discogs](https://www.discogs.com), through the [Discogs API](https://www.discogs.com/developers/): sign-in, your collection, each record’s tracklist and credits, and the cover shown when the Cover Art Archive has none.
 - [MusicBrainz](https://musicbrainz.org), through the [MusicBrainz API](https://musicbrainz.org/doc/MusicBrainz_API): matching each record to a MusicBrainz release.
 - [Cover Art Archive](https://coverartarchive.org): the front cover of the matched release, or of its release group, shown in place of the Discogs image.
 
@@ -73,8 +73,8 @@ The [Discogs API Terms of Use](https://support.discogs.com/hc/en-us/articles/360
 
 > This application uses Discogs’ API but is not affiliated with, sponsored or endorsed by Discogs. ‘Discogs’ is a trademark of Zink Media, LLC.
 
-## Licence
+## License
 
-The code is licensed under the [Apache License 2.0](LICENSE). Redistributions must keep the attribution notices in [NOTICE](NOTICE), as section 4(d) of the licence requires.
+The code is licensed under the [Apache License 2.0](LICENSE). Redistributions must keep the attribution notices in [NOTICE](NOTICE), as section 4(d) of the license requires.
 
-The licence covers the code in this repository. The data and cover images the app shows come from the services above under their own terms, and the covers belong to their copyright owners.
+The license covers the code in this repository. The data and cover images the app shows come from the services above under their own terms, and the covers belong to their copyright owners.
