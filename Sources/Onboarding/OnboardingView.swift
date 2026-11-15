@@ -47,7 +47,7 @@ private struct WelcomeView: View {
             Text("Vinyl for Apple TV")
                 .font(.system(size: 80, weight: .light, design: .serif))
                 .foregroundStyle(.white)
-            Text("Display your Discogs vinyl collection on the big screen.")
+            Text("Display your Discogs vinyl collection\non the big screen.")
                 .font(.title3)
                 .foregroundStyle(.white.opacity(0.6))
                 .multilineTextAlignment(.center)
@@ -118,7 +118,7 @@ private struct VerifierView: View {
 
     private var stepsList: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Authorize on your phone")
+            Text("Authorise on your phone")
                 .font(.title2.weight(.semibold))
             SwiftUI.Label("Scan the code and sign in to Discogs", systemImage: "1.circle")
             SwiftUI.Label("Approve access to your collection", systemImage: "2.circle")
