@@ -292,16 +292,24 @@ struct RecordView: View {
     // MARK: - Stages
 
     private func informativeStage(_ model: RecordViewModel) -> some View {
-        HStack(alignment: .top, spacing: 100) {
-            VStack(alignment: .leading, spacing: 24) {
-                cover(coverSide, cornerRadius: 12, shadowRadius: 30)
-                albumHeader
+        // The notice sits in its own row below the columns, so a long tracklist
+        // pushes into the space above it rather than under it.
+        VStack(spacing: 0) {
+            HStack(alignment: .top, spacing: 100) {
+                VStack(alignment: .leading, spacing: 24) {
+                    cover(coverSide, cornerRadius: 12, shadowRadius: 30)
+                    albumHeader
+                }
+                tracklist(model)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
-            tracklist(model)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            discogsNotice
+                .padding(.top, 24)
         }
         .padding(.horizontal, 100)
         .padding(.top, 90)
+        .padding(.bottom, 90)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(blurredBackdrop(dark: 0.5))
     }
@@ -507,8 +515,15 @@ struct RecordView: View {
                 }
                 .padding(.top, 4)
             }
-            // Discogs' API terms require this notice beside its data. Selecting
-            // it shows a QR code of the release page, as tvOS cannot open links.
+        }
+        .frame(width: coverSide, alignment: .leading)
+    }
+
+    /// The Discogs attribution, along the bottom edge of the informative stage.
+    /// Discogs' API terms require it beside its data. Selecting it shows a QR
+    /// code of the release page, as tvOS cannot open links.
+    private var discogsNotice: some View {
+        HStack(spacing: 0) {
             Button {
                 showingDiscogsQR = true
             } label: {
@@ -518,10 +533,9 @@ struct RecordView: View {
             }
             .buttonStyle(.plain)
             .focused($discogsNoticeFocused)
-            .padding(.top, 12)
             .accessibilityHint("Shows a QR code for this release on discogs.com.")
+            Spacer(minLength: 0)
         }
-        .frame(width: coverSide, alignment: .leading)
     }
 
     /// The line of "1985 · Jazz · Big Band" categorical metadata, split into
