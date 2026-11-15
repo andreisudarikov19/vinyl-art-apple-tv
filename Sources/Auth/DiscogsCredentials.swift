@@ -27,7 +27,7 @@ struct DiscogsCredentialsStore: Sendable {
         try KeychainStore.save(data, account: account, service: service)
     }
 
-    /// Builds up to 0.20.0 saved the sign-in synced through iCloud Keychain.
+    /// Earlier builds saved the sign-in synced through iCloud Keychain.
     /// Finding only that copy, this keeps it on this device instead and
     /// removes the synced one, so updating the app stays signed in.
     func load() throws -> DiscogsCredentials? {
@@ -51,7 +51,7 @@ struct DiscogsCredentialsStore: Sendable {
     /// Keychain items outlive uninstalling the app, so a reinstall would sign
     /// back in. Uninstalling does remove the app's data, `defaults` included,
     /// so the first launch after a fresh install finds no marker there and
-    /// removes any sign-in an earlier install left. Builds up to 0.20.0 set
+    /// removes any sign-in an earlier install left. Earlier builds set
     /// no marker but left app data, which `appDataExists` reports, so an
     /// update from one keeps the sign-in. Call it before this launch writes
     /// any app data.
