@@ -75,6 +75,6 @@ The [Discogs API Terms of Use](https://support.discogs.com/hc/en-us/articles/360
 
 ## Licence
 
-The code is licenced under the [Apache License 2.0](LICENSE). Redistributions must keep the attribution notices in [NOTICE](NOTICE), as section 4(d) of the licence requires.
+The code is licensed under the [Apache License 2.0](LICENSE). Redistributions must keep the attribution notices in [NOTICE](NOTICE), as section 4(d) of the licence requires.
 
 The licence covers the code in this repository. The data and cover images the app shows come from the services above under their own terms, and the covers belong to their copyright owners.
