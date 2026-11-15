@@ -1,37 +1,44 @@
 import Foundation
 
-/// Where the mosaic has no album, so a placeholder can fill the spot. Pure
-/// arithmetic with no SwiftUI, so it can be unit-tested directly.
+/// The mosaic's matrix: an endless grid of cover-sized cells, of which the
+/// albums occupy the first positions in reading order. Every other cell is
+/// empty and gets a placeholder. Rows above the first row are always empty, so
+/// the matrix runs above the collection as well as below it. Pure arithmetic
+/// with no SwiftUI, so it can be unit-tested directly.
 enum MosaicPlaceholderLayout {
     struct Position: Hashable {
+        /// Negative rows lie above the first row of albums.
         let row: Int
         let column: Int
     }
 
-    /// The empty positions in reading order: the gap after the last album in
-    /// its row, then every position in the rows below, up to `rowCount` rows.
-    static func emptyPositions(albumCount: Int, columnCount: Int, rowCount: Int) -> [Position] {
-        guard columnCount > 0, rowCount > 0 else { return [] }
-        let total = rowCount * columnCount
-        let first = max(albumCount, 0)
-        guard first < total else { return [] }
-        return (first..<total).map { Position(row: $0 / columnCount, column: $0 % columnCount) }
+    /// Whether the cell at (`row`, `column`) holds no album. Album `index`
+    /// sits at row `index / columnCount`, column `index % columnCount`.
+    static func isEmpty(row: Int, column: Int, albumCount: Int, columnCount: Int) -> Bool {
+        guard row >= 0 else { return true }
+        return row * columnCount + column >= max(albumCount, 0)
     }
 
-    /// How many rows the mosaic must span: at least the rows the albums need,
-    /// and enough rows of `pitch` (one cover plus one gutter) to run from the
-    /// top inset down to the bottom of the viewport.
-    static func rowCountFillingViewport(
-        albumCount: Int,
-        columnCount: Int,
-        pitch: CGFloat,
-        viewportHeight: CGFloat,
-        topInset: CGFloat
-    ) -> Int {
-        guard columnCount > 0 else { return 0 }
-        let albumRows = (max(albumCount, 0) + columnCount - 1) / columnCount
-        guard pitch > 0, viewportHeight > topInset else { return albumRows }
-        let visibleRows = Int(((viewportHeight - topInset) / pitch).rounded(.up))
-        return max(albumRows, visibleRows)
+    /// The empty positions in the given rows, in reading order.
+    static func emptyPositions(albumCount: Int, columnCount: Int, rows: Range<Int>) -> [Position] {
+        guard columnCount > 0 else { return [] }
+        return rows.flatMap { row in
+            (0..<columnCount).compactMap { column in
+                isEmpty(row: row, column: column, albumCount: albumCount, columnCount: columnCount)
+                    ? Position(row: row, column: column)
+                    : nil
+            }
+        }
+    }
+
+    /// The rows of the matrix that a region from the top edge (y = 0) to
+    /// `height` reaches. Row 0 starts at `topInset`, and each row is `pitch`
+    /// tall (one cover plus one gutter). One extra row is kept on each side as
+    /// margin, so the matrix runs past both edges of the region.
+    static func rows(topInset: CGFloat, pitch: CGFloat, height: CGFloat) -> Range<Int> {
+        guard pitch > 0, height > 0 else { return 0..<0 }
+        let first = Int((-topInset / pitch).rounded(.down)) - 1
+        let last = Int(((height - topInset) / pitch).rounded(.up)) + 1
+        return first..<max(first, last)
     }
 }
