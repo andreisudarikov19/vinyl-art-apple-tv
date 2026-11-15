@@ -54,6 +54,8 @@ struct RecordView: View {
     @State private var idleTask: Task<Void, Never>?
     @FocusState private var screenFocused: Bool
     @FocusState private var pillFocused: Bool
+    @FocusState private var discogsNoticeFocused: Bool
+    @State private var showingDiscogsQR = false
     /// Drives the cover-focused ken-burns: oscillates 1.0..1.03 with a 60s
     /// total cycle (30s each direction). Imperceptible per second; adds
     /// subtle life over a side of an LP. Disabled in Reduce Motion.
@@ -121,6 +123,10 @@ struct RecordView: View {
         }
         .task(id: release.preferredCoverURL) { await loadPalette() }
         .suppressesScreensaver(suppressesSystemScreensaver)
+        // Menu on the remote dismisses the cover; focus goes back to the notice.
+        .fullScreenCover(isPresented: $showingDiscogsQR, onDismiss: { discogsNoticeFocused = true }) {
+            DiscogsReleaseQRView(url: DiscogsNotice.releasePageURL(releaseId: release.releaseId))
+        }
     }
 
     /// Pulls the (already-cached) cover from Nuke once it's available and
@@ -501,6 +507,19 @@ struct RecordView: View {
                 }
                 .padding(.top, 4)
             }
+            // Discogs' API terms require this notice beside its data. Selecting
+            // it shows a QR code of the release page, as tvOS cannot open links.
+            Button {
+                showingDiscogsQR = true
+            } label: {
+                Text(DiscogsNotice.text)
+                    .font(.system(size: 24))
+                    .foregroundStyle(.white.opacity(0.4))
+            }
+            .buttonStyle(.plain)
+            .focused($discogsNoticeFocused)
+            .padding(.top, 12)
+            .accessibilityHint("Shows a QR code for this release on discogs.com.")
         }
         .frame(width: coverSide, alignment: .leading)
     }
@@ -803,6 +822,46 @@ private struct TrackRow: View {
                 .fixedSize()
         }
         .padding(.vertical, 16)
+    }
+}
+
+/// The attribution line the Discogs API terms require beside any Discogs data.
+enum DiscogsNotice {
+    static let text = "Data provided by Discogs"
+
+    /// The release's page on discogs.com, not the api.discogs.com resource,
+    /// so a phone that scans it lands on the release.
+    static func releasePageURL(releaseId: Int) -> String {
+        "https://www.discogs.com/release/\(releaseId)"
+    }
+}
+
+/// Full-screen QR code of a release's discogs.com page, opened from the
+/// Discogs notice. Nothing on it is focusable; the remote's Menu button closes it.
+private struct DiscogsReleaseQRView: View {
+    let url: String
+
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+            VStack(spacing: 24) {
+                if let qr = QRCode.image(from: url) {
+                    Image(uiImage: qr)
+                        .interpolation(.none)
+                        .resizable()
+                        .frame(width: 360, height: 360)
+                        .background(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                } else {
+                    Text(url)
+                        .font(.footnote)
+                        .foregroundStyle(.white)
+                }
+                Text("Scan with your phone")
+                    .font(.headline)
+                    .foregroundStyle(.white.opacity(0.6))
+            }
+        }
     }
 }
 
