@@ -292,24 +292,16 @@ struct RecordView: View {
     // MARK: - Stages
 
     private func informativeStage(_ model: RecordViewModel) -> some View {
-        // The notice sits in its own row below the columns, so a long tracklist
-        // pushes into the space above it rather than under it.
-        VStack(spacing: 0) {
-            HStack(alignment: .top, spacing: 100) {
-                VStack(alignment: .leading, spacing: 24) {
-                    cover(coverSide, cornerRadius: 12, shadowRadius: 30)
-                    albumHeader
-                }
-                tracklist(model)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+        HStack(alignment: .top, spacing: 100) {
+            VStack(alignment: .leading, spacing: 24) {
+                cover(coverSide, cornerRadius: 12, shadowRadius: 30)
+                albumHeader
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            discogsNotice
-                .padding(.top, 24)
+            tracklist(model)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.horizontal, 100)
         .padding(.top, 90)
-        .padding(.bottom, 90)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(blurredBackdrop(dark: 0.5))
     }
@@ -515,27 +507,25 @@ struct RecordView: View {
                 }
                 .padding(.top, 4)
             }
+            discogsNotice
         }
         .frame(width: coverSide, alignment: .leading)
     }
 
-    /// The Discogs attribution, left-aligned to the album column along the
-    /// bottom edge of the informative stage. Discogs' API terms require it
-    /// beside its data. Selecting it shows a QR code of the release page, as
-    /// tvOS cannot open links.
+    /// The Discogs attribution, the last line of the album block under the
+    /// tags. Discogs' API terms require it beside its data. Selecting it shows
+    /// a QR code of the release page, as tvOS cannot open links.
     private var discogsNotice: some View {
-        HStack(spacing: 0) {
-            Button {
-                showingDiscogsQR = true
-            } label: {
-                DiscogsNoticeLabel()
-            }
-            .buttonStyle(.plain)
-            .focused($discogsNoticeFocused)
-            .accessibilityHint("Shows a QR code for this release on discogs.com.")
-            Spacer(minLength: 0)
+        Button {
+            showingDiscogsQR = true
+        } label: {
+            DiscogsNoticeLabel()
         }
-        .frame(width: coverSide, alignment: .leading)
+        .buttonStyle(.plain)
+        .focused($discogsNoticeFocused)
+        .accessibilityHint("Shows a QR code for this release on discogs.com.")
+        // The header's 10pt stack gap plus this 4pt puts the notice 14pt below the tags.
+        .padding(.top, 4)
     }
 
     /// The line of "1985 · Jazz · Big Band" categorical metadata, split into
