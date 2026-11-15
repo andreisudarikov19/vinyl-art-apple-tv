@@ -19,8 +19,13 @@ struct MosaicGridView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @FocusState private var focusedID: Int?
     @FocusState private var trampolineFocused: Bool
+    @FocusState private var discogsNoticeFocused: Bool
     @State private var glowColor: Color = Color(white: 0.15)
     @State private var trampolineArmed: Bool = true
+    @State private var showingDiscogsQR = false
+    /// The tile whose caption was entered last. Its release is the one the
+    /// Discogs QR shows, and the lens stays on it while focus is on the caption.
+    @State private var lensID: Int?
 
     // Tuning knobs
     private let columnCount = 7
@@ -28,14 +33,34 @@ struct MosaicGridView: View {
     private let bezel: CGFloat = 14
     private let titleGap: CGFloat = 8
     private let titleAreaHeight: CGFloat = 56
+    private let captionAreaHeight: CGFloat = 40
 
     private var columns: [GridItem] {
         Array(repeating: GridItem(.flexible(), spacing: gutter), count: columnCount)
     }
 
-    private var focusedRelease: CachedRelease? {
-        guard let focusedID else { return nil }
-        return releases.first { $0.releaseId == focusedID }
+    /// The tile the lens is drawn on: the focused tile, or the tile whose
+    /// caption has focus. Nil when focus is elsewhere (the toolbar).
+    private var lensTileID: Int? {
+        focusedID ?? (discogsNoticeFocused ? lensID : nil)
+    }
+
+    private var lensRelease: CachedRelease? {
+        guard let lensTileID else { return nil }
+        return releases.first { $0.releaseId == lensTileID }
+    }
+
+    private func isLensTile(_ release: CachedRelease) -> Bool {
+        lensTileID == release.releaseId
+    }
+
+    /// Height of everything under the cover in the lens, so the cover stays on its cell.
+    private var belowCoverHeight: CGFloat {
+        titleGap + titleAreaHeight + titleGap + captionAreaHeight
+    }
+
+    private var currentDiscogsURL: String? {
+        lensID.map { DiscogsNotice.releasePageURL(releaseId: $0) }
     }
 
     var body: some View {
@@ -53,16 +78,15 @@ struct MosaicGridView: View {
                 .padding(.bottom, 140)
                 .overlayPreferenceValue(FocusedTileBounds.self) { anchor in
                     GeometryReader { proxy in
-                        if let anchor, let release = focusedRelease {
+                        if let anchor, let release = lensRelease {
                             let rect = proxy[anchor]
                             let scale: CGFloat = reduceMotion ? 1 : 1.18
                             lens(release, coverSize: rect.size)
                                 .scaleEffect(scale)
                                 // Shift down so the COVER (not the whole lens, which
-                                // includes the title below) stays aligned with the cell.
-                                .position(x: rect.midX, y: rect.midY + (titleGap + titleAreaHeight) / 2 * scale)
-                                .allowsHitTesting(false)
-                                .animation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.8), value: focusedID)
+                                // includes the title and caption below) stays aligned with the cell.
+                                .position(x: rect.midX, y: rect.midY + belowCoverHeight / 2 * scale)
+                                .animation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.8), value: lensTileID)
                         }
                     }
                 }
@@ -99,13 +123,19 @@ struct MosaicGridView: View {
         // Edge-to-edge: drop the safe-area (overscan) inset so the wall fills
         // the full screen width.
         .ignoresSafeArea(.container, edges: .horizontal)
-        .task(id: focusedID) { await updateGlow() }
+        // Menu on the remote dismisses the QR cover; focus goes back to the caption.
+        .fullScreenCover(isPresented: $showingDiscogsQR, onDismiss: { discogsNoticeFocused = true }) {
+            if let url = currentDiscogsURL {
+                DiscogsReleaseQRView(url: url)
+            }
+        }
+        .task(id: lensTileID) { await updateGlow() }
     }
 
     private func updateGlow() async {
-        guard let url = focusedRelease?.preferredCoverURL else { return }
+        guard let url = lensRelease?.preferredCoverURL else { return }
         if let image = try? await ImagePipeline.shared.image(for: url) {
-            glowColor = CoverColor.dominant(from: image, releaseId: focusedRelease?.releaseId ?? 0)
+            glowColor = CoverColor.dominant(from: image, releaseId: lensRelease?.releaseId ?? 0)
         }
     }
 
@@ -117,7 +147,7 @@ struct MosaicGridView: View {
         } label: {
             cover(release)
                 .anchorPreference(key: FocusedTileBounds.self, value: .bounds) {
-                    focusedID == release.releaseId ? $0 : nil
+                    isLensTile(release) ? $0 : nil
                 }
         }
         .buttonStyle(BareButtonStyle())
@@ -151,8 +181,10 @@ struct MosaicGridView: View {
                 onMoveUp() // escape to the toolbar
             }
         case .down:
-            let below = index + columnCount
-            if below < count { focusedID = releases[below].releaseId }
+            // The caption sits under the lens, so down goes to it first; its
+            // own down then moves on to the tile below.
+            lensID = releases[index].releaseId
+            discogsNoticeFocused = true
         @unknown default:
             break
         }
@@ -170,7 +202,8 @@ struct MosaicGridView: View {
     }
 
     /// The magnified focused cover, crisp, set in a Liquid Glass bezel that
-    /// holds the title and refracts the surrounding covers.
+    /// holds the title and the Discogs caption beneath it, and refracts the
+    /// surrounding covers.
     private func lens(_ release: CachedRelease, coverSize: CGSize) -> some View {
         VStack(spacing: titleGap) {
             cover(release)
@@ -188,10 +221,42 @@ struct MosaicGridView: View {
             }
             .frame(maxWidth: coverSize.width)
             .frame(height: titleAreaHeight)
+            discogsCaption
+                .frame(height: captionAreaHeight)
         }
         .padding(bezel)
         .glassBezel()
         .shadow(color: .black.opacity(0.6), radius: 30, y: 16)
+    }
+
+    /// The Discogs caption under the lens title, the same as on the record
+    /// screen and CoverFlow. Selecting it shows a QR code of the lens release's
+    /// discogs.com page. Down from a tile lands here, up returns to that tile,
+    /// and down again goes to the tile below.
+    private var discogsCaption: some View {
+        Button {
+            showingDiscogsQR = true
+        } label: {
+            DiscogsNoticeLabel()
+        }
+        .buttonStyle(DiscogsNoticeButtonStyle())
+        // Turns off tvOS's system focus block so only the label's own pill shows.
+        .focusEffectDisabled()
+        .focused($discogsNoticeFocused)
+        // Other directions are consumed so focus stays on the caption.
+        .onMoveCommand { direction in
+            guard let lensID, let index = releases.firstIndex(where: { $0.releaseId == lensID }) else { return }
+            switch direction {
+            case .up:
+                focusedID = lensID
+            case .down:
+                let below = index + columnCount
+                if below < releases.count { focusedID = releases[below].releaseId }
+            default:
+                break
+            }
+        }
+        .accessibilityHint("Shows a QR code for this release on discogs.com.")
     }
 }
 
