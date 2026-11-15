@@ -522,6 +522,8 @@ struct RecordView: View {
             DiscogsNoticeLabel()
         }
         .buttonStyle(.plain)
+        // Turns off tvOS's system focus block so only the label's own pill shows.
+        .focusEffectDisabled()
         .focused($discogsNoticeFocused)
         .accessibilityHint("Shows a QR code for this release on discogs.com.")
         // The header's 10pt stack gap plus this 4pt puts the notice 14pt below the tags.

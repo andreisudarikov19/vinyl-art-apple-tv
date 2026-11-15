@@ -150,6 +150,8 @@ struct CoverFlowView: View {
             DiscogsNoticeLabel()
         }
         .buttonStyle(.plain)
+        // Turns off tvOS's system focus block so only the label's own pill shows.
+        .focusEffectDisabled()
         .focused($discogsNoticeFocused)
         // Up returns to the covers. Other directions are consumed so focus
         // stays on the caption rather than wandering off the screen.
