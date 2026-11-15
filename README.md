@@ -2,9 +2,9 @@
 
 Vinyl for Apple TV shows your Discogs record collection on an Apple TV. It plays no music: it is something to look at while a record plays on your turntable.
 
-![The gallery: record covers in a carousel, under a toolbar with Suggest, Sort, genre, layout and settings controls](docs/assets/screens/gallery.jpg)
+![The gallery: record covers in CoverFlow, under a toolbar with Suggest, Sort, genre, layout and settings controls](docs/assets/screens/gallery.jpg)
 
-You sign in by scanning a QR code on the TV with your phone, then typing the code Discogs gives you into the TV. The app reads the vinyl in your collection and never changes anything on Discogs. Browse the covers as a carousel or a mosaic, sort them or filter them by genre, or let **Suggest** pick a record. Open a record to see its tracklist one side at a time, with credits. Swipe up and the cover stands on its own, ringed by a halo in its colours; the screensaver stays off while the halo shows.
+You sign in by scanning a QR code on the TV with your phone, then typing the code Discogs gives you into the TV. The app reads the vinyl in your collection and never changes anything on Discogs. Browse the covers as CoverFlow or as a grid, sort them or filter them by genre, or let **Suggest** pick a record. Open a record to see its tracklist one side at a time, with credits. Swipe up and the cover stands on its own, ringed by a halo in its colours; the screensaver stays off while the halo shows.
 
 [Website](https://andreisudarikov19.github.io/vinyl-art-apple-tv/) · [Guide](https://andreisudarikov19.github.io/vinyl-art-apple-tv/guide.html) · [Support](https://andreisudarikov19.github.io/vinyl-art-apple-tv/support.html) · [Privacy](https://andreisudarikov19.github.io/vinyl-art-apple-tv/privacy.html)
 
@@ -33,7 +33,7 @@ You need Xcode 26 or later and [XcodeGen](https://github.com/yonaskolb/XcodeGen)
    xcodegen generate
    open VinylForAppleTV.xcodeproj
    ```
-   The project is generated from `project.yml` and isn't committed. Run
+   The project is generated from `project.yml` and isn’t committed. Run
    `xcodegen generate` again after editing `project.yml` or adding files.
    Swift package versions are pinned in `project.yml`: to update one, change
    its version there and run `xcodegen generate`.
@@ -47,9 +47,9 @@ xcodebuild test -scheme VinylForAppleTV -destination 'platform=tvOS Simulator,na
 
 Any tvOS simulator will do; `xcrun simctl list devices tvOS` lists the ones you have.
 
-The tests need no real Discogs keys. `AppSecrets.swift` has to exist for the project to build, but the template's placeholders are enough: copy it as in step 2 and leave them in. Every request in the tests goes to a stub, so they make no network calls.
+The tests need no real Discogs keys. `AppSecrets.swift` has to exist for the project to build, but the template’s placeholders are enough: copy it as in step 2 and leave them in. Every request in the tests goes to a stub, so they make no network calls.
 
-CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) builds the app and runs the same tests on every pull request and every push to `main`. The tests run one at a time, because several suites share one stub.
+CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) builds the app and runs the same tests on every pull request and every push to `main`, except changes that touch only `docs/`, `README.md`, `LICENSE` or `NOTICE`. The tests run one at a time, because several suites share one stub.
 
 ## Versioning
 
@@ -65,7 +65,7 @@ Run `xcodegen generate` after editing them.
 
 The app talks to three services and has no server of its own.
 
-- [Discogs](https://www.discogs.com), through the [Discogs API](https://www.discogs.com/developers/): sign-in, your collection, each record's tracklist and credits, and the cover shown when the Cover Art Archive has none.
+- [Discogs](https://www.discogs.com), through the [Discogs API](https://www.discogs.com/developers/): sign-in, your collection, each record’s tracklist and credits, and the cover shown when the Cover Art Archive has none.
 - [MusicBrainz](https://musicbrainz.org), through the [MusicBrainz API](https://musicbrainz.org/doc/MusicBrainz_API): matching each record to a MusicBrainz release.
 - [Cover Art Archive](https://coverartarchive.org): the front cover of the matched release, or of its release group, shown in place of the Discogs image.
 

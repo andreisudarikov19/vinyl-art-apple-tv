@@ -7,7 +7,7 @@ enum KeychainError: Error, Sendable {
 }
 
 /// Items are kept on this device only, never synced through iCloud Keychain.
-/// Builds up to 0.20.0 saved them synced, so reads and removals can name
+/// Earlier builds saved them synced, so reads and removals can name
 /// that kind too.
 enum KeychainStore {
     enum Kind {

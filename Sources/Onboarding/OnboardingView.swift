@@ -118,7 +118,7 @@ private struct VerifierView: View {
 
     private var stepsList: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Authorize on your phone")
+            Text("Authorise on your phone")
                 .font(.title2.weight(.semibold))
             SwiftUI.Label("Scan the code and sign in to Discogs", systemImage: "1.circle")
             SwiftUI.Label("Approve access to your collection", systemImage: "2.circle")
