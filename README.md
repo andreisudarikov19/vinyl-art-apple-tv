@@ -2,9 +2,9 @@
 
 Vinyl for Apple TV shows your Discogs record collection on an Apple TV. It plays no music: it is something to look at while a record plays on your turntable.
 
-![The gallery: record covers in a carousel, under a toolbar with Suggest, Sort, genre, layout and settings controls](docs/assets/screens/gallery.jpg)
+![The gallery: record covers in CoverFlow, under a toolbar with Suggest, Sort, genre, layout and settings controls](docs/assets/screens/gallery.jpg)
 
-You sign in by scanning a QR code on the TV with your phone, then typing the code Discogs gives you into the TV. The app reads the vinyl in your collection and never changes anything on Discogs. Browse the covers as a carousel or a mosaic, sort them or filter them by genre, or let **Suggest** pick a record. Open a record to see its tracklist one side at a time, with credits. Swipe up and the cover stands on its own, ringed by a halo in its colours; the screensaver stays off while the halo shows.
+You sign in by scanning a QR code on the TV with your phone, then typing the code Discogs gives you into the TV. The app reads the vinyl in your collection and never changes anything on Discogs. Browse the covers as CoverFlow or as a grid, sort them or filter them by genre, or let **Suggest** pick a record. Open a record to see its tracklist one side at a time, with credits. Swipe up and the cover stands on its own, ringed by a halo in its colours; the screensaver stays off while the halo shows.
 
 [Website](https://andreisudarikov19.github.io/vinyl-art-apple-tv/) · [Guide](https://andreisudarikov19.github.io/vinyl-art-apple-tv/guide.html) · [Support](https://andreisudarikov19.github.io/vinyl-art-apple-tv/support.html) · [Privacy](https://andreisudarikov19.github.io/vinyl-art-apple-tv/privacy.html)
 
@@ -73,8 +73,8 @@ The [Discogs API Terms of Use](https://support.discogs.com/hc/en-us/articles/360
 
 > This application uses Discogs’ API but is not affiliated with, sponsored or endorsed by Discogs. ‘Discogs’ is a trademark of Zink Media, LLC.
 
-## License
+## Licence
 
-The code is licensed under the [Apache License 2.0](LICENSE). Redistributions must keep the attribution notices in [NOTICE](NOTICE), as section 4(d) of the license requires.
+The code is licenced under the [Apache License 2.0](LICENSE). Redistributions must keep the attribution notices in [NOTICE](NOTICE), as section 4(d) of the licence requires.
 
-The license covers the code in this repository. The data and cover images the app shows come from the services above under their own terms, and the covers belong to their copyright owners.
+The licence covers the code in this repository. The data and cover images the app shows come from the services above under their own terms, and the covers belong to their copyright owners.

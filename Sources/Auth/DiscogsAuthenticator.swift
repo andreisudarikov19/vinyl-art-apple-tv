@@ -20,7 +20,7 @@ enum DiscogsAuthError: Error, LocalizedError, Sendable {
         case .verifierRejected:
             return "Discogs didn't accept that code. It may be mistyped or expired. Choose Try again to get a fresh one."
         case .noPendingAuthorization:
-            return "No pending authorization. Start sign-in again."
+            return "No pending authorisation. Start sign-in again."
         case .keychainFailure(let status):
             return "Keychain error (\(status))."
         }
