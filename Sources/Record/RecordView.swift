@@ -519,23 +519,23 @@ struct RecordView: View {
         .frame(width: coverSide, alignment: .leading)
     }
 
-    /// The Discogs attribution, along the bottom edge of the informative stage.
-    /// Discogs' API terms require it beside its data. Selecting it shows a QR
-    /// code of the release page, as tvOS cannot open links.
+    /// The Discogs attribution, left-aligned to the album column along the
+    /// bottom edge of the informative stage. Discogs' API terms require it
+    /// beside its data. Selecting it shows a QR code of the release page, as
+    /// tvOS cannot open links.
     private var discogsNotice: some View {
         HStack(spacing: 0) {
             Button {
                 showingDiscogsQR = true
             } label: {
-                Text(DiscogsNotice.text)
-                    .font(.system(size: 24))
-                    .foregroundStyle(.white.opacity(0.4))
+                DiscogsNoticeLabel()
             }
             .buttonStyle(.plain)
             .focused($discogsNoticeFocused)
             .accessibilityHint("Shows a QR code for this release on discogs.com.")
             Spacer(minLength: 0)
         }
+        .frame(width: coverSide, alignment: .leading)
     }
 
     /// The line of "1985 · Jazz · Big Band" categorical metadata, split into
@@ -566,17 +566,8 @@ struct RecordView: View {
         .background(tagPillBackground)
     }
 
-    /// Frosted glass for the catalog tag pills: an ultra-thin material for
-    /// the blurred translucency behind the text, plus a thin white stroke
-    /// for the edge highlight that sells the "glass" reading at TV viewing
-    /// distance. No tvOS 26 dependency — `.ultraThinMaterial` is available
-    /// on every supported version.
     private var tagPillBackground: some View {
-        Capsule()
-            .fill(.ultraThinMaterial)
-            .overlay(
-                Capsule().strokeBorder(.white.opacity(0.22), lineWidth: 0.8)
-            )
+        TagPillGlass()
     }
 
     @ViewBuilder
@@ -847,6 +838,47 @@ enum DiscogsNotice {
     /// so a phone that scans it lands on the release.
     static func releasePageURL(releaseId: Int) -> String {
         "https://www.discogs.com/release/\(releaseId)"
+    }
+}
+
+/// The notice's label, in the tag family: a QR glyph and the text, in the
+/// tag pill's shape and padding. At rest it is quiet with no fill; when the
+/// remote focuses it, the tag pill's glass appears, so it reveals itself as
+/// selectable like the pills beside it.
+private struct DiscogsNoticeLabel: View {
+    @Environment(\.isFocused) private var isFocused
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "qrcode")
+                .font(.system(size: 16, weight: .medium))
+                .accessibilityHidden(true)
+            Text(DiscogsNotice.text)
+                .font(.system(size: 20, weight: .medium))
+        }
+        .foregroundStyle(.white.opacity(isFocused ? 0.88 : 0.5))
+        .padding(.horizontal, 16)
+        .padding(.vertical, 6)
+        .background {
+            if isFocused {
+                TagPillGlass()
+            }
+        }
+    }
+}
+
+/// Frosted glass for the catalog tag pills and the focused Discogs notice: an
+/// ultra-thin material for the blurred translucency behind the text, plus a
+/// thin white stroke for the edge highlight that sells the "glass" reading at
+/// TV viewing distance. No tvOS 26 dependency — `.ultraThinMaterial` is
+/// available on every supported version.
+private struct TagPillGlass: View {
+    var body: some View {
+        Capsule()
+            .fill(.ultraThinMaterial)
+            .overlay(
+                Capsule().strokeBorder(.white.opacity(0.22), lineWidth: 0.8)
+            )
     }
 }
 
