@@ -25,6 +25,7 @@ struct MosaicGridView: View {
     // Tuning knobs
     private let columnCount = 7
     private let gutter: CGFloat = 2
+    private let topInset: CGFloat = 150 // clears the floating toolbar
     private let bezel: CGFloat = 14
     private let titleGap: CGFloat = 8
     private let titleAreaHeight: CGFloat = 56
@@ -43,29 +44,63 @@ struct MosaicGridView: View {
             // Same backdrop as CoverFlow: black with a soft glow tinted by the
             // focused cover, so the empty top/bottom of the wall isn't dead black.
             CollectionGlowBackground(glowColor: glowColor)
-            ScrollView {
-                LazyVGrid(columns: columns, spacing: gutter) {
-                    ForEach(Array(releases.enumerated()), id: \.element.releaseId) { index, release in
-                        tile(release, at: index)
+            // The viewport is read from a GeometryReader rather than measured
+            // later, so the scroll content is sized from the screen on first layout.
+            GeometryReader { viewport in
+                // The scroll view takes the whole screen, top and bottom, so the
+                // matrix reaches the screen edges. The first row keeps its place
+                // by adding the top safe area to the inset.
+                let screenHeight = viewport.size.height + viewport.safeAreaInsets.top + viewport.safeAreaInsets.bottom
+                let gridTop = topInset + viewport.safeAreaInsets.top
+                ScrollView {
+                    VStack(spacing: 0) {
+                        LazyVGrid(columns: columns, spacing: gutter) {
+                            ForEach(Array(releases.enumerated()), id: \.element.releaseId) { index, release in
+                                tile(release, at: index)
+                            }
+                        }
+                        .padding(.top, gridTop)
+                        .padding(.bottom, 140)
+                        // One screen of matrix below the last album, so the
+                        // matrix reaches the bottom edge at every scroll position.
+                        Color.clear.frame(height: screenHeight)
                     }
-                }
-                .padding(.top, 150) // clear the floating toolbar
-                .padding(.bottom, 140)
-                .overlayPreferenceValue(FocusedTileBounds.self) { anchor in
-                    GeometryReader { proxy in
-                        if let anchor, let release = focusedRelease {
-                            let rect = proxy[anchor]
-                            let scale: CGFloat = reduceMotion ? 1 : 1.18
-                            lens(release, coverSize: rect.size)
-                                .scaleEffect(scale)
-                                // Shift down so the COVER (not the whole lens, which
-                                // includes the title below) stays aligned with the cell.
-                                .position(x: rect.midX, y: rect.midY + (titleGap + titleAreaHeight) / 2 * scale)
-                                .allowsHitTesting(false)
-                                .animation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.8), value: focusedID)
+                    // Beneath the covers: the matrix, with its checkerboard ticks
+                    // on the empty cells. It spans the whole scroll content, so it
+                    // runs above the first row and below the last album.
+                    .background(MosaicMatrix(
+                        albumCount: releases.count,
+                        columnCount: columnCount,
+                        gutter: gutter,
+                        topInset: gridTop,
+                        drawsPlaceholders: true
+                    ))
+                    // Above the covers: the same hairlines again, so the matrix
+                    // crosses the covers and the empty cells as one surface.
+                    .overlay(MosaicMatrix(
+                        albumCount: releases.count,
+                        columnCount: columnCount,
+                        gutter: gutter,
+                        topInset: gridTop,
+                        drawsPlaceholders: false
+                    ))
+                    .overlayPreferenceValue(FocusedTileBounds.self) { anchor in
+                        GeometryReader { proxy in
+                            if let anchor, let release = focusedRelease {
+                                let rect = proxy[anchor]
+                                let scale: CGFloat = reduceMotion ? 1 : 1.18
+                                lens(release, coverSize: rect.size)
+                                    .scaleEffect(scale)
+                                    // Shift down so the COVER (not the whole lens, which
+                                    // includes the title below) stays aligned with the cell.
+                                    .position(x: rect.midX, y: rect.midY + (titleGap + titleAreaHeight) / 2 * scale)
+                                    .allowsHitTesting(false)
+                                    .animation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.8), value: focusedID)
+                            }
                         }
                     }
                 }
+                .ignoresSafeArea(.container, edges: .vertical)
             }
             // Focus trampoline: an invisible focusable strip occupying the gap
             // between the floating toolbar and the first row of tiles. The
@@ -192,6 +227,57 @@ struct MosaicGridView: View {
         .padding(bezel)
         .glassBezel()
         .shadow(color: .black.opacity(0.6), radius: 30, y: 16)
+    }
+}
+
+/// The mosaic's matrix, drawn over the whole scroll content: the tuner's
+/// hairlines down every gutter (white 18%, 1 pt), and, when `drawsPlaceholders`
+/// is set, a tuner tick (white 25%, 1 by 8 pt) on the gutter below each empty
+/// cell, alternating by grid position so the cells read as a checkerboard.
+/// The cells are cover-sized and on the covers' pitch, so the matrix continues
+/// the album grid above the first row and below the last album. Nothing here
+/// takes input or focus, and nothing animates.
+private struct MosaicMatrix: View {
+    let albumCount: Int
+    let columnCount: Int
+    let gutter: CGFloat
+    let topInset: CGFloat
+    let drawsPlaceholders: Bool
+
+    var body: some View {
+        Canvas { context, size in
+            // The cover side as the flexible columns lay it out.
+            let side = (size.width - gutter * CGFloat(columnCount - 1)) / CGFloat(columnCount)
+            guard side > 0 else { return }
+            let pitch = side + gutter
+            let rows = MosaicPlaceholderLayout.rows(topInset: topInset, pitch: pitch, height: size.height)
+
+            var lines = Path()
+            for column in 1..<columnCount {
+                let x = CGFloat(column) * pitch - gutter / 2
+                lines.move(to: CGPoint(x: x, y: 0))
+                lines.addLine(to: CGPoint(x: x, y: size.height))
+            }
+            for row in rows {
+                let y = topInset + CGFloat(row) * pitch - gutter / 2
+                guard y >= 0, y <= size.height else { continue }
+                lines.move(to: CGPoint(x: 0, y: y))
+                lines.addLine(to: CGPoint(x: size.width, y: y))
+            }
+            context.stroke(lines, with: .color(.white.opacity(0.18)), lineWidth: 1)
+
+            guard drawsPlaceholders else { return }
+            var ticks = Path()
+            let empty = MosaicPlaceholderLayout.emptyPositions(albumCount: albumCount, columnCount: columnCount, rows: rows)
+            for position in empty where (position.row + position.column).isMultiple(of: 2) {
+                let x = CGFloat(position.column) * pitch + side / 2
+                // The tick sits on the gutter below its cell, centred on the hairline.
+                let y = topInset + CGFloat(position.row) * pitch + side + gutter / 2
+                ticks.addRect(CGRect(x: x - 0.5, y: y - 4, width: 1, height: 8))
+            }
+            context.fill(ticks, with: .color(.white.opacity(0.25)))
+        }
+        .allowsHitTesting(false)
     }
 }
 
