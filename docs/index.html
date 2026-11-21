@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Vinyl for Apple TV — Your Discogs collection on the big screen</title>
   <meta name="description" content="A native tvOS app that turns your Discogs vinyl collection into an ambient cover-art gallery for the living room.">
-  <meta name="theme-color" content="#0a0908">
+  <meta name="theme-color" content="#0b0a08">
   <meta property="og:title" content="Vinyl for Apple TV">
   <meta property="og:description" content="Your Discogs vinyl collection on the big screen — gallery, grid, halo, and a record screen with each album’s tracklist.">
   <meta property="og:image" content="https://andreisudarikov19.github.io/vinyl-art-apple-tv/assets/icon.png">
@@ -15,205 +15,200 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header>
-    <div class="container nav">
-      <a class="nav-brand" href="./" aria-current="page">
-        <img src="assets/icon.png" alt="Vinyl for Apple TV icon">
-        <span>Vinyl for Apple TV</span>
-      </a>
-      <nav class="nav-links">
-        <a href="#features">Features</a>
-        <a href="guide.html">Guide</a>
-        <a href="support.html">Support</a>
-        <a href="privacy.html">Privacy</a>
-      </nav>
-    </div>
-  </header>
+<header class="container">
+<div class="site-nav">
+<a href="./" aria-current="page" class="site-nav__brand"><img width="512" height="307" src="assets/icon.png" alt="Vinyl for Apple TV icon" class="site-nav__icon"><span>Vinyl for Apple TV</span></a>
+<nav aria-label="Main" class="site-nav__links">
+<a href="#features" class="site-nav__link">Features</a>
+<a href="get-started.html" class="site-nav__link">Get started</a>
+<a href="how-to-use.html" class="site-nav__link">How to use</a>
+<a href="support.html" class="site-nav__link">Support</a>
+<a href="privacy.html" class="site-nav__link">Privacy</a>
+</nav></div></header>
+<main>
+<div class="container">
+<div class="home-hero">
+<h1 class="home-hero__title">Your record collection, on the <em class="accent-em">biggest screen</em> in the house.</h1>
+<p class="home-hero__lead">Sign in with Discogs and the whole shelf becomes ambient art. Flip through covers, drop the needle on a single record, or take in a mosaic of everything you own.</p>
+<div class="cta-row"><a href="get-started.html" class="btn-primary">Read the setup guide<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" class="icon"><path d="M4 10h12M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a><span class="btn-soon">Coming soon to the App Store</span></div>
+</div></div>
+<section id="features" class="band-yolk">
+<div class="container">
+<figure class="home-shot">
+<img width="1920" height="1080" src="assets/screens/gallery.jpg" alt="CoverFlow gallery: the focused cover throws its colours onto the back wall" class="home-shot__img">
+<figcaption class="home-shot__caption">Big covers and nothing in the way.</figcaption>
+</figure>
+<div class="statement">
+<div class="statement__head">
+<span class="eyebrow-dark">What it does</span>
+<h2 class="statement__title">Built for the way records are meant to be <em class="em-light">enjoyed.</em></h2>
+</div>
+<p class="statement__lead">Vinyl for Apple TV is a small, focused app: no playback, no streaming, no clutter. Just your records, beautifully rendered.</p>
+</div>
+</div></section>
+<div class="container">
+<div class="features">
+<div class="feature-row--first">
+<figure class="feature__figure">
+<div class="screenshot-crop"><img loading="lazy" width="1920" height="1080" src="assets/screens/gallery.jpg" alt="A close view of the CoverFlow gallery, with the focused cover in the centre and its title below."></div>
+<figcaption class="feature__caption"><strong class="ui-name">CoverFlow gallery.</strong> The default browse view — the focused cover throws its colours onto the back wall.</figcaption>
+</figure>
+<div class="feature__body">
+<span class="feature__num">01</span>
+<h3 class="feature__title">Cover gallery</h3>
+<p class="feature__text">Browse every record in your Discogs collection as a CoverFlow-style wall. Focus a cover and the room behind it lights up with the artwork’s own colours.</p>
+</div>
+</div>
+<div class="feature-row--flip">
+<figure class="feature__figure">
+<img loading="lazy" width="1920" height="1080" src="assets/screens/record.jpg" alt="The record screen: tracklist, credits, year, genre and style tags, and a tuner slider for the record’s sides" class="screenshot">
+<figcaption class="feature__caption"><strong class="ui-name">The record screen.</strong> Tracklist, credits, year, genre and style tags, and a tuner slider for the record’s sides.</figcaption>
+</figure>
+<div class="feature__body">
+<span class="feature__num">02</span>
+<h3 class="feature__title">Record screen</h3>
+<p class="feature__text">Press on any album to see its tracklist, one side at a time. The cover anchors in place while sides A, B, C and D sit beside it on a vintage radio-tuner slider above the tracks. Leave it be and the blurred cover behind it slowly drifts.</p>
+</div>
+</div>
+<div class="feature-row">
+<figure class="feature__figure">
+<img loading="lazy" width="1920" height="1080" src="assets/screens/grid.jpg" alt="Grid view: every cover on one screen, with the focused album magnified in a lens" class="screenshot">
+<figcaption class="feature__caption"><strong class="ui-name">Grid view.</strong> Every cover on one screen. The focused album is magnified in a lens.</figcaption>
+</figure>
+<div class="feature__body">
+<span class="feature__num">03</span>
+<h3 class="feature__title">Grid</h3>
+<p class="feature__text">A seven-column grid of every cover you own. Focus a tile and it lifts into a glass lens with its title, and the glow behind the grid takes on its colour.</p>
+</div>
+</div>
+<div class="feature-row--flip">
+<figure class="feature__figure">
+<img loading="lazy" width="1600" height="900" src="assets/screens/halo.jpg" alt="Cover-art display: the album cover full-bleed with cover-derived ambient halo" class="screenshot">
+<figcaption class="feature__caption"><strong class="ui-name">Cover-art display.</strong> Sit with a record. The cover fills the screen, the room glows in its palette, and the screensaver stays off.</figcaption>
+</figure>
+<div class="feature__body">
+<span class="feature__num">04</span>
+<h3 class="feature__title">Ambient halo</h3>
+<p class="feature__text">A full-screen mode that puts one cover on a dark background, ringed by a halo in its own colours. The screensaver stays off while the halo shows.</p>
+</div>
+</div>
+</div>
+<section class="closing">
+<div class="band__body">
+<span class="eyebrow">Get started</span>
+<h2 class="closing__title">Ready when <em class="accent-em">you are.</em></h2>
+<p class="closing__lead">Bring a Discogs account with at least a few records on the shelf — the app will do the rest.</p>
+</div>
+<div class="cta-row"><a href="get-started.html" class="btn-primary">Read the setup guide<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" class="icon"><path d="M4 10h12M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a><span class="btn-soon">Coming soon to the App Store</span></div>
+</section>
+</div>
+</main>
+<div class="lightbox" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-label="Screenshot viewer">
+<button class="lightbox-close" type="button" aria-label="Close">
+<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6L18 18M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+</button>
+<div class="lightbox-stage">
+<button class="lightbox-prev" type="button" aria-label="Previous screenshot">
+<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14.5 6L8.5 12L14.5 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</button>
+<img class="lightbox-img" alt="" width="1920" height="1080">
+<button class="lightbox-next" type="button" aria-label="Next screenshot">
+<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9.5 6L15.5 12L9.5 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</button>
+</div>
+<div class="lightbox-caption"></div>
+</div>
+<footer class="site-footer">
+<div class="container">
+<div class="site-footer__row">
+<span>Vinyl for Apple TV — made with care by Andrei Sudarikov.</span>
+<div class="site-footer__links">
+<a href="#features" class="site-footer__link">Features</a>
+<a href="get-started.html" class="site-footer__link">Get started</a>
+<a href="how-to-use.html" class="site-footer__link">How to use</a>
+<a href="support.html" class="site-footer__link">Support</a>
+<a href="privacy.html" class="site-footer__link">Privacy</a>
+<a href="https://github.com/andreisudarikov19/vinyl-art-apple-tv" class="site-footer__link">GitHub</a>
+</div></div>
+<p class="site-footer__notice">This application uses Discogs’ API but is not affiliated with, sponsored or endorsed by Discogs. ‘Discogs’ is a trademark of Zink Media, LLC.</p>
+</div></footer>
+<script>
+(function () {
+  const triggers = Array.from(document.querySelectorAll('.feature__figure img'));
+  const overlay = document.querySelector('.lightbox');
+  if (!triggers.length || !overlay) return;
 
-  <main>
-    <section class="hero container">
-      <img class="hero-icon" src="assets/icon.png" alt="App icon: a vinyl record on a yolk-yellow background">
-      <h1>Your record collection, on the biggest screen in the house.</h1>
-      <p class="lead">Sign in with Discogs and the whole shelf becomes ambient art. Flip through covers, drop the needle on a single record, or take in a mosaic of everything you own.</p>
-      <div class="cta-row">
-        <span class="btn btn-soon">Coming soon to the App Store</span>
-      </div>
-    </section>
+  const root = document.documentElement;
+  const imgEl = overlay.querySelector('.lightbox-img');
+  const captionEl = overlay.querySelector('.lightbox-caption');
+  const closeBtn = overlay.querySelector('.lightbox-close');
+  const prevBtn = overlay.querySelector('.lightbox-prev');
+  const nextBtn = overlay.querySelector('.lightbox-next');
 
-    <section id="features" class="container">
-      <span class="section-eyebrow">What it does</span>
-      <h2>Built for the way records are meant to be enjoyed.</h2>
-      <p class="lead">Vinyl for Apple TV is a small, focused app: no playback, no streaming, no clutter. Just your records, beautifully rendered.</p>
+  let currentIndex = -1;
+  let lastFocus = null;
+  let isOpen = false;
+  let hideTimer = null;
 
-      <div class="features">
-        <div class="feature">
-          <div class="icon-dot">▤</div>
-          <h3>Cover gallery</h3>
-          <p>Browse every record in your Discogs collection as a CoverFlow-style wall. Focus a cover and the room behind it lights up with the artwork’s own colours.</p>
-        </div>
-        <div class="feature">
-          <div class="icon-dot">◉</div>
-          <h3>Record screen</h3>
-          <p>Press on any album to see its tracklist, one side at a time. The cover anchors in place while sides A, B, C and D sit beside it on a vintage radio-tuner slider above the tracks. Leave it be and the blurred cover behind it slowly drifts.</p>
-        </div>
-        <div class="feature">
-          <div class="icon-dot">▦</div>
-          <h3>Grid</h3>
-          <p>A seven-column grid of every cover you own. Focus a tile and it lifts into a glass lens with its title, and the glow behind the grid takes on its colour.</p>
-        </div>
-        <div class="feature">
-          <div class="icon-dot">✦</div>
-          <h3>Ambient halo</h3>
-          <p>A full-screen mode that puts one cover on a dark background, ringed by a halo in its own colours. The screensaver stays off while the halo shows.</p>
-        </div>
-      </div>
-    </section>
+  function show(index) {
+    currentIndex = (index + triggers.length) % triggers.length;
+    const src = triggers[currentIndex];
+    imgEl.src = src.src;
+    imgEl.alt = src.alt || '';
+    const name = src.closest('.feature__figure').querySelector('.feature__caption .ui-name');
+    captionEl.textContent = name ? name.textContent.replace(/\.$/, '') : (src.alt || '');
+  }
 
-    <section class="container">
-      <span class="section-eyebrow">Screenshots</span>
-      <h2>A look at the app.</h2>
-      <p class="lead">Big covers and nothing in the way.</p>
+  function open(index) {
+    clearTimeout(hideTimer);
+    lastFocus = document.activeElement;
+    show(index);
+    isOpen = true;
+    overlay.hidden = false;
+    overlay.setAttribute('aria-hidden', 'false');
+    root.classList.add('lightbox-open');
+    void overlay.offsetWidth; // commit the hidden state so the fade-in transition runs
+    overlay.classList.add('is-open');
+    closeBtn.focus();
+  }
 
-      <div class="showcase">
-        <figure class="showcase-item" style="margin: 0;">
-          <img src="assets/screens/gallery.jpg" alt="CoverFlow gallery: the focused cover throws its colours onto the back wall">
-          <figcaption class="caption">
-            <h3>CoverFlow gallery</h3>
-            <p>The default browse view — the focused cover throws its colours onto the back wall.</p>
-          </figcaption>
-        </figure>
-        <figure class="showcase-item" style="margin: 0;">
-          <img src="assets/screens/grid.jpg" alt="Grid view: every cover on one screen, with the focused album magnified in a lens">
-          <figcaption class="caption">
-            <h3>Grid view</h3>
-            <p>Every cover on one screen. The focused album is magnified in a lens.</p>
-          </figcaption>
-        </figure>
-        <figure class="showcase-item" style="margin: 0;">
-          <img src="assets/screens/record.jpg" alt="The record screen: tracklist, credits, year, genre and style tags, and a tuner slider for the record's sides">
-          <figcaption class="caption">
-            <h3>The record screen</h3>
-            <p>Tracklist, credits, year, genre and style tags, and a tuner slider for the record’s sides.</p>
-          </figcaption>
-        </figure>
-        <figure class="showcase-item" style="margin: 0;">
-          <img src="assets/screens/halo.jpg" alt="Cover-art display: the album cover full-bleed with cover-derived ambient halo">
-          <figcaption class="caption">
-            <h3>Cover-art display</h3>
-            <p>Sit with a record. The cover fills the screen, the room glows in its palette, and the screensaver stays off.</p>
-          </figcaption>
-        </figure>
-      </div>
-    </section>
+  function close() {
+    if (!isOpen) return;
+    isOpen = false;
+    overlay.classList.remove('is-open');
+    overlay.setAttribute('aria-hidden', 'true');
+    root.classList.remove('lightbox-open');
+    hideTimer = setTimeout(() => { overlay.hidden = true; imgEl.removeAttribute('src'); }, 200);
+    if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
+  }
 
-    <section class="container">
-      <span class="section-eyebrow">Get started</span>
-      <h2>Ready when you are.</h2>
-      <p class="lead">Bring a Discogs account with at least a few records on the shelf — the app will do the rest.</p>
-      <div class="cta-row" style="justify-content: flex-start; margin-top: 32px;">
-        <span class="btn btn-soon">Coming soon to the App Store</span>
-      </div>
-    </section>
-  </main>
-
-  <div class="lightbox" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-label="Screenshot viewer">
-    <button class="lightbox-close" type="button" aria-label="Close">
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6L18 18M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-    </button>
-    <div class="lightbox-stage">
-      <button class="lightbox-prev" type="button" aria-label="Previous screenshot">
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14.5 6L8.5 12L14.5 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-      <img class="lightbox-img" alt="">
-      <button class="lightbox-next" type="button" aria-label="Next screenshot">
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9.5 6L15.5 12L9.5 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-    </div>
-    <div class="lightbox-caption"></div>
-  </div>
-
-  <footer>
-    <div class="container footer-inner">
-      <div>Vinyl for Apple TV — made with care by Andrei Sudarikov.</div>
-      <div class="footer-links">
-        <a href="guide.html">Guide</a>
-        <a href="privacy.html">Privacy</a>
-        <a href="support.html">Support</a>
-        <a href="https://github.com/andreisudarikov19/vinyl-art-apple-tv">GitHub</a>
-      </div>
-      <p class="footer-notice">This application uses Discogs’ API but is not affiliated with, sponsored or endorsed by Discogs. ‘Discogs’ is a trademark of Zink Media, LLC.</p>
-    </div>
-  </footer>
-
-  <script>
-    (function () {
-      const triggers = Array.from(document.querySelectorAll('.showcase-item img'));
-      const overlay = document.querySelector('.lightbox');
-      if (!triggers.length || !overlay) return;
-
-      const imgEl = overlay.querySelector('.lightbox-img');
-      const captionEl = overlay.querySelector('.lightbox-caption');
-      const closeBtn = overlay.querySelector('.lightbox-close');
-      const prevBtn = overlay.querySelector('.lightbox-prev');
-      const nextBtn = overlay.querySelector('.lightbox-next');
-
-      let currentIndex = -1;
-      let lastFocus = null;
-
-      function show(index) {
-        currentIndex = (index + triggers.length) % triggers.length;
-        const src = triggers[currentIndex];
-        imgEl.src = src.src;
-        imgEl.alt = src.alt || '';
-        const cap = src.closest('.showcase-item').querySelector('.caption h3');
-        captionEl.textContent = cap ? cap.textContent : (src.alt || '');
+  triggers.forEach((img, i) => {
+    img.classList.add('zoomable');
+    img.tabIndex = 0;
+    img.setAttribute('role', 'button');
+    img.setAttribute('aria-label', 'View screenshot full size: ' + (img.alt || ''));
+    img.addEventListener('click', () => open(i));
+    img.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        open(i);
       }
+    });
+  });
 
-      function open(index) {
-        lastFocus = document.activeElement;
-        show(index);
-        overlay.hidden = false;
-        overlay.setAttribute('aria-hidden', 'false');
-        requestAnimationFrame(() => overlay.classList.add('is-open'));
-        document.body.style.overflow = 'hidden';
-        closeBtn.focus();
-      }
-
-      function close() {
-        overlay.classList.remove('is-open');
-        overlay.setAttribute('aria-hidden', 'true');
-        document.body.style.overflow = '';
-        setTimeout(() => { overlay.hidden = true; imgEl.src = ''; }, 200);
-        if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
-      }
-
-      triggers.forEach((img, i) => {
-        img.classList.add('zoomable');
-        img.tabIndex = 0;
-        img.setAttribute('role', 'button');
-        img.setAttribute('aria-label', 'View screenshot full size: ' + (img.alt || ''));
-        img.addEventListener('click', () => open(i));
-        img.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            open(i);
-          }
-        });
-      });
-
-      closeBtn.addEventListener('click', close);
-      prevBtn.addEventListener('click', () => show(currentIndex - 1));
-      nextBtn.addEventListener('click', () => show(currentIndex + 1));
-      overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) close();
-      });
-      document.addEventListener('keydown', (e) => {
-        if (overlay.hidden) return;
-        if (e.key === 'Escape') close();
-        else if (e.key === 'ArrowLeft') show(currentIndex - 1);
-        else if (e.key === 'ArrowRight') show(currentIndex + 1);
-      });
-    })();
-  </script>
+  closeBtn.addEventListener('click', close);
+  prevBtn.addEventListener('click', () => show(currentIndex - 1));
+  nextBtn.addEventListener('click', () => show(currentIndex + 1));
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) close();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (!isOpen) return;
+    if (e.key === 'Escape') close();
+    else if (e.key === 'ArrowLeft') show(currentIndex - 1);
+    else if (e.key === 'ArrowRight') show(currentIndex + 1);
+  });
+})();
+</script>
 </body>
 </html>
