@@ -39,9 +39,10 @@
       <p>Each row of the table is one screen. The drawing in the Controls column shows the remote, numbered for that screen only. The list under the drawing says what each numbered control does there.</p>
       <p>The clickpad is the touch pad on top of the remote. A swipe is a slide of your thumb across it, and a press is a click. The highlight is the selected item, the one that a press chooses. Back (the ‹ button) is number 6 on the drawings.</p>
       <p>The app shows the records (vinyl albums) in your collection on Discogs (the online record database). A tracklist is the list of songs on one side. A side is one face of a record, such as “Side A” or “Side B”, as the record defines them. The toolbar is the row of on-screen buttons at the top of the gallery.</p>
+      <p>The “CoverFlow” view is the default gallery view: one record is highlighted in the centre, with the others in a row beside it.</p>
       <p>On a phone, swipe sideways across the table to see the Controls column.</p>
 
-      <div class="table-wrap">
+      <div class="table-wrap" tabindex="0" role="region" aria-label="Screens table">
         <table class="screens">
           <caption class="visually-hidden">Each screen of the app, with its screenshot, description and controls</caption>
           <thead>
@@ -188,11 +189,11 @@
               <th scope="row">Gallery toolbar: “Suggest”, “Sort”, “Genre”, “Layout” and the gear (“Settings menu”)</th>
               <td class="shot">
                 <p><em>Screenshot to follow</em></p>
-                <p>The toolbar sits at the top of the gallery. “Suggest”, “Sort”, “Genre” and “Layout” appear once the library has records. The gear at the end opens the “Settings menu”.</p>
+                <p>The toolbar sits at the top of the gallery. “Suggest”, “Sort” and “Layout” appear once the library has records. The “Genre” menu appears only when the library has genre or style tags. Swipe right along the toolbar until the gear is highlighted, then press the clickpad to open the “Settings menu”.</p>
                 <p>“Suggest” opens a random record from the records shown, after any genre filter.</p>
                 <p>“Sort” puts the records in order by “Recently added” (the default), “Artist”, “Album” or “Year”.</p>
                 <p>“Genre” lists every genre and style in your collection. Choosing one shows the records that have it. “All genres” clears the filter.</p>
-                <p>“Layout” switches between “CoverFlow” and “Grid”. The sort and layout are remembered between launches; the genre filter is not.</p>
+                <p>“Layout” switches between “CoverFlow” and “Grid”. The sort order and layout are kept between uses of the app. The genre filter is not.</p>
               </td>
               <td class="controls">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 985" role="img" aria-labelledby="toolbar-t-3 toolbar-d-3">
@@ -257,7 +258,8 @@
                 <p>A record opens on its tracklist view. The side selector above the tracklist shows “Side A”, “Side B” and so on, with the current side highlighted.</p>
                 <p>The cover view shows the cover full screen.</p>
                 <p>After you change side, a short message appears for 2 seconds, in the cover view only.</p>
-                <p id="turn-the-halo-on-or-off">The halo appears by itself after a short pause. On the record screen, any swipe turns it off, and it comes back 3 seconds after your last swipe. To keep it off, turn off “Engage halo automatically” in the “Settings menu”. Then the “Halo” button under the cover switches it on and off.</p>
+                <p id="turn-the-halo-on-or-off">The halo appears by itself after a short pause. On the cover view, any swipe turns the halo off, and it comes back 3 seconds after your last swipe. On the tracklist, the halo does not show. After 15 seconds without a swipe, the blurred background starts to drift. To keep it off, turn off “Engage halo automatically” in the “Settings menu”. Then the “Halo” button under the cover switches it on and off.</p>
+                <p>On the cover view, with “Engage halo automatically” off, swipe up to reach the “Halo” button under the cover. Press it to switch the halo on or off.</p>
                 <p>In “CoverFlow”, the halo comes back 60 seconds after the last swipe. With “Engage halo automatically” off, “CoverFlow” shows no halo.</p>
                 <p id="cover-art">The app first shows the Discogs image. It then swaps in a better cover when it finds one. It finds covers through MusicBrainz (an open music database) and the Cover Art Archive, which holds cover images.</p>
                 <p>Back (the ‹ button) is handled by the Apple TV, not by this app.</p>
@@ -389,10 +391,10 @@
                 <p>The “Settings menu” opens from the gear at the end of the toolbar. It lists these items, from top to bottom.</p>
                 <ul>
                   <li id="refresh-your-collection"><strong>“Refresh collection”</strong> reads the whole collection again. It adds new records, removes the ones you have taken off Discogs and updates the rest. Its progress shows at the bottom of the gallery, for example “Refreshing… 120/800”.</li>
-                  <li><strong>“Engage halo automatically”</strong> is on by default. Turn it off for manual halo mode, which the <a href="#turn-the-halo-on-or-off">record screen</a> row explains.</li>
+                  <li><strong>“Engage halo automatically”</strong> is on by default. Turn it off to switch the halo on and off yourself, as the<a href="#turn-the-halo-on-or-off">record screen</a> row explains.</li>
                   <li><strong>“Account”</strong> shows the Discogs username you are signed in with.</li>
                   <li><strong>“Sign out (keep library)”</strong> removes the Discogs sign-in from this Apple TV and keeps your library here. Signing in again with the same account shows the library at once.</li>
-                  <li><strong>“Sign out &amp; erase library”</strong> removes the sign-in and deletes the library from this Apple TV. Your layout, sort order and halo settings stay.</li>
+                  <li><strong>“Sign out &amp; erase library”</strong> removes the sign-in and deletes the library from this Apple TV. Your layout, sort order and halo settings stay. Erasing happens straight away. There is no confirmation step.</li>
                   <li>The app version, then <strong>“About”</strong>, which opens the About screen.</li>
                 </ul>
               </td>
@@ -689,7 +691,7 @@
               <th scope="row">Sign-in: “Building your library”</th>
               <td class="shot">
                 <p><em>Screenshot to follow</em></p>
-                <p>After your first sign in, or after you erase the library, the app builds your library. The screen counts the progress, for example “Fetching 247/812 albums…”. If the build fails, “Retry” starts it again, and “Continue anyway” opens the gallery.</p>
+                <p>After your first sign-in, or after you erase the library, the app loads your library. The screen counts the progress, for example “Fetching 247/812 albums…”. If loading fails, swipe up or down to move between “Retry” and “Continue anyway”. “Retry” starts it again, and “Continue anyway” opens the gallery.</p>
               </td>
               <td class="controls">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 985" role="img" aria-labelledby="signin-t-11 signin-d-11">
@@ -736,7 +738,7 @@
                   </g>
                 </svg>
                 <ul class="moves">
-                  <li>If the build fails, swipe up or down to move between “Retry” and “Continue anyway”.</li>
+                  <li>If loading fails, swipe up or down to move between “Retry” and “Continue anyway”.</li>
                 </ul>
                 <ol>
                   <li value="5"><strong>Press the clickpad.</strong> Chooses the highlighted button.</li>
