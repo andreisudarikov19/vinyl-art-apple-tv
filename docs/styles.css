@@ -425,8 +425,8 @@ section + section { border-top: 1px solid var(--surface-border); }
 .content .controls-layout td.drawing { padding-right: 28px; }
 .content .controls-layout svg {
   display: block;
-  width: 220px;
-  max-width: 220px;
+  width: 330px;
+  max-width: 330px;
   height: auto;
 }
 .content .controls-layout ol,
@@ -456,8 +456,8 @@ section + section { border-top: 1px solid var(--surface-border); }
   }
   .content .controls-layout td.drawing { padding: 0 0 18px; }
   .content .controls-layout svg {
-    width: min(220px, 100%);
-    max-width: min(220px, 100%);
+    width: min(330px, 100%);
+    max-width: min(330px, 100%);
   }
 }
 
