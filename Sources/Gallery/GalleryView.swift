@@ -282,7 +282,7 @@ private struct SettingsMenu: View, Equatable {
     let accountName: String
     let isRefreshing: Bool
     let haloAutoEngage: Bool
-    let setHaloAutoEngage: (Bool) -> Void
+    let setHaloAutoEngage: @MainActor @Sendable (Bool) -> Void
     let refresh: () -> Void
     let signOut: (_ erase: Bool) -> Void
     let showAbout: () -> Void
@@ -300,7 +300,7 @@ private struct SettingsMenu: View, Equatable {
             }
             .disabled(isRefreshing)
             // Plain text: tvOS draws a tick beside it when it's on.
-            Toggle("Engage halo automatically", isOn: Binding(get: { haloAutoEngage }, set: setHaloAutoEngage))
+            Toggle("Engage halo automatically", isOn: Binding(get: { haloAutoEngage }, set: { setHaloAutoEngage($0) }))
             Section {
                 Text("Account: \(accountName)")
                 Button {
