@@ -5,136 +5,201 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Get started — Vinyl for Apple TV</title>
   <meta name="description" content="What you need, how to sign in to Discogs, and what happens when your Vinyl for Apple TV library is built.">
-  <meta name="theme-color" content="#0a0908">
+  <meta name="theme-color" content="#0b0a08">
   <meta property="og:title" content="Get started — Vinyl for Apple TV">
   <meta property="og:description" content="What you need, how to sign in to Discogs, and what happens when your Vinyl for Apple TV library is built.">
   <meta property="og:image" content="https://andreisudarikov19.github.io/vinyl-art-apple-tv/assets/icon.png">
   <meta property="og:type" content="website">
   <link rel="icon" type="image/png" href="assets/icon.png">
   <link rel="apple-touch-icon" href="assets/icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&amp;family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&amp;family=Inter:wght@400;500;600&amp;display=swap">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header>
-    <div class="container nav">
-      <a class="nav-brand" href="./">
-        <img src="assets/icon.png" alt="Vinyl for Apple TV icon">
-        <span>Vinyl for Apple TV</span>
-      </a>
-      <nav class="nav-links" aria-label="Main">
-        <a href="index.html#features">Features</a>
-        <a href="get-started.html" aria-current="page">Get started</a>
-        <a href="how-to-use.html">How to use</a>
-        <a href="support.html">Support</a>
-        <a href="privacy.html">Privacy</a>
-      </nav>
-    </div>
-  </header>
-
-  <main>
-    <article class="container content">
-      <h1>Get started</h1>
-      <p class="subtitle">From install to a built library, in order.</p>
-
-      <p>This page covers what you need, how to sign in to Discogs, and what happens on the first launch. Signing in uses your Apple TV and your phone. Each step says which one to use.</p>
-      <p>You enter your Discogs username and password only on the Discogs page. The app has no password field.</p>
-
-      <h2 id="before-you-start">Before you start</h2>
-      <ul>
-        <li>
-          <p><strong>tvOS 18 or later.</strong> To check, go to Settings → General → About on your Apple TV.</p>
-        </li>
-        <li>
-          <p><strong>A free Discogs account.</strong> You can create one on the <a href="https://www.discogs.com">Discogs website</a>.</p>
-        </li>
-        <li>
-          <p><strong>At least one record with the format Vinyl.</strong> The app shows only releases whose Discogs format is Vinyl. CDs, cassettes and digital releases are left out.</p>
-        </li>
-        <li>
-          <p><strong>A phone with a camera that reads QR codes.</strong> You use it during sign-in.</p>
-        </li>
-      </ul>
-
-      <h2 id="getting-the-app">Getting the app</h2>
-      <p>The app is not on the App Store yet.</p>
-      <!-- TODO(#162, question 1): state the install route once the owner decides it (TestFlight, a build from source, or the App Store). Do not add a promise before then. -->
-      <p>If the app is already on your Apple TV, go to <a href="#sign-in">Sign in</a>.</p>
-
-      <h2 id="sign-in">Sign in</h2>
-      <p>Signing in takes five steps. Steps 1 and 5 happen on the Apple TV. Steps 2, 3 and 4 happen on your phone.</p>
-      <ol>
-        <li>
-          <p><strong>On the Apple TV,</strong> choose <strong>Sign in with Discogs</strong> on the welcome screen.</p>
-          <p>The TV shows <code>Connecting to Discogs…</code>, then the next screen.</p>
-          <img class="screen" src="assets/screens/onboarding/welcome.jpg" alt="The welcome screen: the title Vinyl for Apple TV, a subtitle, and a single Sign in with Discogs button.">
-        </li>
-        <li>
-          <p><strong>On your phone,</strong> open the Camera app and scan the QR code on the TV. Open the link the camera offers. It opens a Discogs page.</p>
-          <p>While you do this, the TV shows the QR code, the heading <strong>Authorise on your phone</strong> and an empty <code>Verification code</code> field.</p>
-          <img class="screen" src="assets/screens/onboarding/authorize.jpg" alt="The Authorise on your phone screen: a blurred QR code on the left, and three numbered steps, an empty Verification code field and a Continue button on the right.">
-        </li>
-        <li>
-          <p><strong>On your phone,</strong> sign in to Discogs if asked, then choose <strong>Authorize</strong>.</p>
-          <p>This lets Vinyl for Apple TV read your collection. Discogs then shows a verification code.</p>
-        </li>
-        <li>
-          <p><strong>On your phone,</strong> note the verification code. Keep the Discogs page open until step 5.</p>
-        </li>
-        <li>
-          <p><strong>On the Apple TV,</strong> select the <code>Verification code</code> field, type the code, and choose <strong>Continue</strong>.</p>
-          <p>The on-screen keyboard opens when you select the field. <strong>Continue</strong> stays unavailable until the field has text. The TV then shows <code>Signing you in…</code>.</p>
-          <img class="screen" src="assets/screens/onboarding/keyboard.jpg" alt="The on-screen keyboard under the Verification code heading, with rows of letters, digits and symbols, and a done key.">
-        </li>
-      </ol>
-
-      <div class="callout info">
-        <p><strong>The app is read-only.</strong> It reads your collection and never adds, edits or removes records on Discogs.</p>
-        <p>To disconnect the app later, revoke access in your <a href="https://www.discogs.com/settings/applications">Discogs application settings</a>.</p>
-      </div>
-
-      <p>If the code is not accepted, the TV shows <code>Couldn't sign in</code> and the reason. Choose <strong>Try again</strong> to get a new QR code, then repeat steps 2 to 5.</p>
-
-      <h2 id="build-library">Build your library</h2>
-      <p>After sign-in, the TV shows <code>Building your library</code> with a count, such as <code>Fetching 247/812 albums…</code>. The count includes every release in your collection, not only vinyl records. Until the count starts, the TV shows <code>Fetching your collection…</code>.</p>
-      <p>The build runs the first time you sign in. It runs again after you erase the library, or when you sign in with a different Discogs account.</p>
-      <p>When the count finishes, the gallery opens. Covers are looked up in the background after that, so some covers change while you browse. <a href="how-to-use.html#cover-art">Cover art</a> explains the order.</p>
-      <p>If the build fails, the TV shows <code>Couldn't build your library</code> and the reason. Choose <strong>Retry</strong> to build again. Choose <strong>Continue anyway</strong> to open the gallery without a library. You can then choose <strong>Refresh collection</strong> in the Settings menu to build it.</p>
-      <p>If you choose Continue anyway, the build also starts again the next time you open the app.</p>
-      <p>The app reads your collection 100 records at a time, so a large collection takes longer. If Discogs asks the app to slow down, the build pauses for 5, 15 and then 30 seconds before it reports an error.</p>
-
-      <h2 id="sign-in-again">Sign in again later</h2>
-      <p>After you choose <strong>Sign out (keep library)</strong>, signing in with the same Discogs account opens the gallery at once. The app then adds any records you have added since.</p>
-      <p>If Discogs stops accepting the sign-in, the app returns to the welcome screen with a notice that says so.</p>
-      <p>If you delete the app and install it again, the first launch removes the Discogs sign-in that the earlier install left behind. You then sign in again.</p>
-
-      <h2 id="another-account">Use another Discogs account</h2>
-      <p>To use a different Discogs account, sign out from the Settings menu first. Then sign in with the other account.</p>
-      <p>The app builds a library for the new account. A library kept from the earlier account is erased when that build starts.</p>
-
-      <h2 id="what-stays-on-your-apple-tv">What stays on your Apple TV</h2>
-      <p>Your library is stored on this Apple TV. Your Discogs sign-in is kept in the Keychain on this device only, and it is not synced through iCloud Keychain.</p>
-      <p>The <a href="privacy.html">privacy policy</a> lists what the app stores and which services it connects to.</p>
-
-      <h2>Next steps</h2>
-      <p>The gallery opens in CoverFlow, sorted by Recently added, so your most recently added record is in the centre.</p>
-      <p>If the gallery says <code>No vinyl yet</code>, check that your records have the format Vinyl. Then see <a href="support.html#frequently-asked-questions">Support</a>.</p>
-      <p>When the gallery opens, you are ready. <a href="how-to-use.html">How to use</a> explains the Siri Remote, the gallery, the record screen, the halo and the Settings menu.</p>
-    </article>
-  </main>
-
-  <footer>
-    <div class="container footer-inner">
-      <div>Vinyl for Apple TV — made with care by Andrei Sudarikov.</div>
-      <nav class="footer-links" aria-label="Footer">
-        <a href="index.html#features">Features</a>
-        <a href="get-started.html">Get started</a>
-        <a href="how-to-use.html">How to use</a>
-        <a href="support.html">Support</a>
-        <a href="privacy.html">Privacy</a>
-        <a href="https://github.com/andreisudarikov19/vinyl-art-apple-tv">GitHub</a>
-      </nav>
-      <p class="footer-notice">This application uses Discogs’ API but is not affiliated with, sponsored or endorsed by Discogs. ‘Discogs’ is a trademark of Zink Media, LLC.</p>
-    </div>
-  </footer>
+<header class="container">
+<div class="site-nav">
+<a href="./" class="site-nav__brand"><img width="512" height="307" src="assets/icon.png" alt="Vinyl for Apple TV icon" class="site-nav__icon"><span>Vinyl for Apple TV</span></a>
+<nav aria-label="Main" class="site-nav__links">
+<a href="index.html#features" class="site-nav__link">Features</a>
+<a href="get-started.html" aria-current="page" class="site-nav__link--current">Get started</a>
+<a href="how-to-use.html" class="site-nav__link">How to use</a>
+<a href="support.html" class="site-nav__link">Support</a>
+<a href="privacy.html" class="site-nav__link">Privacy</a>
+</nav></div></header>
+<main>
+<div class="container">
+<div class="hero">
+<div class="hero__body">
+<h1 class="hero__title">Get <em class="accent-em">started</em></h1>
+<p class="hero__sub">From a fresh install to your records on the screen, one step at a time.</p>
+<div class="hero__intro">
+<p class="text">This page covers what you need, how to sign in to Discogs, and what happens the first time you open the app. You use your Apple TV and your phone, and each step tells you which one to pick up.</p>
+<p class="text">Your Discogs password stays with Discogs. You type it only on the Discogs page on your phone. The app itself has no password field.</p>
+</div></div>
+<div class="hero__art"><img width="400" height="400" src="assets/record-tile.svg" alt="" class="hero__art-img"></div>
+</div>
+<nav aria-label="Steps" class="stepnav">
+<div class="stepnav__grid">
+<a href="#before-you-start" class="stepnav__link"><span class="num">01</span><span class="stepnav__name">Before you start</span></a>
+<a href="#getting-the-app" class="stepnav__link"><span class="num">02</span><span class="stepnav__name">Get the app</span></a>
+<a href="#sign-in" class="stepnav__link"><span class="num">03</span><span class="stepnav__name">Sign in</span></a>
+<a href="#build-library" class="stepnav__link"><span class="num">04</span><span class="stepnav__name">Build your library</span></a>
+</div>
+<div class="stepnav__more">
+<span class="stepnav__more-label">Good to know</span>
+<a href="#sign-in-again" class="stepnav__more-link">Sign in again later</a>
+<a href="#another-account" class="stepnav__more-link">Use another Discogs account</a>
+<a href="#what-stays-on-your-apple-tv" class="stepnav__more-link">What stays on your Apple TV</a>
+</div></nav>
+<section id="before-you-start" class="screen">
+<div class="screen__head"><span class="screen__code">01</span><h2 class="section-title">Before you start</h2></div>
+<div class="lede-wrap"><p class="text">Four things to have ready. If you can tick all of them, you are set.</p></div>
+<ul class="checklist">
+<li class="check-card"><svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" class="check-card__icon"><circle cx="12" cy="12" r="10.5" fill="none" stroke="#F4C444" stroke-width="1.5"/><path d="M7.5 12.4l3 3 6-6.6" fill="none" stroke="#F4C444" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><strong class="check-card__title">An Apple TV with tvOS 18 or later</strong><span class="check-card__text">tvOS is the Apple TV’s own software. To see your version, open Settings on the Apple TV, then General, then About.</span></li>
+<li class="check-card"><svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" class="check-card__icon"><circle cx="12" cy="12" r="10.5" fill="none" stroke="#F4C444" stroke-width="1.5"/><path d="M7.5 12.4l3 3 6-6.6" fill="none" stroke="#F4C444" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><strong class="check-card__title">A Discogs account</strong><span class="check-card__text">It is free. You can create one on the <a href="https://www.discogs.com">Discogs website</a>.</span></li>
+<li class="check-card"><svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" class="check-card__icon"><circle cx="12" cy="12" r="10.5" fill="none" stroke="#F4C444" stroke-width="1.5"/><path d="M7.5 12.4l3 3 6-6.6" fill="none" stroke="#F4C444" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><strong class="check-card__title">At least one vinyl record</strong><span class="check-card__text">The app shows only the records whose format on Discogs is <code class="ui-value">Vinyl</code>. CDs, cassettes and digital releases are left out.</span></li>
+<li class="check-card"><svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" class="check-card__icon"><circle cx="12" cy="12" r="10.5" fill="none" stroke="#F4C444" stroke-width="1.5"/><path d="M7.5 12.4l3 3 6-6.6" fill="none" stroke="#F4C444" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><strong class="check-card__title">A phone with a camera</strong><span class="check-card__text">You use it once, during sign-in, to scan a QR code. That is a square pattern a phone camera can read.</span></li>
+</ul>
+</section>
+<section id="getting-the-app" class="screen">
+<div class="screen__head"><span class="screen__code">02</span><h2 class="section-title">Get the app</h2></div>
+<div class="prose">
+<p class="text">The app is not on the App Store yet.</p>
+<p class="text">Is the app already on your Apple TV? Then go straight to <a href="#sign-in">Sign in</a>.</p>
+</div>
+</section>
+<section id="sign-in" class="screen">
+<div class="screen__head"><span class="screen__code">03</span><h2 class="section-title">Sign in</h2></div>
+<div class="lede-wrap"><p class="text">Signing in takes four steps. You start and finish on the Apple TV. The two steps in between happen on your phone.</p></div>
+<ol class="signin-steps">
+<li class="signin-step">
+<div class="signin-step__main">
+<span class="signin-step__num">1</span>
+<div class="signin-step__body">
+<span class="chip--tv"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" class="icon"><rect x="2" y="4" width="16" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7 17h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>On the Apple TV</span>
+<h3 class="signin-step__title">Choose <strong class="ui-name">Sign in with Discogs</strong></h3>
+<p class="text">It is the only button on the welcome screen. Press the clickpad, the round pad at the top of the remote.</p>
+<p class="text">The TV shows <code class="ui-value">Connecting to Discogs…</code> and then moves to the next screen.</p>
+</div></div>
+<img loading="lazy" width="1600" height="900" src="assets/screens/onboarding/welcome.jpg" alt="The welcome screen: the title Vinyl for Apple TV, a subtitle, and a single Sign in with Discogs button." class="signin-step__img">
+</li>
+<li class="signin-step">
+<div class="signin-step__main">
+<span class="signin-step__num">2</span>
+<div class="signin-step__body">
+<span class="chip--phone"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" class="icon"><rect x="6" y="2" width="8" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9 15.5h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>On your phone</span>
+<h3 class="signin-step__title">Scan the code on the TV</h3>
+<p class="text">Open the Camera app on your phone and point it at the square QR code on the TV. Open the link the camera offers. It takes you to a Discogs page.</p>
+<p class="text">While you do this, the TV keeps showing the code, the heading <code class="ui-value">Authorise on your phone</code> and an empty <code class="ui-value">Verification code</code> box.</p>
+</div></div>
+<img loading="lazy" width="1600" height="900" src="assets/screens/onboarding/authorize.jpg" alt="The Authorise on your phone screen: a blurred QR code on the left, and three numbered steps, an empty Verification code field and a Continue button on the right." class="signin-step__img">
+</li>
+<li class="signin-step">
+<div class="signin-step__main">
+<span class="signin-step__num">3</span>
+<div class="signin-step__body">
+<span class="chip--phone"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" class="icon"><rect x="6" y="2" width="8" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9 15.5h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>On your phone</span>
+<h3 class="signin-step__title">Get your verification code</h3>
+<p class="text">Sign in to Discogs if it asks you to, then choose <strong class="ui-name">Authorize</strong>.</p>
+<p class="text">Discogs then shows you a verification code. Note it, and keep the Discogs page open until you have typed the code on the TV.</p>
+</div></div>
+</li>
+<li class="signin-step">
+<div class="signin-step__main">
+<span class="signin-step__num">4</span>
+<div class="signin-step__body">
+<span class="chip--tv"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" class="icon"><rect x="2" y="4" width="16" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7 17h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>On the Apple TV</span>
+<h3 class="signin-step__title">Type the code on the TV</h3>
+<p class="text">Select the <code class="ui-value">Verification code</code> box. The on-screen keyboard opens. Type the code, choose <strong class="ui-name">done</strong>, then choose <strong class="ui-name">Continue</strong>.</p>
+<p class="text"><strong class="ui-name">Continue</strong> cannot be chosen until you have typed something. The TV then shows <code class="ui-value">Signing you in…</code>.</p>
+</div></div>
+<img loading="lazy" width="1600" height="900" src="assets/screens/onboarding/keyboard.jpg" alt="The on-screen keyboard under the Verification code heading, with rows of letters, digits and symbols, and a done key." class="signin-step__img">
+</li>
+</ol>
+<div class="panels">
+<aside class="panel">
+<span class="eyebrow">If it does not work</span>
+<h3 class="panel__title">The code is not accepted</h3>
+<p class="text-sm">The TV shows <code class="ui-value">Couldn’t sign in</code> and the reason. Choose <strong class="ui-name">Try again</strong> to get a new QR code, then repeat steps 2 to 4.</p>
+</aside>
+<aside class="panel">
+<span class="eyebrow">Peace of mind</span>
+<h3 class="panel__title">The app only reads</h3>
+<p class="text-sm">It reads your collection and never adds, changes or removes records on Discogs.</p><p class="text-sm">To disconnect the app later, remove its access in your <a href="https://www.discogs.com/settings/applications">Discogs application settings</a>.</p>
+</aside>
+</div>
+</section>
+<section id="build-library" class="screen">
+<div class="screen__head"><span class="screen__code">04</span><h2 class="section-title">Build your library</h2></div>
+<div class="screen__cols">
+<div class="screen__main--prose">
+<p class="text">Once you are signed in, the app fetches your collection from Discogs and builds your library. This happens by itself. You only need to wait.</p>
+<h3 class="subhead">What you see</h3>
+<p class="text">The TV first shows <code class="ui-value">Fetching your collection…</code>. Then it shows <code class="ui-value">Building your library</code> with a count, such as <code class="ui-value">Fetching 247/812 albums…</code>. The count includes everything in your Discogs collection, not only the vinyl records.</p>
+<h3 class="subhead">How long it takes</h3>
+<p class="text">The app reads your collection 100 records at a time, so a large collection takes longer.</p>
+<p class="text">Sometimes Discogs asks the app to slow down. The app then pauses for 5, 15 and then 30 seconds, and reports an error only after that.</p>
+<h3 class="subhead">When it is done</h3>
+<p class="text">When the count finishes, the gallery opens. The app keeps looking for better cover images in the background, so some covers change while you browse. <a href="how-to-use.html#cover-art">How to use</a> explains where they come from.</p>
+<h3 class="subhead">When it runs again</h3>
+<p class="text">The build runs the first time you sign in. It runs again after you erase the library, or when you sign in with a different Discogs account.</p>
+</div>
+<aside class="panel--side">
+<span class="eyebrow">If it does not work</span>
+<h3 class="panel__title">The build fails</h3>
+<p class="text-sm">The TV shows <code class="ui-value">Couldn’t build your library</code> and the reason. You have two choices.</p>
+<ul class="options">
+<li class="options__item"><strong class="ui-name">Retry</strong> starts the build again.</li>
+<li class="options__item"><strong class="ui-name">Continue anyway</strong> opens the gallery without a library. You can build it later with <strong class="ui-name">Refresh collection</strong> in the settings menu. The build also starts again by itself the next time you open the app.</li>
+</ul>
+</aside>
+</div>
+</section>
+<section class="band-ready">
+<div class="band__body">
+<h2 class="band__title">You are <em class="em-light">ready</em></h2>
+<p class="band__lead">When the gallery opens, your records appear as a row of covers, with the one you added most recently in the centre.</p>
+<p class="band__note">Does the gallery say <code class="ui-value--on-yolk">No vinyl yet</code>? Check that your records have the format <code class="ui-value--on-yolk">Vinyl</code> on Discogs. If they do, see <a href="support.html" class="link-on-yolk">Support</a>.</p>
+</div>
+<a href="how-to-use.html" class="btn-dark">Next: How to use<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" class="icon"><path d="M4 10h12M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+</section>
+<div class="side-rule"><span class="eyebrow">Bonus tracks</span><span aria-hidden="true" class="side-rule__line"></span><span class="side-rule__name">Good to know</span></div>
+<div class="card-grid">
+<section id="sign-in-again" class="card">
+<h2 class="card__title">Sign in again later</h2>
+<p class="text-sm">If you signed out with <strong class="ui-name">Sign out (keep library)</strong>, sign in with the same Discogs account and the gallery opens at once. The app then adds any records you have added since.</p>
+<p class="text-sm">If Discogs stops accepting the sign-in, the app returns to the welcome screen with a notice that says so.</p>
+<p class="text-sm">If you delete the app and install it again, you need to sign in again. The first launch removes the sign-in that the earlier install left behind.</p>
+</section>
+<section id="another-account" class="card">
+<h2 class="card__title">Use another Discogs account</h2>
+<p class="text-sm">Sign out from the settings menu first. Then sign in with the other account.</p>
+<p class="text-sm">The app builds a library for the new account. A library kept from the earlier account is erased when that build starts.</p>
+</section>
+<section id="what-stays-on-your-apple-tv" class="card">
+<h2 class="card__title">What stays on your Apple TV</h2>
+<p class="text-sm">Your library is stored on this Apple TV.</p>
+<p class="text-sm">Your Discogs sign-in is kept on this Apple TV only, in its Keychain, which is Apple’s secure storage for sign-ins. It is not synced through iCloud Keychain.</p>
+<p class="text-sm">The <a href="privacy.html">privacy policy</a> lists what the app stores and which services it connects to.</p>
+</section>
+</div>
+</div>
+</main>
+<footer class="site-footer">
+<div class="container">
+<div class="site-footer__row">
+<span>Vinyl for Apple TV — made with care by Andrei Sudarikov.</span>
+<div class="site-footer__links">
+<a href="index.html#features" class="site-footer__link">Features</a>
+<a href="get-started.html" class="site-footer__link">Get started</a>
+<a href="how-to-use.html" class="site-footer__link">How to use</a>
+<a href="support.html" class="site-footer__link">Support</a>
+<a href="privacy.html" class="site-footer__link">Privacy</a>
+<a href="https://github.com/andreisudarikov19/vinyl-art-apple-tv" class="site-footer__link">GitHub</a>
+</div></div>
+<p class="site-footer__notice">This application uses Discogs’ API but is not affiliated with, sponsored or endorsed by Discogs. ‘Discogs’ is a trademark of Zink Media, LLC.</p>
+</div></footer>
 </body>
 </html>
