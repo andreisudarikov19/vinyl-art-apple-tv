@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 985" role="img" aria-labelledby="signin-t signin-d">
+  <title id="signin-t">Sign-in screens: remote controls</title>
+  <desc id="signin-d">Numbers used on this screen: 5 clickpad press, activate the highlighted button: Sign in with Discogs, Continue or Try again.</desc>
+  <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="208.5" y="14" width="243" height="943" rx="42"/>
+    <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
+    <line x1="323" y1="61.5" x2="337" y2="61.5"/>
+    <circle cx="403.5" cy="62" r="21"/>
+    <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
+    <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
+    <circle cx="330" cy="212" r="107.5"/>
+    <circle cx="330" cy="212" r="58"/>
+    <circle cx="278" cy="370" r="42.5"/>
+    <polyline points="284.5,356 272,370 284.5,384"/>
+    <circle cx="382" cy="370" r="42.5"/>
+    <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
+    <line x1="376" y1="381.5" x2="388" y2="381.5"/>
+    <circle cx="278" cy="472.5" r="42.5"/>
+    <polygon points="266,461.5 266,483.5 279,472.5"/>
+    <line x1="284" y1="461.5" x2="284" y2="483.5"/>
+    <line x1="290" y1="461.5" x2="290" y2="483.5"/>
+    <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
+    <line x1="382" y1="461.5" x2="382" y2="483.5"/>
+    <line x1="371" y1="472.5" x2="393" y2="472.5"/>
+    <line x1="371" y1="575.5" x2="393" y2="575.5"/>
+    <circle cx="278" cy="575" r="42.5"/>
+    <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
+    <line x1="265" y1="588" x2="268.5" y2="584.5"/>
+    <line x1="281" y1="572" x2="290" y2="563"/>
+  </g>
+  <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+    <line x1="371.01" y1="170.99" x2="406.01" y2="135.99" stroke-opacity="0.45"/>
+    <line x1="371.01" y1="253.01" x2="406.01" y2="288.01" stroke-opacity="0.45"/>
+    <line x1="288.99" y1="253.01" x2="253.99" y2="288.01" stroke-opacity="0.45"/>
+    <line x1="288.99" y1="170.99" x2="253.99" y2="135.99" stroke-opacity="0.45"/>
+    <circle cx="330" cy="212" r="15"/>
+  </g>
+  <g fill="currentColor" font-family="sans-serif" font-size="16" text-anchor="middle">
+    <text x="330" y="217.6">5</text>
+  </g>
+</svg>
