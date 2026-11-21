@@ -43,14 +43,16 @@
 
       <h2>What the app accesses</h2>
       <ul>
-        <li><strong>Your Discogs account.</strong> When you sign in, the app uses Discogs’s OAuth flow so you can authorise it to read your collection. The app receives an access token, which it uses to read your Discogs username, list the records you own and read their public metadata (artist, title, tracklist, year, catalogue number). The app only reads: it never makes changes to your Discogs account.</li>
-        <li><strong>Cover-art lookups.</strong> For every record in your collection, the app queries the public MusicBrainz API by release metadata (artist + album + catalogue number) to find the matching release, then asks the public Cover Art Archive for its front cover. When the Cover Art Archive has one, the app shows it in place of the Discogs cover. These are anonymous queries — no account information is sent.</li>
+        <li><strong>Your Discogs account.</strong> When you sign in, the app uses Discogs’s OAuth flow so you can authorise it to read your collection. The app receives an access token (the key the app uses to reach Discogs), which it uses to read your Discogs username, list the records you own and read their public metadata (artist, title, tracklist, year, catalogue number). The app only reads: it never makes changes to your Discogs account.</li>
+        <li><strong>Cover-art lookups.</strong> For every record in your collection, the app queries the public MusicBrainz API by artist, title and, if the record has one, catalogue number. It uses that to find the matching release, then asks the public Cover Art Archive for its front cover. When the Cover Art Archive has one, the app shows it in place of the Discogs cover. These are anonymous queries — no account information is sent.</li>
       </ul>
 
       <h2>What the app stores</h2>
       <ul>
-        <li><strong>On your Apple TV, locally only.</strong> Your Discogs collection is cached on-device using SwiftData (Apple’s standard local-storage framework). Cover images are cached using the Nuke image library. Your access token is stored in the Apple TV’s Keychain, on this device only: it is never synced through iCloud Keychain. None of this leaves the Apple TV.</li>
-        <li><strong>Not in iCloud.</strong> The app stores nothing in iCloud, and tvOS does not back the app’s data up there: iCloud Backup covers iPhone, iPad and Apple Vision Pro, not Apple TV.</li>
+        <li><strong>Stored on your Apple TV, and what leaves it.</strong> Your Discogs collection is saved on the device. Cover images are saved on the device too. The system may also clear your saved collection and cover images when space is low. Your access token (the key the app uses to reach Discogs) stays in the Apple TV’s secure storage, on this device only. It is never copied to other devices through iCloud, Apple’s online storage service. Your collection stays on the Apple TV; only the release details for cover lookups leave it.</li>
+        <li><strong>Sent online to find cover art.</strong> For every record, the app searches MusicBrainz, an online music database, for the matching release. It then asks the Cover Art Archive, an online image library, for its front cover.</li>
+        <li><strong>Display choices.</strong> Your layout, sort order and display settings are saved on the Apple TV with the app’s other data.</li>
+        <li><strong>Not in iCloud.</strong> The app stores nothing in iCloud, Apple’s online storage service.</li>
       </ul>
 
       <h2>What the app does <em>not</em> do</h2>
@@ -74,13 +76,15 @@
 
       <h2 id="your-choices">Your choices</h2>
       <ul>
-        <li><strong>Signing out.</strong> Sign out (keep library) removes the Discogs sign-in from the Apple TV and keeps your library there. Sign out &amp; erase library also deletes the library. Both options are in the Settings menu.</li>
+        <li><strong>Signing out: before handing over or switching accounts.</strong> To hand the Apple TV to someone else, or to sign in with a different Discogs account, choose “Sign out &amp; erase library” first. If you keep the library instead, it is erased when the app next builds the library for a different Discogs account on this Apple TV.</li>
+        <li><strong>Signing out: keep library.</strong> Choose “Sign out (keep library)” only if you plan to sign back in to the same account later. It removes the Discogs sign-in and keeps your library. A kept library belongs only to the Discogs account it came from. To delete it later, sign in to that account and choose “Sign out &amp; erase library”.</li>
+        <li><strong>Signing out: erase library.</strong> To remove your saved collection from the Apple TV, choose “Sign out &amp; erase library”. It happens straight away, with no confirmation step. It removes the Discogs sign-in and your saved collection. Your collection on Discogs is not changed. The cover images are kept after you erase the library. Deleting the app removes them.</li>        <li><strong>Signing out: display choices.</strong> Your layout, sort order and display settings stay after either sign-out option, so the next person sees them too. To clear them as well, delete the app, as described under Deleting data. Both of the sign-out options are in the Settings menu, opened from the gear icon in the gallery toolbar.</li>
         <li><strong>Revoking access.</strong> You can disconnect the app from your Discogs account at any time from <a href="https://www.discogs.com/settings/applications">your Discogs application settings</a>. Doing so immediately invalidates the access token. The next time the app reaches Discogs (it does each time it starts, and when you open a record), it returns to the welcome screen and asks you to sign in again. Your library stays on the Apple TV, so signing back in to the same account shows it at once.</li>
-        <li><strong>Deleting data.</strong> Deleting the app from your Apple TV (choose Delete, not Offload, which keeps the app’s data) removes the cached collection and cover images at once. It does not remove the access token: Keychain items outlive the app, so the token stays on the Apple TV until you install the app again, and the first launch of that install removes it. You then sign in afresh. To remove the token straight away, choose Sign out (keep library) in the app’s Settings menu before deleting the app. You can also revoke access from your Discogs application settings at any time.</li>
+        <li><strong>Deleting data.</strong> To free space, delete the app. Erasing the library keeps the cover images. Deleting the app from your Apple TV removes your saved collection and the cover images. Deleting the app also removes your layout, sort order and display settings. They are stored with the app’s data. The app does not copy the token to other devices through iCloud. The app keeps the token when you delete it, and removes the token the first time it runs after you install the app again. You then sign in afresh. To remove the token straight away, choose “Sign out &amp; erase library” in the Settings menu before deleting the app. You can also revoke access from your Discogs application settings at any time.</li>
       </ul>
 
       <h2>Changes to this policy</h2>
-      <p>If this policy changes in a meaningful way, the change will be noted here and the “Last updated” date will be revised. Because the app collects nothing, material changes are not expected.</p>
+      <p>If this policy changes in a meaningful way, the change will be noted here and the “Last updated” date will be revised. The app collects no personal data.</p>
 
       <h2>Contact</h2>
       <p>For privacy questions, write to <a href="mailto:support.vinyl.for.appletv@gmail.com">support.vinyl.for.appletv@gmail.com</a>. For bug reports, the project’s <a href="https://github.com/andreisudarikov19/vinyl-art-apple-tv/issues">GitHub issues page</a> is the fastest route.</p>
