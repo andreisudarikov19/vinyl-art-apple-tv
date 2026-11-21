@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 985" role="img" aria-labelledby="cover-flow-t cover-flow-d">
   <title id="cover-flow-t">Gallery, CoverFlow view: remote controls</title>
-  <desc id="cover-flow-d">Numbers used on this screen: 1 clickpad up, move to the toolbar. 3 clickpad left, previous record. 4 clickpad right, next record. 5 clickpad press, open the record.</desc>
+  <desc id="cover-flow-d">Numbers used on this screen: 1 clickpad (the touch pad on top of the remote) up, move to the toolbar. 3 clickpad left, previous record. 4 clickpad right, next record. 5 clickpad press, open the record.</desc>
   <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
     <rect x="208.5" y="14" width="243" height="943" rx="42"/>
     <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
@@ -28,20 +28,22 @@
     <line x1="265" y1="588" x2="268.5" y2="584.5"/>
     <line x1="281" y1="572" x2="290" y2="563"/>
   </g>
-  <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
-    <line x1="371.01" y1="170.99" x2="406.01" y2="135.99" stroke-opacity="0.45"/>
-    <line x1="371.01" y1="253.01" x2="406.01" y2="288.01" stroke-opacity="0.45"/>
-    <line x1="288.99" y1="253.01" x2="253.99" y2="288.01" stroke-opacity="0.45"/>
-    <line x1="288.99" y1="170.99" x2="253.99" y2="135.99" stroke-opacity="0.45"/>
-    <circle cx="330" cy="129" r="15"/>
-    <circle cx="247" cy="212" r="15"/>
-    <circle cx="413" cy="212" r="15"/>
-    <circle cx="330" cy="212" r="15"/>
+  <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
+    <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
+    <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
+    <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
+    <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
   </g>
-  <g fill="currentColor" font-family="sans-serif" font-size="16" text-anchor="middle">
-    <text x="330" y="134.6">1</text>
-    <text x="247" y="217.6">3</text>
-    <text x="413" y="217.6">4</text>
-    <text x="330" y="217.6">5</text>
+  <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+    <circle cx="330" cy="129" r="19"/>
+    <circle cx="247" cy="212" r="19"/>
+    <circle cx="413" cy="212" r="19"/>
+    <circle cx="330" cy="212" r="19"/>
+  </g>
+  <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
+    <text x="330" y="137.4" font-family="sans-serif">1</text>
+    <text x="247" y="220.4" font-family="sans-serif">3</text>
+    <text x="413" y="220.4" font-family="sans-serif">4</text>
+    <text x="330" y="220.4" font-family="sans-serif">5</text>
   </g>
 </svg>
