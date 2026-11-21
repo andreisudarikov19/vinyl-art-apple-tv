@@ -521,6 +521,8 @@ footer {
   --card-bg: #15120e;
   --badge-ink: #0a0908;
   max-width: calc(1120px + 2 * var(--content-pad));
+  /* Desktop: the content column is 1104px wide, as in the design */
+  padding-right: calc(var(--content-pad) + 16px);
   font-family: var(--sans);
   font-size: 17px;
   line-height: 1.6;
@@ -673,7 +675,7 @@ footer {
   margin: 109px 0 0 4px;
   align-self: start;
 }
-.how-to .meet .panel svg { top: 22px; width: 423.5px; }
+.how-to .meet .panel svg { top: 22px; width: 423.5px; transform: translateX(calc(-50% + 0.5px)); }
 .how-to .meet h2 { font-size: clamp(2.6rem, 4.6vw, 3.6rem); line-height: 1.05; margin: 0 0 20px; }
 .how-to .meet .kicker { margin: 0 0 12px; display: block; }
 .how-to .meet-list {
@@ -705,10 +707,12 @@ footer {
   position: absolute;
   top: 18.1px;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(calc(-50% + 0.45px));
   width: 344.2px;
   height: auto;
 }
+/* Outline colour of the remote drawings, as in the design (the stroke is the currentColor group) */
+.how-to svg { color: rgb(159, 157, 153); }
 /* The remote fades out over the bottom 12% of the panel, from 88% down, as in the design */
 .how-to .panel::after {
   content: "";
@@ -737,11 +741,11 @@ footer {
   gap: 18px;
   font-size: clamp(2.5rem, 4.6vw, 3.6rem);
   line-height: 1.05;
-  margin: 0 0 36px;
+  margin: 0 0 29px;
 }
 .how-to .chapter-body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-columns: minmax(0, 1fr) 340px;
   gap: 56px;
   align-items: start;
 }
@@ -845,25 +849,28 @@ footer {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: start;
-  gap: 24px;
+  gap: 32px;
   margin-top: 8px;
 }
 .how-to .bonus-card {
-  padding: 36px;
+  padding: 28px;
   border: 1px solid var(--rule);
   border-radius: 22px;
   background: var(--card-bg);
 }
-.how-to .bonus-card h2 { font-size: clamp(2.1rem, 3.4vw, 2.8rem); margin-bottom: 20px; }
+.how-to .bonus-card h2 { font-size: 1.8rem; line-height: 1.2; margin-bottom: 20px; }
+.how-to .bonus-card .badge { margin-bottom: 22px; }
+.how-to .bonus-card p,
+.how-to .bonus-card li { line-height: 1.5; }
 .how-to .bonus-card > ol { padding-left: 1.6em; margin: 0 0 1em; }
 .how-to .bonus-card > ol li::marker { color: var(--yolk); font-family: var(--mono); font-size: 14px; }
-.how-to .bonus-card > ol li { margin-bottom: 10px; }
+.how-to .bonus-card > ol li { margin-bottom: 12px; }
 .how-to .bonus-card .controls-layout {
   background: none;
   border: 0;
   border-radius: 0;
-  padding: 24px 0 0;
-  margin-top: 28px;
+  padding: 22px 0 0;
+  margin-top: 21px;
   border-top: 1px solid var(--rule);
   border-radius: 0;
 }
@@ -872,14 +879,14 @@ footer {
 .how-to .bonus-card .panel {
   width: 70px;
   height: 132.5px;
-  margin: 0 0 0 -5px;
+  margin: 0 0 0 3px;
   background: none;
 }
 .how-to .bonus-card .panel svg { top: 0; width: 187.2px; }
 /* The mini remote sits to the left of its label and list, as in the design */
 .how-to .bonus-card .controls-layout tr {
   display: grid;
-  grid-template-columns: 90px minmax(0, 1fr);
+  grid-template-columns: 98px minmax(0, 1fr);
   align-items: start;
 }
 .how-to .bonus-card .controls-layout td.drawing { display: contents; }
