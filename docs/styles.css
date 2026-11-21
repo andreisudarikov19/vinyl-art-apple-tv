@@ -395,14 +395,6 @@ section + section { border-top: 1px solid var(--surface-border); }
   border-radius: 12px;
   border: 1px solid var(--surface-border);
 }
-.content figure { margin: 28px 0; }
-.content figure img.screen { margin: 0; }
-.content figcaption {
-  margin-top: 10px;
-  color: var(--text-faint);
-  font-size: 0.92rem;
-  line-height: 1.5;
-}
 
 /* Controls on how-to-use.html: each screen has a layout table, with the
    remote drawing beside its numbered list. Under 600px the two cells stack,
@@ -416,10 +408,6 @@ section + section { border-top: 1px solid var(--surface-border); }
   vertical-align: top;
   padding: 0;
   border: 0;
-  background: none;
-}
-.content .controls-layout td:first-child {
-  position: static;
   background: none;
 }
 .content .controls-layout td.drawing { padding-right: 28px; }
@@ -530,10 +518,6 @@ a.feature:hover { border-color: rgba(255, 193, 7, 0.4); }
 .callout.info {
   background: rgba(90, 200, 250, 0.08);
   border-left-color: #5ac8fa;
-}
-.callout.tip {
-  background: rgba(48, 209, 88, 0.08);
-  border-left-color: #30d158;
 }
 
 /* --- Footer --- */
