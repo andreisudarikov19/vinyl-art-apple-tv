@@ -888,10 +888,12 @@ footer {
   display: grid;
   grid-template-columns: 98px minmax(0, 1fr);
   align-items: start;
+  align-content: start;
+  min-height: 132.5px;
 }
 .how-to .bonus-card .controls-layout td.drawing { display: contents; }
-.how-to .bonus-card .card-label { grid-column: 2; grid-row: 1; }
-.how-to .bonus-card .panel { grid-column: 1; grid-row: 1 / span 2; }
+.how-to .bonus-card .card-label { grid-column: 2; grid-row: 1; margin-bottom: 13px; }
+.how-to .bonus-card .panel { grid-column: 1; grid-row: 1; margin-bottom: -132.5px; }
 .how-to .bonus-card .controls-layout td.list { grid-column: 2; grid-row: 2; }
 .how-to .bonus-card .panel::after { background: linear-gradient(to bottom, transparent, var(--card-bg)); }
 
