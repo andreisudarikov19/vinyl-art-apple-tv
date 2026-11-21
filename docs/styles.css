@@ -934,3 +934,12 @@ footer {
   .how-to .items tr:last-child td { border-bottom: 0; }
   .how-to .items tr:last-child th { border-bottom: 0; }
 }
+
+/* Back button glyph used in the How to use text. */
+.how-to .back-glyph {
+  display: inline-block;
+  width: 1.3em;
+  height: 1.3em;
+  vertical-align: -0.3em;
+  color: var(--ink, currentColor);
+}
