@@ -45,6 +45,12 @@ targets:
         product: Nuke
       - package: Nuke
         product: NukeUI
+      # Xcode runs the App Intents metadata extractor on every app target.
+      # Without this framework it prints "Metadata extraction skipped" on
+      # every build. The app has no App Intents code, so the extractor finds
+      # nothing and writes no output. Linking the system framework lets it run
+      # its normal path. Remove this line only together with that warning.
+      - sdk: AppIntents.framework
 
   VinylForAppleTVTests:
     type: bundle.unit-test
