@@ -21,9 +21,10 @@
         <img src="assets/icon.png" alt="Vinyl for Apple TV icon">
         <span>Vinyl for Apple TV</span>
       </a>
-      <nav class="nav-links">
+      <nav class="nav-links" aria-label="Main">
         <a href="index.html#features">Features</a>
-        <a href="guide.html">Guide</a>
+        <a href="get-started.html">Get started</a>
+        <a href="how-to-use.html">How to use</a>
         <a href="support.html">Support</a>
         <a href="privacy.html" aria-current="page">Privacy</a>
       </nav>
@@ -48,13 +49,13 @@
 
       <h2>What the app stores</h2>
       <ul>
-        <li><strong>On your Apple TV, locally only.</strong> Your Discogs collection is cached on-device using SwiftData (Apple’s standard local-storage framework). Cover images are cached using the Nuke image library. Your access token is stored in the Apple TV’s keychain, on this device only: it is never synced through iCloud Keychain. None of this leaves the Apple TV.</li>
+        <li><strong>On your Apple TV, locally only.</strong> Your Discogs collection is cached on-device using SwiftData (Apple’s standard local-storage framework). Cover images are cached using the Nuke image library. Your access token is stored in the Apple TV’s Keychain, on this device only: it is never synced through iCloud Keychain. None of this leaves the Apple TV.</li>
         <li><strong>Not in iCloud.</strong> The app stores nothing in iCloud, and tvOS does not back the app’s data up there: iCloud Backup covers iPhone, iPad and Apple Vision Pro, not Apple TV.</li>
       </ul>
 
       <h2>What the app does <em>not</em> do</h2>
       <ul>
-        <li><strong>No analytics.</strong> The app does not include Google Analytics, Firebase, Mixpanel, Segment, Sentry, Crashlytics, or any other telemetry SDK. Crash logs that you choose to share with Apple via the system-level "Share with App Developers" setting are the only signal the developer ever receives, and they contain no personal information beyond what Apple itself anonymises.</li>
+        <li><strong>No analytics.</strong> The app does not include Google Analytics, Firebase, Mixpanel, Segment, Sentry, Crashlytics, or any other telemetry SDK. Crash logs that you choose to share with Apple via the system-level “Share with App Developers” setting are the only signal the developer ever receives, and they contain no personal information beyond what Apple itself anonymises.</li>
         <li><strong>No advertising.</strong> The app shows no ads and contains no advertising SDKs. There is no tracker that follows you between apps or websites.</li>
         <li><strong>No third-party servers.</strong> The app talks directly to <a href="https://www.discogs.com">Discogs</a>, <a href="https://coverartarchive.org">Cover Art Archive</a>, and <a href="https://musicbrainz.org">MusicBrainz</a> over HTTPS. The Cover Art Archive is a joint project of MusicBrainz and the Internet Archive, so its images download from the Internet Archive’s servers. There is no backend operated by the developer.</li>
         <li><strong>No data sale.</strong> The developer never sells, shares, or transmits any personal information about you, because the developer never receives any to begin with.</li>
@@ -71,14 +72,15 @@
       <h2>Children’s privacy</h2>
       <p>The app does not knowingly collect any data from anyone, regardless of age.</p>
 
-      <h2>Your choices</h2>
+      <h2 id="your-choices">Your choices</h2>
       <ul>
+        <li><strong>Signing out.</strong> Sign out (keep library) removes the Discogs sign-in from the Apple TV and keeps your library there. Sign out &amp; erase library also deletes the library. Both options are in the Settings menu.</li>
         <li><strong>Revoking access.</strong> You can disconnect the app from your Discogs account at any time from <a href="https://www.discogs.com/settings/applications">your Discogs application settings</a>. Doing so immediately invalidates the access token. The next time the app reaches Discogs (it does each time it starts, and when you open a record), it returns to the welcome screen and asks you to sign in again. Your library stays on the Apple TV, so signing back in to the same account shows it at once.</li>
-        <li><strong>Deleting data.</strong> Deleting the app from your Apple TV (choose Delete, not Offload, which keeps the app’s data) removes the cached collection and cover images at once. It does not remove the access token: keychain items outlive the app, so the token stays on the Apple TV until you install the app again, and the first launch of that install removes it. You then sign in afresh. To remove the token straight away, choose Sign out (keep library) in the app’s Settings menu before deleting the app. You can also revoke access from your Discogs application settings at any time.</li>
+        <li><strong>Deleting data.</strong> Deleting the app from your Apple TV (choose Delete, not Offload, which keeps the app’s data) removes the cached collection and cover images at once. It does not remove the access token: Keychain items outlive the app, so the token stays on the Apple TV until you install the app again, and the first launch of that install removes it. You then sign in afresh. To remove the token straight away, choose Sign out (keep library) in the app’s Settings menu before deleting the app. You can also revoke access from your Discogs application settings at any time.</li>
       </ul>
 
       <h2>Changes to this policy</h2>
-      <p>If this policy changes in a meaningful way, the change will be noted here and the "Last updated" date will be revised. Because the app collects nothing, material changes are not expected.</p>
+      <p>If this policy changes in a meaningful way, the change will be noted here and the “Last updated” date will be revised. Because the app collects nothing, material changes are not expected.</p>
 
       <h2>Contact</h2>
       <p>For privacy questions, write to <a href="mailto:support.vinyl.for.appletv@gmail.com">support.vinyl.for.appletv@gmail.com</a>. For bug reports, the project’s <a href="https://github.com/andreisudarikov19/vinyl-art-apple-tv/issues">GitHub issues page</a> is the fastest route.</p>
@@ -88,12 +90,14 @@
   <footer>
     <div class="container footer-inner">
       <div>Vinyl for Apple TV — made with care by Andrei Sudarikov.</div>
-      <div class="footer-links">
-        <a href="guide.html">Guide</a>
-        <a href="privacy.html">Privacy</a>
+      <nav class="footer-links" aria-label="Footer">
+        <a href="index.html#features">Features</a>
+        <a href="get-started.html">Get started</a>
+        <a href="how-to-use.html">How to use</a>
         <a href="support.html">Support</a>
+        <a href="privacy.html">Privacy</a>
         <a href="https://github.com/andreisudarikov19/vinyl-art-apple-tv">GitHub</a>
-      </div>
+      </nav>
       <p class="footer-notice">This application uses Discogs’ API but is not affiliated with, sponsored or endorsed by Discogs. ‘Discogs’ is a trademark of Zink Media, LLC.</p>
     </div>
   </footer>

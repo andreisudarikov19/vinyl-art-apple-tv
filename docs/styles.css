@@ -5,7 +5,7 @@
   --surface-border: rgba(255, 247, 233, 0.08);
   --text: #faf7f2;
   --text-muted: rgba(250, 247, 242, 0.62);
-  --text-faint: rgba(250, 247, 242, 0.38);
+  --text-faint: rgba(250, 247, 242, 0.56);
   --yolk: #ffc107;
   --yolk-warm: #ffb300;
   --yolk-glow: rgba(255, 193, 7, 0.22);
@@ -45,6 +45,13 @@ a {
   transition: border-color 120ms ease, color 120ms ease;
 }
 a:hover { border-bottom-color: var(--yolk); }
+a:focus-visible,
+.btn:focus-visible,
+.faq summary:focus-visible {
+  outline: 2px solid var(--yolk);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
 
 h1, h2, h3 {
   font-weight: 700;
@@ -95,7 +102,8 @@ p.lead { font-size: clamp(1.15rem, 1.8vw, 1.35rem); color: var(--text); line-hei
   color: var(--text-muted);
   border: none;
 }
-.nav-links a:hover { color: var(--text); }
+.nav-links a:hover,
+.nav-links a[aria-current="page"] { color: var(--text); }
 
 /* --- Hero --- */
 .hero {
@@ -146,6 +154,13 @@ p.lead { font-size: clamp(1.15rem, 1.8vw, 1.35rem); color: var(--text); line-hei
   cursor: pointer;
   transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
 }
+/* A link styled as a button, for the call to action. */
+.btn-link {
+  background: var(--yolk);
+  color: #0a0908;
+}
+.btn-link:hover { background: var(--yolk-warm); }
+
 /* Not a link: shown until the App Store page exists. */
 .btn-soon {
   background: var(--surface);
@@ -346,9 +361,11 @@ section + section { border-top: 1px solid var(--surface-border); }
 .content {
   padding-top: clamp(40px, 6vw, 80px);
   padding-bottom: clamp(60px, 8vw, 100px);
-  /* A 720px column inside the container's side gutters. */
+  /* A 720px column inside the container's side gutters. Long words, such as
+     the support email, wrap instead of overflowing a narrow phone. */
   max-width: calc(720px + 2 * var(--content-pad));
   margin: 0 auto;
+  overflow-wrap: anywhere;
 }
 .content h1 { font-size: clamp(2rem, 4vw, 2.8rem); margin-bottom: 16px; }
 .content .updated, .content .subtitle { color: var(--text-faint); font-size: 0.9rem; margin-bottom: 40px; }
@@ -378,6 +395,22 @@ section + section { border-top: 1px solid var(--surface-border); }
   border-radius: 12px;
   border: 1px solid var(--surface-border);
 }
+.content figure { margin: 28px 0; }
+.content figure img.screen { margin: 0; }
+.content figcaption {
+  margin-top: 10px;
+  color: var(--text-faint);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+/* Hub cards on guide.html are links. */
+a.feature {
+  display: block;
+  color: inherit;
+  transition: border-color 120ms ease;
+}
+a.feature:hover { border-color: rgba(255, 193, 7, 0.4); }
 
 .faq details {
   background: var(--surface);

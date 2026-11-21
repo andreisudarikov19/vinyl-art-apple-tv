@@ -17,13 +17,14 @@
 <body>
   <header>
     <div class="container nav">
-      <a class="nav-brand" href="./" aria-current="page">
+      <a class="nav-brand" href="./">
         <img src="assets/icon.png" alt="Vinyl for Apple TV icon">
         <span>Vinyl for Apple TV</span>
       </a>
-      <nav class="nav-links">
-        <a href="#features">Features</a>
-        <a href="guide.html">Guide</a>
+      <nav class="nav-links" aria-label="Main">
+        <a href="index.html#features" aria-current="page">Features</a>
+        <a href="get-started.html">Get started</a>
+        <a href="how-to-use.html">How to use</a>
         <a href="support.html">Support</a>
         <a href="privacy.html">Privacy</a>
       </nav>
@@ -90,7 +91,7 @@
           </figcaption>
         </figure>
         <figure class="showcase-item" style="margin: 0;">
-          <img src="assets/screens/record.jpg" alt="The record screen: tracklist, credits, year, genre and style tags, and a tuner slider for the record's sides">
+          <img src="assets/screens/record.jpg" alt="The record screen: tracklist, credits, year, genre and style tags, and a tuner slider for the record’s sides">
           <figcaption class="caption">
             <h3>The record screen</h3>
             <p>Tracklist, credits, year, genre and style tags, and a tuner slider for the record’s sides.</p>
@@ -112,6 +113,7 @@
       <p class="lead">Bring a Discogs account with at least a few records on the shelf — the app will do the rest.</p>
       <div class="cta-row" style="justify-content: flex-start; margin-top: 32px;">
         <span class="btn btn-soon">Coming soon to the App Store</span>
+        <a class="btn btn-link" href="get-started.html">Read the setup guide</a>
       </div>
     </section>
   </main>
@@ -135,12 +137,14 @@
   <footer>
     <div class="container footer-inner">
       <div>Vinyl for Apple TV — made with care by Andrei Sudarikov.</div>
-      <div class="footer-links">
-        <a href="guide.html">Guide</a>
-        <a href="privacy.html">Privacy</a>
+      <nav class="footer-links" aria-label="Footer">
+        <a href="index.html#features">Features</a>
+        <a href="get-started.html">Get started</a>
+        <a href="how-to-use.html">How to use</a>
         <a href="support.html">Support</a>
+        <a href="privacy.html">Privacy</a>
         <a href="https://github.com/andreisudarikov19/vinyl-art-apple-tv">GitHub</a>
-      </div>
+      </nav>
       <p class="footer-notice">This application uses Discogs’ API but is not affiliated with, sponsored or endorsed by Discogs. ‘Discogs’ is a trademark of Zink Media, LLC.</p>
     </div>
   </footer>
