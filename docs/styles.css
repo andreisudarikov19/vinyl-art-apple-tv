@@ -695,6 +695,17 @@ footer {
   width: min(320px, 100%);
   height: auto;
 }
+/* The remote fades out at the bottom of the panel, as in the design */
+.how-to .panel::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 40%;
+  background: linear-gradient(to bottom, transparent, var(--panel-bg));
+  pointer-events: none;
+}
 /* Number badges on the drawings: yolk discs with dark digits. Only the numbered
    circles (stroke-width 1.2) change; the remote outlines keep their stroke colour. */
 .how-to svg g[stroke-width="1.2"] circle { fill: var(--yolk); stroke: var(--yolk); }
