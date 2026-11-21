@@ -404,26 +404,8 @@ section + section { border-top: 1px solid var(--surface-border); }
   line-height: 1.5;
 }
 
-/* Gesture table on how-to-use.html. The wrapper scrolls sideways on narrow
-   screens; the first column stays visible while it scrolls. */
-.table-wrap { overflow-x: auto; margin: 24px 0; }
-.content table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
-.content th, .content td {
-  text-align: left;
-  vertical-align: top;
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--surface-border);
-  color: var(--text-muted);
-}
-.content th { color: var(--text); font-weight: 600; }
-.content th:first-child,
-.content td:first-child {
-  position: sticky;
-  left: 0;
-  background: var(--bg);
-}
 /* Controls on how-to-use.html: each screen has a layout table, with the
-   remote drawing beside its numbered list. On phones the two cells stack,
+   remote drawing beside its numbered list. Under 600px the two cells stack,
    one under the other. The table is a layout, so its cells are not headers. */
 .content .controls-layout {
   width: 100%;
@@ -440,14 +422,11 @@ section + section { border-top: 1px solid var(--surface-border); }
   position: static;
   background: none;
 }
-.content .controls-layout td.drawing {
-  width: 180px;
-  padding-right: 28px;
-}
+.content .controls-layout td.drawing { padding-right: 28px; }
 .content .controls-layout svg {
   display: block;
-  width: 100%;
-  max-width: 180px;
+  width: 220px;
+  max-width: 220px;
   height: auto;
 }
 .content .controls-layout ol,
@@ -467,7 +446,7 @@ section + section { border-top: 1px solid var(--surface-border); }
    the digits change; the outline strokes keep their own colour. */
 .content .controls-layout svg text { fill: var(--yolk); }
 
-@media (max-width: 600px) {
+@media (max-width: 599px) {
   .content .controls-layout,
   .content .controls-layout tbody,
   .content .controls-layout tr,
@@ -476,7 +455,10 @@ section + section { border-top: 1px solid var(--surface-border); }
     width: 100%;
   }
   .content .controls-layout td.drawing { padding: 0 0 18px; }
-  .content .controls-layout svg { max-width: 100%; }
+  .content .controls-layout svg {
+    width: min(220px, 100%);
+    max-width: min(220px, 100%);
+  }
 }
 
 .visually-hidden {

@@ -42,6 +42,7 @@
       <h2 id="gallery-coverflow">Gallery, the default view (“CoverFlow”)</h2>
       <img class="screen" src="assets/screens/gallery.jpg" width="1920" height="1080" alt="The CoverFlow gallery: the highlighted cover in the centre, larger than the others, with the toolbar above it and its artist and title below.">
       <p>Gallery shows the highlighted (selected) record in the centre, with its artist and title below it, and its colours tint the background. Swipe left or right on the clickpad (the touch pad on top of the remote) to move one record at a time.</p>
+      <p>In the CoverFlow layout, the halo comes back 60 seconds after your last swipe. With “Engage halo automatically” off, the CoverFlow layout shows no halo.</p>
       <p>Back (the ‹ button) is handled by the Apple TV, not by this app.</p>
       <h3>Controls</h3>
       <table class="controls-layout">
@@ -263,9 +264,13 @@
       <img class="screen" src="assets/screens/record.jpg" width="1920" height="1080" alt="The record screen in the tracklist view: the cover on the left with its title, artist and tags, and the tracklist for Side A on the right, with the side selector above it.">
       <p>A record opens on its tracklist (the list of songs) view. The side selector above the tracklist shows each side, such as “Side A” and “Side B”, with the current side highlighted. A side is one face of a record, as the record defines them.</p>
       <p>The cover view shows the cover full screen. After you change side, a short message appears for 2 seconds, in the cover view only.</p>
-      <p id="turn-the-halo-on-or-off">In automatic mode, the halo appears by itself after a short pause. On the cover view, any swipe turns the halo off, and in automatic mode it comes back 3 seconds after your last swipe. On the tracklist, the halo does not show. After 15 seconds without a swipe, the blurred background starts to drift. To keep it off, turn off “Engage halo automatically” in the “Settings menu”. Then the “Halo” button under the cover switches it on and off.</p>
-      <p>On the cover view, with “Engage halo automatically” off, swipe up to reach the “Halo” button under the cover. Press it to switch the halo on or off.</p>
-      <p>In “CoverFlow”, the halo comes back 60 seconds after the last swipe. With “Engage halo automatically” off, “CoverFlow” shows no halo.</p>
+      <p id="turn-the-halo-on-or-off">In automatic mode, the halo appears by itself after a short pause. On the cover view, any swipe turns the halo off, and in automatic mode it comes back 3 seconds after your last swipe. On the tracklist, the halo does not show. After 15 seconds without a swipe, the blurred background starts to drift.</p>
+      <p>To keep the halo off:</p>
+      <ol>
+        <li>Press Back (the ‹ button) to return to the gallery, then swipe right along the toolbar to the gear and press the clickpad. The Apple TV handles Back.</li>
+        <li>In the “Settings menu”, swipe up or down to “Engage halo automatically” and press the clickpad to turn it off. Then press Back (the ‹ button) to close the menu. The Apple TV handles this button.</li>
+        <li>Open the record again, and on the cover view, swipe up to the “Halo” button under the cover. Press the clickpad to switch the halo on or off.</li>
+      </ol>
       <p id="cover-art">The app first shows the Discogs image. It then swaps in a better cover when it finds one. It finds covers through MusicBrainz (an open music database) and the Cover Art Archive, which holds cover images.</p>
       <p>Back (the ‹ button) is handled by the Apple TV, not by this app.</p>
       <h3>Controls</h3>
@@ -332,17 +337,17 @@
                 <li value="2"><strong>Swipe down.</strong> Shows the tracklist view.</li>
                 <li value="3"><strong>Swipe left.</strong> Goes to the previous side. At the first side, nothing changes.</li>
                 <li value="4"><strong>Swipe right.</strong> Goes to the next side. At the last side, nothing changes.</li>
-                <li value="5"><strong>Press the clickpad.</strong> Goes to the next side. At the last side, nothing changes.</li>
+                <li value="5"><strong>Press the clickpad.</strong> With the “Halo” button highlighted, press to switch the halo on or off. Otherwise, press to flip to the next side. At the last side, nothing changes.</li>
               </ol>
             </td>
           </tr>
         </tbody>
       </table>
 
-      <h2>The Discogs QR code</h2>
+      <h2>“Data provided by Discogs”</h2>
       <p><em>Screenshot coming soon.</em></p>
-      <p>On the tracklist view, select the “Data provided by Discogs” line under the cover details. The screen shows a QR code of the record’s page on discogs.com, with the words “Scan with your phone”.</p>
-      <p>Scan the code with a phone to open that page.</p>
+      <p>This is the QR code that opens the record’s page on discogs.com. A QR code (a square pattern a phone camera can read) is shown full screen, with the words “Scan with your phone”.</p>
+      <p>On the tracklist view, select the “Data provided by Discogs” line under the cover details. Scan the code with a phone to open that page.</p>
       <h3>Controls</h3>
       <table class="controls-layout">
         <caption class="visually-hidden">Controls on the Discogs QR code screen</caption>
@@ -412,7 +417,7 @@
         <li><strong>“Account”</strong> shows the Discogs username you are signed in with.</li>
         <li><strong>“Sign out (keep library)”</strong> removes the Discogs sign-in from this Apple TV and keeps your library here. Signing in again with the same account shows the library at once.</li>
         <li><strong>“Sign out &amp; erase library”</strong> removes the sign-in and deletes the library from this Apple TV. Your layout, sort order and halo settings stay. Erasing happens straight away. There is no confirmation step.</li>
-        <li>The app version, then <strong>“About”</strong>, which opens the About screen.</li>
+        <li>The app version, then <strong>“About”</strong>, which opens the “About” screen.</li>
       </ul>
       <h3>Controls</h3>
       <table class="controls-layout">
@@ -472,7 +477,7 @@
                 <li>Swipe up or down to move between items.</li>
               </ul>
               <ol>
-                <li value="5"><strong>Press the clickpad.</strong> Chooses the highlighted item, such as “Refresh collection” or “Sign out (keep library)”.</li>
+                <li value="5"><strong>Press the clickpad.</strong> Chooses the highlighted item, such as “Refresh collection” or “Sign out &amp; erase library”, which deletes the library straight away, with no confirmation.</li>
                 <li value="6"><strong>Back</strong> (the ‹ button). The Apple TV handles this button.</li>
               </ol>
             </td>
@@ -480,12 +485,12 @@
         </tbody>
       </table>
 
-      <h2>About</h2>
+      <h2>“About”</h2>
       <p><em>Screenshot coming soon.</em></p>
-      <p>About shows the app name and version, the privacy policy, support and email addresses, and the Discogs notice. Nothing on this screen can be selected. The addresses are plain text, to type on a phone or computer, because the Apple TV has no browser.</p>
+      <p>“About” shows the app name and version, the privacy policy, support and email addresses, and the Discogs notice. Nothing on this screen can be selected. The addresses are plain text, to type on a phone or computer, because the Apple TV has no browser.</p>
       <h3>Controls</h3>
       <table class="controls-layout">
-        <caption class="visually-hidden">Controls on the About screen</caption>
+        <caption class="visually-hidden">Controls on the “About” screen</caption>
         <tbody>
           <tr>
             <td class="drawing">
@@ -554,7 +559,7 @@
           <tr>
             <td class="drawing">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 985" role="img" aria-labelledby="signin-t-8 signin-d-8">
-                <title id="signin-t-8">Sign-in screens: remote controls</title>
+                <title id="signin-t-8">Welcome screen</title>
                 <desc id="signin-d-8">Sign-in screen. 5 clickpad (the touch pad on top of the remote) press opens the highlighted (selected) button: “Sign in with Discogs”, “Continue” or “Try again”. Discogs is the online record database that this app reads.</desc>
                 <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                   <rect x="208.5" y="14" width="243" height="943" rx="42"/>
@@ -606,7 +611,7 @@
         </tbody>
       </table>
 
-      <h2>Sign-in: “Code” (the verification code)</h2>
+      <h2>Sign-in: “Verification code”</h2>
       <img class="screen" src="assets/screens/onboarding/authorize.jpg" width="1600" height="900" alt="The code screen: a QR code to scan with a phone, three steps to sign in, a Verification code box and a Continue button.">
       <p>The code screen shows a QR code to scan with a phone, and three steps to follow on the phone. Enter the code that Discogs shows you in the “Verification code” box. “Continue” is unavailable until a code is typed.</p>
       <h3>Controls</h3>
@@ -616,7 +621,7 @@
           <tr>
             <td class="drawing">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 985" role="img" aria-labelledby="signin-t-9 signin-d-9">
-                <title id="signin-t-9">Sign-in screens: remote controls</title>
+                <title id="signin-t-9">Verification code screen</title>
                 <desc id="signin-d-9">Sign-in screen. 5 clickpad (the touch pad on top of the remote) press opens the highlighted (selected) button: “Sign in with Discogs”, “Continue” or “Try again”. Discogs is the online record database that this app reads.</desc>
                 <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                   <rect x="208.5" y="14" width="243" height="943" rx="42"/>
@@ -671,7 +676,7 @@
         </tbody>
       </table>
 
-      <h2>Sign-in: “Keyboard” (typing the code on the TV)</h2>
+      <h2>Sign-in: “Typing the code”</h2>
       <img class="screen" src="assets/screens/onboarding/keyboard.jpg" width="1600" height="900" alt="The on-screen keyboard for the Verification code box, with the “done” key below the letters.">
       <p>The Apple TV shows its on-screen keyboard for the “Verification code” box. Choose “done” when the code is typed.</p>
       <h3>Controls</h3>
@@ -681,7 +686,7 @@
           <tr>
             <td class="drawing">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 985" role="img" aria-labelledby="signin-t-10 signin-d-10">
-                <title id="signin-t-10">Sign-in screens: remote controls</title>
+                <title id="signin-t-10">Keyboard screen</title>
                 <desc id="signin-d-10">Sign-in screen. 5 clickpad (the touch pad on top of the remote) press opens the highlighted (selected) button: “Sign in with Discogs”, “Continue” or “Try again”. Discogs is the online record database that this app reads.</desc>
                 <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                   <rect x="208.5" y="14" width="243" height="943" rx="42"/>
@@ -746,7 +751,7 @@
           <tr>
             <td class="drawing">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 985" role="img" aria-labelledby="signin-t-11 signin-d-11">
-                <title id="signin-t-11">Sign-in screens: remote controls</title>
+                <title id="signin-t-11">Building your library screen</title>
                 <desc id="signin-d-11">Sign-in screen. 5 clickpad (the touch pad on top of the remote) press opens the highlighted (selected) button: “Sign in with Discogs”, “Continue” or “Try again”. Discogs is the online record database that this app reads.</desc>
                 <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                   <rect x="208.5" y="14" width="243" height="943" rx="42"/>
