@@ -36,7 +36,7 @@
       <h1>How to use</h1>
       <p class="subtitle">The Siri Remote, the screens and the controls.</p>
 
-      <p>This page describes each screen and control. Start with the Siri Remote, then read the sections for the screen you are on.</p>
+      <p>Start with the Siri Remote, then read the section for the screen you are on.</p>
 
       <h2 id="siri-remote">Use the Siri Remote</h2>
       <p>Swipe on the clickpad to move the focus. Press the clickpad to select the focused item. The list below shows what each gesture does on each screen.</p>
@@ -62,8 +62,8 @@
         <li><strong>Swipe up:</strong> show the cover full screen. In manual halo mode, swipe up again to reach the Halo button.</li>
         <li><strong>Swipe down:</strong> show the tracklist.</li>
         <li><strong>Press:</strong> go to the next side. On the last side, nothing changes.</li>
-        <li><strong>Press the Halo button:</strong> turn the halo on or off. The button appears only in manual halo mode.</li>
-        <li><strong>Press the Data provided by Discogs line:</strong> show a QR code for the release on discogs.com.</li>
+        <li><strong>Press the clickpad on the Halo button:</strong> turn the halo on or off. The button appears only in manual halo mode.</li>
+        <li><strong>Press the clickpad on the Data provided by Discogs line:</strong> show a QR code for the release on discogs.com.</li>
       </ul>
 
       <h2 id="gallery-toolbar">Use the gallery toolbar</h2>
@@ -89,7 +89,6 @@
       </figure>
 
       <h2 id="sort-filter-suggest">Sort, filter and Suggest</h2>
-      <p>Sort, the genre menu and Suggest all work on the same records. Changing one changes what the others see.</p>
       <ul>
         <li>The sort options are Recently added, which is the default, Artist, Album and Year.</li>
         <li>The genre menu lists every genre and style in your collection. Choosing one shows the records that have it as a genre or a style.</li>
@@ -99,7 +98,7 @@
 
       <h2 id="open-a-record">Open a record</h2>
       <p>A record opens on its tracklist. The cover is on the left, with the title, the artist and tags for the year, genres and styles.</p>
-      <p>Records are split into sides, which the tuner above the tracklist shows as Side A, Side B and so on. Swipe left or right, or press the clickpad, to move to the next side. The tracks change with the side.</p>
+      <p>Records are split into sides, which the tuner above the tracklist shows as Side A, Side B and so on. Swipe left or right, or press the clickpad, to move to the next side.</p>
       <p>A multi-disc release continues the side letters. Disc 2 of a double LP appears as sides C and D. Credits such as <em>Composed by</em> or <em>Vocals by</em> appear under each track title. Producer and engineer credits are not shown.</p>
       <p>Swipe up to see the cover full screen. There, a message such as Side B appears for two seconds after each change.</p>
       <figure>
@@ -109,22 +108,22 @@
 
       <h2 id="turn-the-halo-on-or-off">Turn the halo on or off</h2>
       <p>The halo is a soft glow of colour from the cover, shown around the cover. Any swipe turns it off. A press on the clickpad to change side does not.</p>
-      <p><strong>Automatic halo</strong> is the default. On a record's cover view, the halo returns 3 seconds after your last swipe, and it fades in over 3 seconds. In CoverFlow, the halo returns 60 seconds after your last swipe.</p>
-      <p><strong>Manual halo</strong> is for when you want to decide. Turn off <strong>Engage halo automatically</strong> in the Settings menu. A <strong>Halo</strong> button then appears under the cover on a record's cover view. Press the clickpad on the button to turn the halo on or off. CoverFlow shows no halo in manual mode, and the button starts off each time you open the app.</p>
+      <p><strong>Automatic halo</strong> is the default. On a record’s cover view, the halo returns 3 seconds after your last swipe, and it fades in over 3 seconds. In CoverFlow, the halo returns 60 seconds after your last swipe.</p>
+      <p><strong>Manual halo</strong> lets you decide. Turn off <strong>Engage halo automatically</strong> in the Settings menu. A <strong>Halo</strong> button then appears under the cover on a record’s cover view.</p>
+      <p>Press the clickpad on the Halo button to turn the halo on or off. CoverFlow shows no halo in manual mode, and the button starts off each time you open the app.</p>
       <p>The grid never shows a halo.</p>
-      <p>While the halo is on, the screensaver stays off. On a record's tracklist, the blurred cover drifts after 15 seconds without a swipe, and the screensaver stays off while it drifts.</p>
+      <p>While the halo is on, the screensaver stays off. On a record’s tracklist, the blurred cover drifts after 15 seconds without a swipe, and the screensaver stays off while it drifts.</p>
       <figure>
         <img class="screen" src="assets/screens/halo.jpg" alt="The cover full screen on a dark background, with a soft halo of colour from the cover around it.">
-        <figcaption>A record's cover view, with the halo on.</figcaption>
+        <figcaption>A record’s cover view, with the halo on.</figcaption>
       </figure>
 
       <h2 id="cover-art">Cover art</h2>
       <p>The app first shows the Discogs image for each record. It then looks for a better cover in two free services. <strong>MusicBrainz</strong> is an open music database. The <strong>Cover Art Archive</strong> holds cover images for MusicBrainz releases.</p>
-      <p>For each record, the app searches MusicBrainz using the title, the artist and the catalogue number. It accepts only a close match, scored 90 or more out of 100.</p>
-      <p>If the Cover Art Archive has a front cover for the matched release, the app shows that cover. If not, it checks the release group. If neither has one, the Discogs cover stays.</p>
+      <p>For each record, the app searches MusicBrainz using the title, the artist and, when there is one, the catalogue number. It accepts only a close match, scored 90 or more out of 100.</p>
+      <p>If the Cover Art Archive has an image for the matched release, the app shows it. If not, it checks the release group. If neither has an image, the Discogs cover stays.</p>
       <p>MusicBrainz asks clients to make no more than one request a second, so the app waits 1.1 seconds between searches. At that pace, 800 records need about 15 minutes of searches alone.</p>
       <p>Each record is looked up once, and the result is saved, so later launches skip it. A lookup that fails because a service is busy is tried again. A record is given up after three such failures and keeps its Discogs cover.</p>
-      <p>Opening a record looks up its cover at once, so a better cover can appear straight away.</p>
 
       <h2 id="settings">Use the Settings menu</h2>
       <p>Choose the gear at the end of the toolbar to open Settings. It holds these items.</p>
@@ -134,9 +133,9 @@
         <li><strong>Account</strong> shows the Discogs username you are signed in with.</li>
         <li><strong>Sign out (keep library)</strong> removes the Discogs sign-in from this Apple TV and keeps your library here. Signing in again with the same account shows the library at once.</li>
         <li><strong>Sign out &amp; erase library</strong> removes the Discogs sign-in and deletes the library from this Apple TV. Your layout, sort and halo settings stay.</li>
-        <li><strong>The app version</strong> is shown as text, followed by <strong>About</strong>. About lists the privacy policy and support addresses as text.</li>
+        <li><strong>The app version</strong>, then <strong>About</strong>, which lists the privacy policy and support addresses.</li>
       </ul>
-      <p>If Discogs stops accepting the app's access, the app returns to the sign-in screen with a notice. Your library stays on the Apple TV.</p>
+      <p>If Discogs stops accepting the app’s access, the app returns to the sign-in screen with a notice. Your library stays on the Apple TV.</p>
       <p>For what each sign-out option keeps and removes, see <a href="privacy.html#your-choices">Your choices</a> in the privacy policy.</p>
 
       <h2 id="refresh-your-collection">Refresh your collection</h2>

@@ -37,6 +37,7 @@
       <p class="subtitle">From install to a built library, in order.</p>
 
       <p>This page covers what you need, how to sign in to Discogs, and what happens on the first launch. Signing in uses your Apple TV and your phone. Each step says which one to use.</p>
+      <p>You enter your Discogs username and password only on the Discogs page. The app has no password field.</p>
 
       <h2 id="before-you-start">Before you start</h2>
       <ul>
@@ -94,17 +95,29 @@
       <p>If the code is not accepted, the TV shows <code>Couldn't sign in</code> and the reason. Choose <strong>Try again</strong> to get a new QR code, then repeat steps 2 to 5.</p>
 
       <h2 id="build-library">Build your library</h2>
-      <p>After sign-in, the TV shows <code>Building your library</code> with a count, such as <code>Fetching 247/812 albums…</code>. The count includes every release in your collection, not only vinyl records.</p>
+      <p>After sign-in, the TV shows <code>Building your library</code> with a count, such as <code>Fetching 247/812 albums…</code>. The count includes every release in your collection, not only vinyl records. Until the count starts, the TV shows <code>Fetching your collection…</code>.</p>
       <p>The build runs the first time you sign in. It runs again after you erase the library, or when you sign in with a different Discogs account.</p>
       <p>When the count finishes, the gallery opens. Covers are looked up in the background after that, so some covers change while you browse. <a href="how-to-use.html#cover-art">Cover art</a> explains the order.</p>
       <p>If the build fails, the TV shows <code>Couldn't build your library</code> and the reason. Choose <strong>Retry</strong> to build again. Choose <strong>Continue anyway</strong> to open the gallery without a library. You can then choose <strong>Refresh collection</strong> in the Settings menu to build it.</p>
       <p>If you choose Continue anyway, the build also starts again the next time you open the app.</p>
+      <p>The app reads your collection 100 records at a time, so a large collection takes longer. If Discogs asks the app to slow down, the build pauses for 5, 15 and then 30 seconds before it reports an error.</p>
+
+      <h2 id="sign-in-again">Sign in again later</h2>
+      <p>After you choose <strong>Sign out (keep library)</strong>, signing in with the same Discogs account opens the gallery at once. The app then adds any records you have added since.</p>
+      <p>If Discogs stops accepting the sign-in, the app returns to the welcome screen with a notice that says so.</p>
+      <p>If you delete the app and install it again, the first launch removes the Discogs sign-in that the earlier install left behind. You then sign in again.</p>
+
+      <h2 id="another-account">Use another Discogs account</h2>
+      <p>To use a different Discogs account, sign out from the Settings menu first. Then sign in with the other account.</p>
+      <p>The app builds a library for the new account. A library kept from the earlier account is erased when that build starts.</p>
 
       <h2 id="what-stays-on-your-apple-tv">What stays on your Apple TV</h2>
       <p>Your library is stored on this Apple TV. Your Discogs sign-in is kept in the Keychain on this device only, and it is not synced through iCloud Keychain.</p>
       <p>The <a href="privacy.html">privacy policy</a> lists what the app stores and which services it connects to.</p>
 
       <h2>Next steps</h2>
+      <p>The gallery opens in CoverFlow, sorted by Recently added, so your most recently added record is in the centre.</p>
+      <p>If the gallery says <code>No vinyl yet</code>, check that your records have the format Vinyl. Then see <a href="support.html#frequently-asked-questions">Support</a>.</p>
       <p>When the gallery opens, you are ready. <a href="how-to-use.html">How to use</a> explains the Siri Remote, the gallery, the record screen, the halo and the Settings menu.</p>
     </article>
   </main>
