@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Quick start guide — Vinyl for Apple TV</title>
-  <meta name="description" content="A friendly, step-by-step walkthrough of installing Vinyl for Apple TV and connecting it to your Discogs collection.">
+  <title>Guide — Vinyl for Apple TV</title>
+  <meta name="description" content="A guide to Vinyl for Apple TV: getting the app, signing in to Discogs, using the screens, and answers to common questions.">
   <meta name="theme-color" content="#0a0908">
-  <meta property="og:title" content="Quick start guide — Vinyl for Apple TV">
-  <meta property="og:description" content="A friendly, step-by-step walkthrough of installing Vinyl for Apple TV and connecting it to your Discogs collection.">
+  <meta property="og:title" content="Guide — Vinyl for Apple TV">
+  <meta property="og:description" content="A guide to Vinyl for Apple TV: getting the app, signing in to Discogs, using the screens, and answers to common questions.">
   <meta property="og:image" content="https://andreisudarikov19.github.io/vinyl-art-apple-tv/assets/icon.png">
   <meta property="og:type" content="website">
   <link rel="icon" type="image/png" href="assets/icon.png">
@@ -32,75 +32,53 @@
 
   <main>
     <article class="container content">
-      <h1>Quick start guide</h1>
-      <p class="subtitle">Getting your Discogs collection onto your Apple TV — step by step.</p>
+      <h1>Guide</h1>
+      <p class="subtitle">Getting the app, signing in, using the screens, and common questions.</p>
 
-      <p>This guide walks you through signing into the app for the first time. It is written for anyone who has not connected an app to a music service like Discogs before. There are seven small steps. The whole thing takes about five minutes.</p>
+      <p>This guide has three parts. <a href="#installation">Installation</a> covers what you need and how to sign in. <a href="#how-to-use">How to use</a> describes each screen and control. <a href="#faq">FAQ</a> answers common questions.</p>
 
-      <p>You will use your Apple TV the whole time. During one step you will look at your phone (or a tablet) briefly to confirm that the app may read your record collection.</p>
+      <p>During sign-in you will look at your phone (or a tablet) briefly, to confirm that the app may read your record collection.</p>
 
-      <h2>Before you begin</h2>
+      <h2 id="installation">Installation</h2>
+
+      <h3>Before you start</h3>
       <ul>
         <li>
           <p>An Apple TV running tvOS 18 or later.</p>
           <p>To check, on your Apple TV go to <strong>Settings</strong> → <strong>General</strong> → <strong>About</strong>.</p>
         </li>
         <li>
-          <p>A free <a href="https://www.discogs.com">Discogs</a> account.</p>
-          <p>If you do not have one yet, you can create one on the Discogs website in about a minute.</p>
+          <p>A free <a href="https://www.discogs.com">Discogs</a> account, with records in your collection whose format is <strong>Vinyl</strong>.</p>
+          <p>The app shows only releases whose format on Discogs is Vinyl. CDs, cassettes and digital releases are left out.</p>
         </li>
         <li>
-          <p>At least a few records in your Discogs collection.</p>
-          <p>The app shows what is on your shelf, so it needs something to show. New to Discogs? Their <a href="https://support.discogs.com">help centre</a> has step-by-step articles on adding records.</p>
-        </li>
-        <li>
-          <p>Your phone or a tablet within reach, with a camera that can scan a QR code.</p>
+          <p>A phone or tablet within reach, with a camera that can scan a QR code.</p>
           <p>You will use it briefly during sign-in.</p>
         </li>
       </ul>
 
-      <h2>Step 1. Open the app</h2>
+      <h3 id="getting-the-app">Getting the app</h3>
+      <!-- TODO: install route for testers (TestFlight link, build from source, or wait). Owner decision pending, see #162 question 1. Do not add a link or a build route until the owner decides. -->
+      <p>The app is not on the App Store yet.</p>
+      <p>Install instructions for testers will appear here.</p>
+
+      <h3 id="signing-in">Signing in</h3>
       <ol>
         <li>
-          <p>On the Apple TV home screen, focus Vinyl for Apple TV and press the centre button on the Siri Remote to open it.</p>
-        </li>
-        <li>
           <p>On the welcome screen, choose <strong>Sign in with Discogs</strong>.</p>
-          <p>It is the only button on the screen, below the title.</p>
         </li>
       </ol>
       <img class="screen" src="assets/screens/onboarding/welcome.jpg" alt="The welcome screen shows the title Vinyl for Apple TV with the subtitle Display your Discogs vinyl collection on the big screen and a single Sign in with Discogs button.">
-
-      <h2>Step 2. Look at the QR code</h2>
-      <p>The TV now shows a square QR code (a pattern of black and white dots), a numbered list of what to do on your phone, and a white field labelled <code>Verification code</code>. Keep your phone ready. In the picture below, the code is blurred out.</p>
-      <img class="screen" src="assets/screens/onboarding/authorize.jpg" alt="The authorise screen with a blurred code on the left, captioned Scan with your phone, and on the right the heading Authorise on your phone, three numbered steps, an empty Verification code field and a Continue button.">
-
-      <h2>Step 3. Scan the code with your phone</h2>
-      <ol>
+      <ol start="2">
         <li>
-          <p>Open the Camera app on your phone.</p>
-        </li>
-        <li>
-          <p>Point the camera at the TV so the QR code is centred in the viewfinder.</p>
-        </li>
-        <li>
-          <p>Tap the link banner that appears on your phone.</p>
-          <p>If no banner appears, move a little closer to the TV and hold the phone steady until one does.</p>
+          <p>Scan the QR code on the TV with your phone's camera, and open the link your phone offers.</p>
+          <p>The TV shows a square QR code, three numbered steps, and a white <code>Verification code</code> field. In the picture below, the code is blurred out.</p>
         </li>
       </ol>
-
-      <h2>Step 4. Sign in to Discogs and authorise the app</h2>
-      <ol>
+      <img class="screen" src="assets/screens/onboarding/authorize.jpg" alt="The authorise screen with a blurred code on the left, captioned Scan with your phone, and on the right the heading Authorise on your phone, three numbered steps, an empty Verification code field and a Continue button.">
+      <ol start="3">
         <li>
-          <p>Sign in to Discogs with your username and password.</p>
-          <p>If your browser already remembers them, you may only need to tap to confirm.</p>
-        </li>
-        <li>
-          <p>Read the short page Discogs shows you.</p>
-          <p>It asks you to authorise Vinyl for Apple TV to use your Discogs account. The app only reads your collection.</p>
-        </li>
-        <li>
-          <p>Press the <strong>Authorize</strong> button on the Discogs page.</p>
+          <p>Sign in to Discogs on your phone and approve the app's access to your collection.</p>
         </li>
       </ol>
 
@@ -109,92 +87,324 @@
         <p>To disconnect the app later, visit your <a href="https://www.discogs.com/settings/applications">Discogs application settings</a> and revoke access.</p>
       </div>
 
-      <h2>Step 5. Note the code Discogs gives you</h2>
-      <ol>
+      <ol start="4">
         <li>
-          <p>Find the verification code on the Discogs page.</p>
-          <p>It is a short line of letters and numbers, roughly ten characters long, shown in a box.</p>
-        </li>
-        <li>
-          <p>Leave the Discogs page open.</p>
-          <p>You will read the code from it in the next step.</p>
-        </li>
-      </ol>
-
-      <h2>Step 6. Type the code on your TV</h2>
-      <ol>
-        <li>
-          <p>Back on the Apple TV, focus the <code>Verification code</code> field.</p>
-        </li>
-        <li>
-          <p>Press the centre button on the Siri Remote.</p>
-          <p>The on-screen keyboard appears: a single row of lowercase letters, with numbers and symbols below.</p>
-        </li>
-        <li>
-          <p>Type the code exactly as Discogs showed it, capital letters included.</p>
-        </li>
-        <li>
-          <p>Choose <strong>Continue</strong>.</p>
-          <p>The TV briefly shows <code>Signing you in…</code>.</p>
+          <p>Type the code that Discogs shows you into the <code>Verification code</code> field on the TV.</p>
+          <p>Select the field to open the on-screen keyboard, and type the code exactly as Discogs shows it.</p>
         </li>
       </ol>
       <img class="screen" src="assets/screens/onboarding/keyboard.jpg" alt="The on-screen keyboard with a horizontal row of lowercase letters, a row of digits and symbols below, and ABC / abc / #+= mode toggles in the middle.">
-      <p>If your iPhone is signed in to the same Apple ID as your Apple TV, you can use it as a keyboard. A notification appears on the iPhone offering to type on the Apple TV — tap it and enter the code on your phone instead. This is usually much faster than tapping each character with the Siri Remote.</p>
+      <ol start="5">
+        <li>
+          <p>Choose <strong>Continue</strong>.</p>
+          <p>The TV shows <code>Signing you in…</code>.</p>
+        </li>
+      </ol>
 
       <div class="callout tip">
-        <p><strong>If the code is rejected, the TV shows <code>Couldn't sign in</code>.</strong> The code may be mistyped, or it may have expired: Discogs codes stop working after a while.</p>
-        <p>Choose <strong>Try again</strong> on the TV and start again from Step 2. You will get a fresh code each time. (Pressing the <strong>Menu button</strong> on the Siri Remote here takes you out of the app.)</p>
+        <p><strong>If the code is rejected, the TV shows <code>Couldn't sign in</code>.</strong> The code may be mistyped, or it may have expired.</p>
+        <p>Choose <strong>Try again</strong> on the TV. You will get a fresh QR code and a fresh code.</p>
       </div>
 
-      <h2>Step 7. Wait while your library is built</h2>
-      <p>The TV now shows <code>Building your library</code> with a counter, like <code>Fetching 247/812 albums…</code>. This is the app downloading your record list from Discogs. Depending on the size of your collection, it takes anywhere from a few seconds to a few minutes. This only happens the first time you sign in — afterwards the app remembers your collection and only checks for new records.</p>
-      <p>Some covers may load twice. The app first shows the image Discogs has on file, then looks each record up on MusicBrainz and, when the Cover Art Archive (a free, open image database) has a cover for it, swaps that one in. The app does this once for each record, and the cover it settles on stays cached on your Apple TV.</p>
-      <p>When the count finishes, the gallery opens automatically. You are in.</p>
-
-      <h2>What to do next</h2>
-      <p>You are now on the cover gallery.</p>
+      <h3 id="building-your-library">Building your library</h3>
+      <p>After you sign in, the TV shows <code>Building your library</code> with a counter, such as <code>Fetching 247/812 albums…</code>. This is the app downloading your collection from Discogs. The counter counts every release in your collection, not only vinyl, so its last number can be larger than the number of records you see. This happens when you first sign in. After that, the app keeps your library on the Apple TV.</p>
+      <p>When the count finishes, the gallery opens. Covers are improved after that. The app first shows the image Discogs has on file. Then, with the gallery open, it looks each record up on MusicBrainz and, when the Cover Art Archive (a free, open image database) has a cover for it, swaps that one in. Each record is looked up once and the result is kept. A lookup that fails for a temporary reason is tried again later.</p>
+      <p>If the download fails, the TV shows <code>Couldn't build your library</code> with the reason and two buttons:</p>
       <ul>
         <li>
-          <p>Swipe left or right on the Siri Remote’s clickpad to flip between records.</p>
-          <p>Pressing the left or right edge of the clickpad does the same.</p>
+          <p><strong>Retry</strong> starts the download again.</p>
         </li>
         <li>
-          <p>Press the centre button on a cover to open its detail screen with the tracklist.</p>
-          <ul>
-            <li>
-              <p>From there, swipe up on the clickpad to show the cover full-screen with an ambient halo, ideal for sitting with a record while it plays on your turntable.</p>
-              <p>Pressing the top edge of the clickpad does the same.</p>
-            </li>
-          </ul>
+          <p><strong>Continue anyway</strong> opens the gallery without waiting. Once the gallery is open, the app tries the download again in the background.</p>
         </li>
       </ul>
 
-      <h2>If something does not look right</h2>
+      <h2 id="how-to-use">How to use</h2>
+      <p>Once your library is ready, the gallery opens. This part describes each screen and control.</p>
 
+      <h3>The gallery toolbar</h3>
+      <p>The toolbar floats at the top of the gallery. Once the collection has records, it holds these controls, from left to right:</p>
+      <ul>
+        <li>
+          <p><strong>Suggest</strong> opens a random record from the records currently shown.</p>
+        </li>
+        <li>
+          <p><strong>Sort</strong> orders the covers by Recently added, Artist, Album or Year.</p>
+        </li>
+        <li>
+          <p><strong>Genre</strong> shows only the records in one genre or style. The list holds both genres and styles. <strong>All genres</strong> shows everything. The control appears only when the collection has genres or styles to pick from.</p>
+        </li>
+        <li>
+          <p>The layout button switches between CoverFlow and the grid. In CoverFlow it shows a grid icon; in the grid it shows a stacked-covers icon.</p>
+        </li>
+        <li>
+          <p>The gear opens the <strong>Settings menu</strong>, described below.</p>
+        </li>
+      </ul>
+
+      <h3>CoverFlow</h3>
+      <p>CoverFlow is the default layout. The centred cover is large, with its title and details beneath it.</p>
+      <ul>
+        <li>
+          <p>Swipe left or right to move through the covers.</p>
+        </li>
+        <li>
+          <p>Press the clickpad to open the centred record.</p>
+        </li>
+        <li>
+          <p>Swipe up to move focus to the toolbar.</p>
+        </li>
+      </ul>
+
+      <h3>The grid</h3>
+      <p>Press the layout button to switch to the grid. It shows seven covers in each row. The focused cover lifts and shows its title. Swipe to move between covers, and swipe up from the top row to reach the toolbar. The grid does not show the halo.</p>
+
+      <h3 id="opening-a-record">Opening a record</h3>
+      <p>Press a cover in CoverFlow or in the grid to open its record. The record screen opens on the tracklist.</p>
+      <ul>
+        <li>
+          <p>The side slider above the tracklist shows one side at a time, labelled A, B, C and so on. Swipe left or right to change side. In the full-screen cover view, a short label such as <strong>Side B</strong> confirms the change.</p>
+        </li>
+        <li>
+          <p>Press the clickpad to move to the next side. On the last side, it stays there.</p>
+        </li>
+        <li>
+          <p>On a multi-disc release, the letters carry on from disc to disc. The second disc's side A is shown as C.</p>
+        </li>
+        <li>
+          <p>Swipe up to show the cover full-screen, with the halo (see below). Swipe down to return to the tracklist.</p>
+        </li>
+        <li>
+          <p>Under the tags, press the line <strong>Data provided by Discogs</strong> to show a QR code for the release on discogs.com. Scan it with your phone, because the TV cannot open links.</p>
+        </li>
+      </ul>
+
+      <h3 id="the-halo">The halo</h3>
+      <p>The halo is a soft glow in colours taken from the cover. It surrounds the cover on the full-screen view of a record, and in CoverFlow.</p>
+      <ul>
+        <li>
+          <p><strong>Automatic</strong> is on by default. Any swipe turns the halo off. It comes back 3 seconds after your last swipe and fades in over 3 seconds. In CoverFlow the wait is 60 seconds. Pressing the clickpad does not turn it off.</p>
+        </li>
+        <li>
+          <p><strong>Manual</strong> is used when <strong>Engage halo automatically</strong> is off in the Settings menu. On the full-screen cover view, a <strong>Halo</strong> pill appears under the cover. Press it to switch the halo on or off. CoverFlow shows no halo in this mode.</p>
+        </li>
+        <li>
+          <p>The grid never shows the halo.</p>
+        </li>
+      </ul>
+
+      <h3>Covers</h3>
+      <p>The app matches each record on MusicBrainz and shows the front cover from the Cover Art Archive when there is one. If the Cover Art Archive has no cover for the record, the app shows the image Discogs has for it. The lookups are spaced about a second apart, so a large collection takes a while to settle.</p>
+
+      <h3 id="settings-menu">Settings menu</h3>
+      <p>Press the gear at the top of the gallery to open the Settings menu. It shows your Discogs username as <code>Account: …</code>, followed by these choices:</p>
+      <ul>
+        <li>
+          <p><strong>Refresh collection</strong> reads your whole collection again, with progress shown at the bottom of the screen. Records you no longer have are removed, and edits to records are picked up.</p>
+        </li>
+        <li>
+          <p><strong>Engage halo automatically</strong> is on by default. Turn it off to use the Halo pill instead.</p>
+        </li>
+        <li>
+          <p><strong>Sign out (keep library)</strong> signs you out but keeps your library on the Apple TV. Signing in again with the same Discogs account shows the library straight away.</p>
+        </li>
+        <li>
+          <p><strong>Sign out &amp; erase library</strong> signs you out and deletes the library from the Apple TV.</p>
+        </li>
+        <li>
+          <p><strong>About</strong> shows the app version, the privacy, support and email addresses, and the Discogs notice.</p>
+        </li>
+      </ul>
+
+      <h3 id="keeping-up-to-date">Keeping your collection up to date</h3>
+      <p>Each time the app starts, it checks Discogs for records you have added since the last check, and adds them to the library. It does not remove records, and it does not pick up edits to records you already have. To do either, choose <strong>Refresh collection</strong> in the Settings menu.</p>
+
+      <h3 id="siri-remote">The Siri Remote</h3>
+      <p>The app uses the clickpad on the Siri Remote. Swipe to move, and press the clickpad to select. The table shows what each gesture does on each kind of screen.</p>
+      <!-- wireframe goes here (#163) -->
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Gesture</th>
+            <th scope="col">Gallery (CoverFlow or grid)</th>
+            <th scope="col">Record screen</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Swipe left or right</th>
+            <td>Move to the previous or next cover. In the grid, the move stays within the row.</td>
+            <td>Change side.</td>
+          </tr>
+          <tr>
+            <th scope="row">Swipe up</th>
+            <td>In CoverFlow, or on the top row of the grid, move focus to the toolbar. Elsewhere in the grid, move up a row.</td>
+            <td>From the tracklist, show the cover full-screen. With the manual halo, move from the cover to the Halo pill.</td>
+          </tr>
+          <tr>
+            <th scope="row">Swipe down</th>
+            <td>In the grid, move down a row when there is one. In CoverFlow, no effect.</td>
+            <td>Show the tracklist.</td>
+          </tr>
+          <tr>
+            <th scope="row">Press</th>
+            <td>Open the highlighted record. On the toolbar, use the control.</td>
+            <td>Move to the next side. Toggle the Halo pill when it has focus. Press the Discogs line under the tags to show its QR code.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 id="faq">FAQ</h2>
+      <p>Short answers to common questions, grouped by topic.</p>
+
+      <h3>Getting started</h3>
       <div class="faq">
         <details>
-          <summary>I cannot see any of my records.</summary>
-          <p>Check on the Discogs website that the records on your shelf are tagged as <code>Vinyl</code> — the app only shows vinyl releases, so CDs, cassettes and digital releases will be hidden by design. Your collection can be public or private: the app reads it signed in as you.</p>
+          <summary>What do I need to use the app?</summary>
+          <p>An Apple TV running tvOS 18 or later, a free Discogs account with records whose format is Vinyl, and a phone or tablet whose camera can scan QR codes.</p>
         </details>
 
         <details>
-          <summary>Only some of my records appeared.</summary>
-          <p>The app reads the folder Discogs calls <code>All</code>, which holds your whole collection, records in your own custom folders included. Records you add on Discogs later appear the next time the app starts, or straight away when you choose <strong>Refresh collection</strong> in the Settings menu (the gear at the top of the gallery). If a genre is picked in the gallery’s genre menu, only that genre shows; choose <strong>All genres</strong> to see everything.</p>
+          <summary>Is the app on the App Store?</summary>
+          <p>Not yet. See <a href="#getting-the-app">Getting the app</a> in the Installation section.</p>
         </details>
 
         <details>
-          <summary>The QR code will not scan.</summary>
-          <p>The simplest fix is to sit closer to the TV so the camera can see the pattern clearly, or to turn up the room lights. If your phone’s camera cannot scan QR codes, use another phone or tablet that can, and sign in to Discogs on that one.</p>
+          <summary>Does the app play music?</summary>
+          <p>No. It shows covers, tracklists, credits and the halo around the cover. It never plays audio, so it sits alongside your turntable.</p>
         </details>
 
         <details>
-          <summary>A cover is missing or blurry.</summary>
-          <p>The app shows the cover the Cover Art Archive (a free, open image database) has for a record, and the image on Discogs when it has none. Discogs allows community-submitted images, and not every release has a high-quality one. For a record the Cover Art Archive has no cover for, uploading a better cover to Discogs is the lasting fix; it shows up in the app after you choose <strong>Refresh collection</strong> in the Settings menu.</p>
+          <summary>Does the app change anything on my Discogs account?</summary>
+          <p>No. It only reads your collection. It cannot add, edit or remove records.</p>
+        </details>
+      </div>
+
+      <h3>Sign-in and account</h3>
+      <div class="faq">
+        <details>
+          <summary>How do I sign in?</summary>
+          <p>Choose <strong>Sign in with Discogs</strong>, scan the QR code with your phone and sign in to Discogs there, then type the code Discogs shows you into the <code>Verification code</code> field on the TV and choose <strong>Continue</strong>. The steps are in <a href="#signing-in">Signing in</a>.</p>
         </details>
 
         <details>
-          <summary>Something else is off.</summary>
-          <p>Send a note to <a href="mailto:support.vinyl.for.appletv@gmail.com">support.vinyl.for.appletv@gmail.com</a>. Including your Apple TV model, your tvOS version, and what you were doing when the problem appeared helps a lot. The <a href="support.html">support page</a> has a checklist of useful details to include.</p>
+          <summary>The TV says Couldn't sign in.</summary>
+          <p>The code may be mistyped or may have expired. Choose <strong>Try again</strong> to get a fresh QR code and code.</p>
+        </details>
+
+        <details>
+          <summary>Do I have to sign in every time?</summary>
+          <p>No. The Apple TV stays signed in until you sign out, or until Discogs stops accepting the app's access.</p>
+        </details>
+
+        <details>
+          <summary>Why did the app ask me to sign in again?</summary>
+          <p>Discogs stopped accepting the app's access, because it was revoked or has expired. Your library stays on the Apple TV, and signing in with the same account shows it straight away.</p>
+        </details>
+
+        <details>
+          <summary>What is the difference between the two sign-out options?</summary>
+          <p><strong>Sign out (keep library)</strong> keeps your library on the Apple TV for the same account. <strong>Sign out &amp; erase library</strong> deletes it.</p>
+        </details>
+
+        <details>
+          <summary>I deleted the app and installed it again. Am I still signed in?</summary>
+          <p>No. The first launch after a fresh install removes the sign-in left by the earlier install, so you sign in again.</p>
+        </details>
+      </div>
+
+      <h3>Collection and sync</h3>
+      <div class="faq">
+        <details>
+          <summary>Why are some of my records missing?</summary>
+          <p>Only releases whose format on Discogs is Vinyl appear. CDs, cassettes and digital releases are left out on purpose. Also check that the genre control is on <strong>All genres</strong>, because a chosen genre or style hides the rest.</p>
+        </details>
+
+        <details>
+          <summary>I added records on Discogs. When do they appear?</summary>
+          <p>The next time the app starts. To see them straight away, choose <strong>Refresh collection</strong> in the Settings menu.</p>
+        </details>
+
+        <details>
+          <summary>Why haven't my edits or removals appeared?</summary>
+          <p>Starting the app only adds new records. Choose <strong>Refresh collection</strong>. It reads the whole collection again, picks up edits, and removes records you no longer have.</p>
+        </details>
+      </div>
+
+      <h3>Covers</h3>
+      <div class="faq">
+        <details>
+          <summary>Where do the covers come from?</summary>
+          <p>The app finds each record on MusicBrainz and shows the front cover from the Cover Art Archive (a free, open image database) when it has one. Otherwise it shows the image Discogs has for the release. Covers are improved after the gallery opens, and again when you open a record.</p>
+        </details>
+
+        <details>
+          <summary>A cover is missing or blurry. What can I do?</summary>
+          <p>If the Cover Art Archive has no cover for the record, the app shows the Discogs image. Uploading a better cover to Discogs changes it: choose <strong>Refresh collection</strong> and the new image appears. If the Cover Art Archive already has a cover, the app keeps using that one.</p>
+        </details>
+      </div>
+
+      <h3>Halo and the record screen</h3>
+      <div class="faq">
+        <details>
+          <summary>What is the halo?</summary>
+          <p>A soft glow in colours taken from the cover, shown around the cover in the full-screen view.</p>
+        </details>
+
+        <details>
+          <summary>When does the halo appear?</summary>
+          <p>In automatic mode, 3 seconds after your last swipe on the record screen, or 60 seconds in CoverFlow. Any swipe turns it off again. Pressing the clickpad does not.</p>
+        </details>
+
+        <details>
+          <summary>How do I switch the halo on myself?</summary>
+          <p>Turn off <strong>Engage halo automatically</strong> in the Settings menu, then press the <strong>Halo</strong> pill under the cover. CoverFlow shows no halo in this mode.</p>
+        </details>
+
+        <details>
+          <summary>Does the app stop the screensaver?</summary>
+          <p>Yes, while the halo shows. It also does so while the blurred background behind the tracklist drifts, which starts after 15 seconds without input. The grid does not hold the screensaver off.</p>
+        </details>
+
+        <details>
+          <summary>How do I get to the second side of a double LP?</summary>
+          <p>On the record screen, swipe left or right, or press the clickpad. Sides keep their letters across discs, so the second disc's side A is shown as C.</p>
+        </details>
+      </div>
+
+      <h3>Data and privacy</h3>
+      <div class="faq">
+        <details>
+          <summary>Where is my data stored?</summary>
+          <p>Your library is kept in the app's own storage on the Apple TV. The app does not sync the library through iCloud.</p>
+        </details>
+
+        <details>
+          <summary>Where is my Discogs sign-in kept?</summary>
+          <p>In the Keychain on this Apple TV only. It is not synced through iCloud Keychain.</p>
+        </details>
+
+        <details>
+          <summary>Which services does the app contact?</summary>
+          <p>Discogs, for your collection, release details and sign-in. MusicBrainz, to find each record's cover. And the Cover Art Archive, for covers.</p>
+        </details>
+      </div>
+
+      <h3>Something is wrong</h3>
+      <div class="faq">
+        <details>
+          <summary>The TV says Couldn't build your library.</summary>
+          <p>Choose <strong>Retry</strong> to start the download again. <strong>Continue anyway</strong> opens the gallery now, and the download is tried again once the gallery opens.</p>
+        </details>
+
+        <details>
+          <summary>A record says Couldn't load the tracklist.</summary>
+          <p>Go back to the gallery and open the record again. The tracklist is downloaded each time a record opens.</p>
+        </details>
+
+        <details>
+          <summary>How do I report a problem?</summary>
+          <p>Email <a href="mailto:support.vinyl.for.appletv@gmail.com">support.vinyl.for.appletv@gmail.com</a>, or open an issue on GitHub. The <a href="support.html">support page</a> lists the details that help most.</p>
         </details>
       </div>
     </article>

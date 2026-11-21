@@ -378,6 +378,27 @@ section + section { border-top: 1px solid var(--surface-border); }
   border-radius: 12px;
   border: 1px solid var(--surface-border);
 }
+.content h3 { font-size: 1.2rem; margin-top: 36px; margin-bottom: 10px; }
+.content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0 8px;
+  font-size: 0.95rem;
+}
+.content th, .content td {
+  text-align: left;
+  vertical-align: top;
+  padding: 12px 14px 12px 0;
+  border-bottom: 1px solid var(--surface-border);
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.content thead th { color: var(--text); font-weight: 600; }
+.content tbody th { color: var(--text); font-weight: 600; }
+@media (max-width: 600px) {
+  .content table { font-size: 0.85rem; }
+  .content th, .content td { padding-right: 10px; }
+}
 
 .faq details {
   background: var(--surface);
