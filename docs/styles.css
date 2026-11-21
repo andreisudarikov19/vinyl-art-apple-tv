@@ -463,6 +463,9 @@ section + section { border-top: 1px solid var(--surface-border); }
 }
 .content .controls-layout li:last-child { margin-bottom: 0; }
 .content .controls-layout ul.moves li { margin-bottom: 6px; }
+/* The numbers on the drawings take the same yolk colour as the lists. Only
+   the digits change; the outline strokes keep their own colour. */
+.content .controls-layout svg text { fill: var(--yolk); }
 
 @media (max-width: 600px) {
   .content .controls-layout,
