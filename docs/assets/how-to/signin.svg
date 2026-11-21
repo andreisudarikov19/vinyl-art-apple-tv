@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 985" role="img" aria-labelledby="signin-t signin-d">
   <title id="signin-t">Sign-in screens: remote controls</title>
-  <desc id="signin-d">Numbers used on this screen: 5 clickpad (the touch pad on top of the remote) press, open the highlighted (selected) item: Sign in with Discogs, Continue or Try again.</desc>
+  <desc id="signin-d">Sign-in screen. 5 clickpad (the touch pad on top of the remote) press opens the highlighted (selected) button: “Sign in with Discogs”, “Continue” or “Try again”. Discogs is the online record database that this app reads.</desc>
   <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
     <rect x="208.5" y="14" width="243" height="943" rx="42"/>
     <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 985" role="img" aria-labelledby="qr-t qr-d">
   <title id="qr-t">Discogs QR screen (Discogs, the online record database): remote controls</title>
-  <desc id="qr-d">Numbers used on this screen: 6 Back closes this screen; the Apple TV handles the Back button here.</desc>
+  <desc id="qr-d">QR code screen. The square code links to this release's page on discogs.com, for a phone to scan. 6 Back (the ‹ button) closes this screen; the Apple TV handles the Back button here.</desc>
   <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
     <rect x="208.5" y="14" width="243" height="943" rx="42"/>
     <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>

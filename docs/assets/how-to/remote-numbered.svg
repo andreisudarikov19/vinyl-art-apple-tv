@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 985" role="img" aria-labelledby="remote-numbered-t remote-numbered-d">
-  <title id="remote-numbered-t">Siri Remote (USB-C), numbered controls</title>
-  <desc id="remote-numbered-d">Line drawing of the remote with its numbered controls: 1 clickpad (the touch pad on top of the remote) up, 2 clickpad down, 3 clickpad left, 4 clickpad right, 5 clickpad press, 6 Back (the button labelled ‹), which the Apple TV itself handles on the screens where it closes them. The TV, Play/Pause, Volume, Mute, Power and Siri controls are drawn but not numbered.</desc>
+  <title id="remote-numbered-t">Siri Remote, numbered controls</title>
+  <desc id="remote-numbered-d">Line drawing of the remote with its numbered controls: 1 clickpad (the touch pad on top of the remote) up, 2 clickpad down, 3 clickpad left, 4 clickpad right, 5 clickpad press, 6 Back (the ‹ button) closes the current screen; the Apple TV handles the Back button. The TV, Play/Pause, Volume, Mute, Power and Siri (the voice button) controls are drawn but not numbered.</desc>
   <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
     <rect x="208.5" y="14" width="243" height="943" rx="42"/>
     <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>

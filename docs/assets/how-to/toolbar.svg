@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 985" role="img" aria-labelledby="toolbar-t toolbar-d">
   <title id="toolbar-t">Gallery toolbar: remote controls</title>
-  <desc id="toolbar-d">Numbers used on this screen: 3 clickpad (the touch pad on top of the remote) left, previous toolbar control. 4 clickpad right, next toolbar control. 5 clickpad press, open the highlighted (selected) item.</desc>
+  <desc id="toolbar-d">Gallery toolbar, the row of on-screen buttons at the top. 3 clickpad (the touch pad on top of the remote) left, previous button. 4 clickpad right, next button. 5 clickpad press, open the highlighted (selected) button.</desc>
   <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
     <rect x="208.5" y="14" width="243" height="943" rx="42"/>
     <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>

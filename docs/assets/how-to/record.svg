@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 985" role="img" aria-labelledby="record-t record-d">
   <title id="record-t">Record screen: remote controls</title>
-  <desc id="record-d">Numbers used on this screen: 1 clickpad (the touch pad on top of the remote) up, show the cover. 2 clickpad down, show the tracklist (the list of songs). 3 clickpad left, previous side. 4 clickpad right, next side. 5 clickpad press, flip to the next side.</desc>
+  <desc id="record-d">3 clickpad (the touch pad on top of the remote) left, previous side (side A, side B and so on, as the record defines them). 4 clickpad right, next side. 5 clickpad press, flip to the next side. 1 up, show the cover. 2 down, show the tracklist (the list of songs).</desc>
   <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
     <rect x="208.5" y="14" width="243" height="943" rx="42"/>
     <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>

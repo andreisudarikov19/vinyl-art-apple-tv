@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 985" role="img" aria-labelledby="settings-t settings-d">
   <title id="settings-t">Settings menu: remote controls</title>
-  <desc id="settings-d">Numbers used on this screen: 5 clickpad (the touch pad on top of the remote) press, choose the highlighted (selected) item. 6 Back closes the menu; the Apple TV handles the Back button here.</desc>
+  <desc id="settings-d">Numbers used on this screen: 5 clickpad (the touch pad on top of the remote) press, choose the highlighted (selected) item. 6 Back (the ‹ button) closes this screen; the Apple TV handles the Back button here.</desc>
   <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
     <rect x="208.5" y="14" width="243" height="943" rx="42"/>
     <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
