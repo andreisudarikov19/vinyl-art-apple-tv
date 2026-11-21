@@ -12,6 +12,9 @@
   <meta property="og:type" content="website">
   <link rel="icon" type="image/png" href="assets/icon.png">
   <link rel="apple-touch-icon" href="assets/icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Instrument+Serif:ital@0;1&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -32,781 +35,1083 @@
   </header>
 
   <main>
-    <article class="container content">
-      <h1>How to use</h1>
-      <p class="subtitle">Each screen of the app, what it shows and the controls you use on it.</p>
+    <article class="container content how-to">
+      <div class="intro">
+        <div class="hero-text">
+          <h1>How to <span class="accent">use</span></h1>
+          <p class="subtitle">A tour of every screen, and what your remote does on each one.</p>
+          <p>Vinyl for Apple TV shows the records in your Discogs collection on your TV. This guide takes you through the app one screen at a time. For each screen you get a picture, a short explanation and a list of what the remote does there.</p>
+          <p>Not signed in yet? <a href="get-started.html">Get started</a> takes you through signing in step by step. Come back here when your records are on screen.</p>
+        </div>
+        <img class="hero-art" src="assets/how-to/hero-record.png" width="300" height="300" alt="">
+      </div>
 
-      <p>The app shows the records (vinyl albums) in your collection on Discogs (the online record database). Each section is one screen, with a screenshot and a drawing of the remote whose numbers match the list beside it.</p>
-      <p>On a phone, each drawing sits above its list.</p>
+      <nav class="chapter-index" aria-label="Chapters">
+        <div class="index-group">
+          <p class="index-label">Start here</p>
+          <p class="index-title">The basics</p>
+          <ul>
+            <li><a href="#meet-the-remote"><span class="code">00</span>Meet the remote</a></li>
+          </ul>
+        </div>
+        <div class="index-group">
+          <p class="index-label">Side A</p>
+          <p class="index-title">The gallery</p>
+          <ul>
+            <li><a href="#covers-in-a-row"><span class="code">A1</span>Covers in a row</a></li>
+            <li><a href="#covers-in-a-grid"><span class="code">A2</span>Covers in a grid</a></li>
+            <li><a href="#toolbar"><span class="code">A3</span>The toolbar</a></li>
+          </ul>
+        </div>
+        <div class="index-group">
+          <p class="index-label">Side B</p>
+          <p class="index-title">A record</p>
+          <ul>
+            <li><a href="#record-screen"><span class="code">B1</span>The record screen</a></li>
+          </ul>
+        </div>
+        <div class="index-group">
+          <p class="index-label">Side C</p>
+          <p class="index-title">Settings</p>
+          <ul>
+            <li><a href="#settings"><span class="code">C1</span>The settings menu</a></li>
+          </ul>
+        </div>
+        <div class="index-group">
+          <p class="index-label">Bonus tracks</p>
+          <p class="index-title">Good to know</p>
+          <ul>
+            <li><a href="#discogs-qr"><span class="code">+1</span>Open a record on Discogs</a></li>
+            <li><a href="#about"><span class="code">+2</span>The “About” screen</a></li>
+          </ul>
+        </div>
+      </nav>
 
-      <h2 id="gallery-coverflow">Gallery, the default view</h2>
-      <img class="screen" src="assets/screens/gallery.jpg" width="1920" height="1080" alt="Covers in a row, with the highlighted cover in the centre, larger than the others, the toolbar above it, and its artist and title below.">
-      <p>The row of covers, with the highlighted one large, is called “CoverFlow”.</p>
-      <p>Gallery shows the highlighted (selected) record in the centre, with its artist and title below it, and its colours tint the background. Swipe left or right on the clickpad (the touch pad on top of the remote) to move one record at a time.</p>
-      <p>When the covers are in a row, the halo (the soft glow of colour from the cover) comes back 60 seconds after your last swipe. With “Engage halo automatically” off, no halo shows when the covers are in a row.</p>
-      <p>Back (the ‹ button) is handled by the Apple TV, not by this app.</p>
-      <h3>Controls</h3>
-      <table class="controls-layout">
-        <caption class="visually-hidden">Controls on the Gallery screen</caption>
-        <tbody>
-          <tr>
-            <td class="drawing">
-              <svg xmlns="http://www.w3.org/2000/svg" width="330" height="493" viewBox="0 0 660 985" role="img" aria-labelledby="cover-flow-t-1 cover-flow-d-1">
-                <title id="cover-flow-t-1">Gallery, default view: remote controls</title>
-                <desc id="cover-flow-d-1">Numbers used on this screen: 1 clickpad (the touch pad on top of the remote) up, move to the toolbar. 3 clickpad left, previous record. 4 clickpad right, next record. 5 clickpad press, open the record.</desc>
-                <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="208.5" y="14" width="243" height="943" rx="42"/>
-                  <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
-                  <line x1="323" y1="61.5" x2="337" y2="61.5"/>
-                  <circle cx="403.5" cy="62" r="21"/>
-                  <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
-                  <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
-                  <circle cx="330" cy="212" r="107.5"/>
-                  <circle cx="330" cy="212" r="58"/>
-                  <circle cx="278" cy="370" r="42.5"/>
-                  <polyline points="284.5,356 272,370 284.5,384"/>
-                  <circle cx="382" cy="370" r="42.5"/>
-                  <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
-                  <line x1="376" y1="381.5" x2="388" y2="381.5"/>
-                  <circle cx="278" cy="472.5" r="42.5"/>
-                  <polygon points="266,461.5 266,483.5 279,472.5"/>
-                  <line x1="284" y1="461.5" x2="284" y2="483.5"/>
-                  <line x1="290" y1="461.5" x2="290" y2="483.5"/>
-                  <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
-                  <line x1="382" y1="461.5" x2="382" y2="483.5"/>
-                  <line x1="371" y1="472.5" x2="393" y2="472.5"/>
-                  <line x1="371" y1="575.5" x2="393" y2="575.5"/>
-                  <circle cx="278" cy="575" r="42.5"/>
-                  <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
-                  <line x1="265" y1="588" x2="268.5" y2="584.5"/>
-                  <line x1="281" y1="572" x2="290" y2="563"/>
-                </g>
-                <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
-                  <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
-                  <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
-                  <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
-                  <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
-                </g>
-                <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
-                  <circle cx="330" cy="129" r="19"/>
-                  <circle cx="247" cy="212" r="19"/>
-                  <circle cx="413" cy="212" r="19"/>
-                  <circle cx="330" cy="212" r="19"/>
-                </g>
-                <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
-                  <text x="330" y="137.4" font-family="sans-serif">1</text>
-                  <text x="247" y="220.4" font-family="sans-serif">3</text>
-                  <text x="413" y="220.4" font-family="sans-serif">4</text>
-                  <text x="330" y="220.4" font-family="sans-serif">5</text>
-                </g>
-              </svg>
-            </td>
-            <td class="list">
-              <ol>
-                <li value="1"><strong>Swipe up.</strong> Moves the highlight to the toolbar, the row of on-screen buttons at the top of the gallery.</li>
-                <li value="3"><strong>Swipe left.</strong> Brings the previous record to the centre. At the first record, nothing changes.</li>
-                <li value="4"><strong>Swipe right.</strong> Brings the next record to the centre. At the last record, nothing changes.</li>
-                <li value="5"><strong>Press the clickpad.</strong> Opens the highlighted record.</li>
-              </ol>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <section class="meet" id="meet-the-remote" aria-labelledby="meet-title">
+        <div class="panel">
+          <svg xmlns="http://www.w3.org/2000/svg" width="330" height="493" viewBox="0 0 660 985" role="img" aria-labelledby="meet-remote-t meet-remote-d">
+              <title id="meet-remote-t">Siri Remote, numbered controls</title>
+              <desc id="meet-remote-d">Line drawing of the remote with its numbered controls: 1 clickpad (the touch pad on top of the remote) up, 2 clickpad down, 3 clickpad left, 4 clickpad right, 5 clickpad press, 6 Back (the ‹ button) closes the current screen; the Apple TV handles the Back button. The TV, Play/Pause, Volume, Mute, Power and Siri (the voice button) controls are drawn but not numbered.</desc>
+              <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="208.5" y="14" width="243" height="943" rx="42"/>
+              <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
+              <line x1="323" y1="61.5" x2="337" y2="61.5"/>
+              <circle cx="403.5" cy="62" r="21"/>
+              <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
+              <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
+              <circle cx="330" cy="212" r="107.5"/>
+              <circle cx="330" cy="212" r="58"/>
+              <circle cx="278" cy="370" r="42.5"/>
+              <polyline points="284.5,356 272,370 284.5,384"/>
+              <circle cx="382" cy="370" r="42.5"/>
+              <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
+              <line x1="376" y1="381.5" x2="388" y2="381.5"/>
+              <circle cx="278" cy="472.5" r="42.5"/>
+              <polygon points="266,461.5 266,483.5 279,472.5"/>
+              <line x1="284" y1="461.5" x2="284" y2="483.5"/>
+              <line x1="290" y1="461.5" x2="290" y2="483.5"/>
+              <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
+              <line x1="382" y1="461.5" x2="382" y2="483.5"/>
+              <line x1="371" y1="472.5" x2="393" y2="472.5"/>
+              <line x1="371" y1="575.5" x2="393" y2="575.5"/>
+              <circle cx="278" cy="575" r="42.5"/>
+              <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
+              <line x1="265" y1="588" x2="268.5" y2="584.5"/>
+              <line x1="281" y1="572" x2="290" y2="563"/>
+              </g>
+              <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
+              <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
+              <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
+              <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
+              <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
+              </g>
+              <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+              <circle cx="330" cy="129" r="19"/>
+              <circle cx="330" cy="295" r="19"/>
+              <circle cx="247" cy="212" r="19"/>
+              <circle cx="413" cy="212" r="19"/>
+              <circle cx="330" cy="212" r="19"/>
+              <line x1="59" y1="367" x2="226" y2="367"/>
+              <circle cx="40" cy="367" r="19"/>
+              </g>
+              <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
+              <text x="330" y="137.4" font-family="sans-serif">1</text>
+              <text x="330" y="303.4" font-family="sans-serif">2</text>
+              <text x="247" y="220.4" font-family="sans-serif">3</text>
+              <text x="413" y="220.4" font-family="sans-serif">4</text>
+              <text x="330" y="220.4" font-family="sans-serif">5</text>
+              <text x="40" y="375.4" font-family="sans-serif">6</text>
+              </g>
+            </svg>
+        </div>
+        <div class="meet-body">
+          <p class="kicker">Start here</p>
+          <h2 id="meet-title">Meet the remote</h2>
+          <p>You only need two parts of the remote for this app: the clickpad, which is the round pad at the top, and the Back button just below it.</p>
+          <ol class="meet-list">
+            <li value="1"><strong>Swipe up.</strong> Slide your thumb up across the clickpad.</li>
+            <li value="2"><strong>Swipe down.</strong> Slide your thumb down.</li>
+            <li value="3"><strong>Swipe left.</strong> Slide your thumb to the left.</li>
+            <li value="4"><strong>Swipe right.</strong> Slide your thumb to the right.</li>
+            <li value="5"><strong>Press the clickpad.</strong> Push the pad down until it clicks.</li>
+            <li value="6"><strong>Back.</strong> The ‹ button. It returns to the previous screen. The Apple TV looks after this button itself, so the app cannot change what it does.</li>
+          </ol>
+          <p class="lead">Swiping moves the highlight: the cover or button that stands out on the screen. Pressing the clickpad opens or chooses whatever is highlighted.</p>
+          <p class="small">Every drawing in this guide uses these same numbers, and shows only the ones that do something on that screen.</p>
+        </div>
+      </section>
 
-      <h2>Gallery, the grid (“Grid”)</h2>
-      <img class="screen" src="assets/screens/grid.jpg" width="1920" height="1080" alt="The “Grid” view: albums in rows of seven under the toolbar, with the layout button highlighted.">
-      <p>“Grid” shows seven albums in each row. An album is one release in your collection.</p>
-      <p>The grid does not show the halo, but its background is tinted by the highlighted album.</p>
-      <p>Back (the ‹ button) is handled by the Apple TV, not by this app.</p>
-      <h3>Controls</h3>
-      <table class="controls-layout">
-        <caption class="visually-hidden">Controls on the grid</caption>
-        <tbody>
-          <tr>
-            <td class="drawing">
-              <svg xmlns="http://www.w3.org/2000/svg" width="330" height="493" viewBox="0 0 660 985" role="img" aria-labelledby="grid-t-2 grid-d-2">
-                <title id="grid-t-2">Gallery, “Grid” view: remote controls</title>
-                <desc id="grid-d-2">Numbers used on this screen: 1 clickpad (the touch pad on top of the remote) up, up a row, or to the toolbar from the top row. 2 clickpad down, down a row. 3 clickpad left, previous cover. 4 clickpad right, next cover. 5 clickpad press, open the record.</desc>
-                <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="208.5" y="14" width="243" height="943" rx="42"/>
-                  <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
-                  <line x1="323" y1="61.5" x2="337" y2="61.5"/>
-                  <circle cx="403.5" cy="62" r="21"/>
-                  <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
-                  <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
-                  <circle cx="330" cy="212" r="107.5"/>
-                  <circle cx="330" cy="212" r="58"/>
-                  <circle cx="278" cy="370" r="42.5"/>
-                  <polyline points="284.5,356 272,370 284.5,384"/>
-                  <circle cx="382" cy="370" r="42.5"/>
-                  <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
-                  <line x1="376" y1="381.5" x2="388" y2="381.5"/>
-                  <circle cx="278" cy="472.5" r="42.5"/>
-                  <polygon points="266,461.5 266,483.5 279,472.5"/>
-                  <line x1="284" y1="461.5" x2="284" y2="483.5"/>
-                  <line x1="290" y1="461.5" x2="290" y2="483.5"/>
-                  <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
-                  <line x1="382" y1="461.5" x2="382" y2="483.5"/>
-                  <line x1="371" y1="472.5" x2="393" y2="472.5"/>
-                  <line x1="371" y1="575.5" x2="393" y2="575.5"/>
-                  <circle cx="278" cy="575" r="42.5"/>
-                  <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
-                  <line x1="265" y1="588" x2="268.5" y2="584.5"/>
-                  <line x1="281" y1="572" x2="290" y2="563"/>
-                </g>
-                <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
-                  <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
-                  <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
-                  <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
-                  <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
-                </g>
-                <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
-                  <circle cx="330" cy="129" r="19"/>
-                  <circle cx="330" cy="295" r="19"/>
-                  <circle cx="247" cy="212" r="19"/>
-                  <circle cx="413" cy="212" r="19"/>
-                  <circle cx="330" cy="212" r="19"/>
-                </g>
-                <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
-                  <text x="330" y="137.4" font-family="sans-serif">1</text>
-                  <text x="330" y="303.4" font-family="sans-serif">2</text>
-                  <text x="247" y="220.4" font-family="sans-serif">3</text>
-                  <text x="413" y="220.4" font-family="sans-serif">4</text>
-                  <text x="330" y="220.4" font-family="sans-serif">5</text>
-                </g>
-              </svg>
-            </td>
-            <td class="list">
-              <ol>
-                <li value="1"><strong>Swipe up.</strong> Moves up one row. From the top row, moves the highlight to the toolbar.</li>
-                <li value="2"><strong>Swipe down.</strong> Moves down one row, if there is a row below.</li>
-                <li value="3"><strong>Swipe left.</strong> Moves to the previous album in the row. At the start of a row, nothing changes.</li>
-                <li value="4"><strong>Swipe right.</strong> Moves to the next album in the row. At the end of a row, nothing changes.</li>
-                <li value="5"><strong>Press the clickpad.</strong> Opens the highlighted album.</li>
-              </ol>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="side-divider">
+        <span class="side-label">Side A</span>
+        <span class="side-rule" aria-hidden="true"></span>
+        <span class="side-name">The gallery</span>
+      </div>
 
-      <h2 id="sort-filter-suggest">The gallery toolbar</h2>
-      <p><em>Screenshot coming soon.</em></p>
-      <p>The toolbar sits at the top of the gallery. “Suggest”, “Sort” and “Layout” appear once the library has records. The “Genre” menu appears only when the library has genre or style tags. The gear is the rightmost button on the toolbar. Swipe right along the toolbar until the gear is highlighted, then press the clickpad to open the “Settings menu”.</p>
-      <p>“Suggest” opens a random record from the records shown, after any genre filter.</p>
-      <p>“Sort” puts the records in order by “Recently added” (the default), “Artist”, “Album” or “Year”.</p>
-      <p>“Genre” lists every genre and style in your collection. Choosing one shows the records that have it. “All genres” clears the filter.</p>
-      <p>“Layout” switches between “CoverFlow” and “Grid”. The sort order and layout are kept between uses of the app. The genre filter is not.</p>
-      <h3>Controls</h3>
-      <table class="controls-layout">
-        <caption class="visually-hidden">Controls on the gallery toolbar</caption>
-        <tbody>
-          <tr>
-            <td class="drawing">
-              <svg xmlns="http://www.w3.org/2000/svg" width="330" height="493" viewBox="0 0 660 985" role="img" aria-labelledby="toolbar-t-3 toolbar-d-3">
-                <title id="toolbar-t-3">Gallery toolbar: remote controls</title>
-                <desc id="toolbar-d-3">Gallery toolbar, the row of on-screen buttons at the top. 3 clickpad (the touch pad on top of the remote) left, previous button. 4 clickpad right, next button. 5 clickpad press, open the highlighted (selected) button.</desc>
-                <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="208.5" y="14" width="243" height="943" rx="42"/>
-                  <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
-                  <line x1="323" y1="61.5" x2="337" y2="61.5"/>
-                  <circle cx="403.5" cy="62" r="21"/>
-                  <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
-                  <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
-                  <circle cx="330" cy="212" r="107.5"/>
-                  <circle cx="330" cy="212" r="58"/>
-                  <circle cx="278" cy="370" r="42.5"/>
-                  <polyline points="284.5,356 272,370 284.5,384"/>
-                  <circle cx="382" cy="370" r="42.5"/>
-                  <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
-                  <line x1="376" y1="381.5" x2="388" y2="381.5"/>
-                  <circle cx="278" cy="472.5" r="42.5"/>
-                  <polygon points="266,461.5 266,483.5 279,472.5"/>
-                  <line x1="284" y1="461.5" x2="284" y2="483.5"/>
-                  <line x1="290" y1="461.5" x2="290" y2="483.5"/>
-                  <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
-                  <line x1="382" y1="461.5" x2="382" y2="483.5"/>
-                  <line x1="371" y1="472.5" x2="393" y2="472.5"/>
-                  <line x1="371" y1="575.5" x2="393" y2="575.5"/>
-                  <circle cx="278" cy="575" r="42.5"/>
-                  <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
-                  <line x1="265" y1="588" x2="268.5" y2="584.5"/>
-                  <line x1="281" y1="572" x2="290" y2="563"/>
-                </g>
-                <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
-                  <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
-                  <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
-                  <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
-                  <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
-                </g>
-                <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
-                  <circle cx="247" cy="212" r="19"/>
-                  <circle cx="413" cy="212" r="19"/>
-                  <circle cx="330" cy="212" r="19"/>
-                </g>
-                <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
-                  <text x="247" y="220.4" font-family="sans-serif">3</text>
-                  <text x="413" y="220.4" font-family="sans-serif">4</text>
-                  <text x="330" y="220.4" font-family="sans-serif">5</text>
-                </g>
-              </svg>
-            </td>
-            <td class="list">
-              <ol>
-                <li value="3"><strong>Swipe left.</strong> Moves the highlight to the button on its left.</li>
-                <li value="4"><strong>Swipe right.</strong> Moves the highlight to the button on its right.</li>
-                <li value="5"><strong>Press the clickpad.</strong> Chooses the highlighted button. “Suggest” opens a record. “Sort” and “Genre” open menus. “Layout” switches between “CoverFlow” and “Grid”. The gear opens the “Settings menu”.</li>
-              </ol>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <section class="chapter" id="covers-in-a-row">
+        <h2><span class="code">A1</span>Covers in a row</h2>
+        <div class="chapter-body">
+          <div class="chapter-main">
+            <img class="screen" src="assets/screens/gallery.jpg" width="1920" height="1080" alt="Covers in a row, with the highlighted cover in the centre, larger than the others, the toolbar above it, and its artist and title below.">
+            <p>When you first open the app, your records appear as a row of covers with one large cover in the middle. This layout is called “CoverFlow”.</p>
+            <p>The large cover is the highlighted record. Its artist and title sit underneath, and the background takes on its colours.</p>
+            <p>Swipe left or right to move through your collection, one record at a time. Press the clickpad to open the record in the middle.</p>
+            <h3>The halo</h3>
+            <p>Stop swiping for 60 seconds and a soft glow of colour from the cover appears. We call it the halo. If you would rather not see it, switch off “Engage halo automatically” in <a href="#settings">the settings menu</a>.</p>
+          </div>
+              <table class="controls-layout">
+                <caption class="visually-hidden">Controls on the Gallery screen</caption>
+                <tbody>
+                  <tr>
+                    <td class="drawing">
+                      <p class="card-label">Controls</p>
+                      <div class="panel">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="330" height="493" viewBox="0 0 660 985" role="img" aria-labelledby="cover-flow-t-1 cover-flow-d-1">
+                          <title id="cover-flow-t-1">Gallery, default view: remote controls</title>
+                          <desc id="cover-flow-d-1">Numbers used on this screen: 1 clickpad (the touch pad on top of the remote) up, move to the toolbar. 3 clickpad left, previous record. 4 clickpad right, next record. 5 clickpad press, open the record.</desc>
+                          <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="208.5" y="14" width="243" height="943" rx="42"/>
+                          <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
+                          <line x1="323" y1="61.5" x2="337" y2="61.5"/>
+                          <circle cx="403.5" cy="62" r="21"/>
+                          <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
+                          <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
+                          <circle cx="330" cy="212" r="107.5"/>
+                          <circle cx="330" cy="212" r="58"/>
+                          <circle cx="278" cy="370" r="42.5"/>
+                          <polyline points="284.5,356 272,370 284.5,384"/>
+                          <circle cx="382" cy="370" r="42.5"/>
+                          <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
+                          <line x1="376" y1="381.5" x2="388" y2="381.5"/>
+                          <circle cx="278" cy="472.5" r="42.5"/>
+                          <polygon points="266,461.5 266,483.5 279,472.5"/>
+                          <line x1="284" y1="461.5" x2="284" y2="483.5"/>
+                          <line x1="290" y1="461.5" x2="290" y2="483.5"/>
+                          <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
+                          <line x1="382" y1="461.5" x2="382" y2="483.5"/>
+                          <line x1="371" y1="472.5" x2="393" y2="472.5"/>
+                          <line x1="371" y1="575.5" x2="393" y2="575.5"/>
+                          <circle cx="278" cy="575" r="42.5"/>
+                          <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
+                          <line x1="265" y1="588" x2="268.5" y2="584.5"/>
+                          <line x1="281" y1="572" x2="290" y2="563"/>
+                          </g>
+                          <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
+                          <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
+                          <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
+                          <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
+                          <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
+                          </g>
+                          <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+                          <circle cx="330" cy="129" r="19"/>
+                          <circle cx="247" cy="212" r="19"/>
+                          <circle cx="413" cy="212" r="19"/>
+                          <circle cx="330" cy="212" r="19"/>
+                          </g>
+                          <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
+                          <text x="330" y="137.4" font-family="sans-serif">1</text>
+                          <text x="247" y="220.4" font-family="sans-serif">3</text>
+                          <text x="413" y="220.4" font-family="sans-serif">4</text>
+                          <text x="330" y="220.4" font-family="sans-serif">5</text>
+                          </g>
+                        </svg>
+                      </div>
+                    </td>
+                    <td class="list">
+                      <ol>
+                    <li value="1"><strong>Swipe up.</strong> Moves up to the toolbar, the row of buttons at the top.</li>
+                    <li value="3"><strong>Swipe left.</strong> Shows the previous record. At the first record, nothing happens.</li>
+                    <li value="4"><strong>Swipe right.</strong> Shows the next record. At the last record, nothing happens.</li>
+                    <li value="5"><strong>Press the clickpad.</strong> Opens the record in the middle.</li>
+                      </ol>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
 
-      <h2 id="open-a-record">The record screen</h2>
-      <img class="screen" src="assets/screens/record.jpg" width="1920" height="1080" alt="The record screen in the tracklist view: the cover on the left with its title, artist and tags, and the tracklist for Side A on the right, with the side selector above it.">
-      <p>A record opens on its tracklist (the list of songs) view. A side is one face of a record, as the record defines them. The side selector above the tracklist shows each side, such as “Side A”, with the current one highlighted.</p>
-      <p>The cover view shows the cover centred on a black background. After you change side, a short message appears for 2 seconds, in the cover view only.</p>
-      <p><em>Cover view screenshot coming soon.</em></p>
-      <p id="turn-the-halo-on-or-off">In automatic mode, the halo appears by itself after a short pause. In automatic mode, on the cover view, any swipe turns the halo off, and it comes back 3 seconds after your last swipe. On the tracklist, the halo does not show. After 15 seconds without a swipe, the blurred background starts to drift.</p>
-      <p>To keep the halo off:</p>
-      <ol>
-        <li>Press Back (the ‹ button) to return to the gallery. The Apple TV handles Back. Swipe up to move the highlight to the toolbar, then swipe right along the toolbar until the gear is highlighted, and press the clickpad.</li>
-        <li>In the “Settings menu”, swipe to “Engage halo automatically” and press the clickpad. Check that the tick beside it is gone before you press Back.</li>
-        <li>Press Back to return to the gallery, and open the record again. The record opens on the tracklist, so swipe up to show the cover. Swipe up again until the “Halo” button under the cover is highlighted, then press the clickpad to switch the halo on or off. The button is filled white when the halo is on, and it is plain glass when the halo is off.</li>
-      </ol>
-      <p id="cover-art">The app first shows the Discogs image. It then swaps in a better cover when it finds one. It finds covers through MusicBrainz (an open music database) and the Cover Art Archive, which holds cover images.</p>
-      <p>Back (the ‹ button) is handled by the Apple TV, not by this app.</p>
-      <h3>Controls</h3>
-      <table class="controls-layout">
-        <caption class="visually-hidden">Controls on the record screen</caption>
-        <tbody>
-          <tr>
-            <td class="drawing">
-              <svg xmlns="http://www.w3.org/2000/svg" width="330" height="493" viewBox="0 0 660 985" role="img" aria-labelledby="record-t-4 record-d-4">
-                <title id="record-t-4">Record screen: remote controls</title>
-                <desc id="record-d-4">3 clickpad (the touch pad on top of the remote) left, previous side (side A, side B and so on, as the record defines them). 4 clickpad right, next side. 5 clickpad press, flip to the next side. 1 up, show the cover. 2 down, show the tracklist (the list of songs).</desc>
-                <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="208.5" y="14" width="243" height="943" rx="42"/>
-                  <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
-                  <line x1="323" y1="61.5" x2="337" y2="61.5"/>
-                  <circle cx="403.5" cy="62" r="21"/>
-                  <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
-                  <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
-                  <circle cx="330" cy="212" r="107.5"/>
-                  <circle cx="330" cy="212" r="58"/>
-                  <circle cx="278" cy="370" r="42.5"/>
-                  <polyline points="284.5,356 272,370 284.5,384"/>
-                  <circle cx="382" cy="370" r="42.5"/>
-                  <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
-                  <line x1="376" y1="381.5" x2="388" y2="381.5"/>
-                  <circle cx="278" cy="472.5" r="42.5"/>
-                  <polygon points="266,461.5 266,483.5 279,472.5"/>
-                  <line x1="284" y1="461.5" x2="284" y2="483.5"/>
-                  <line x1="290" y1="461.5" x2="290" y2="483.5"/>
-                  <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
-                  <line x1="382" y1="461.5" x2="382" y2="483.5"/>
-                  <line x1="371" y1="472.5" x2="393" y2="472.5"/>
-                  <line x1="371" y1="575.5" x2="393" y2="575.5"/>
-                  <circle cx="278" cy="575" r="42.5"/>
-                  <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
-                  <line x1="265" y1="588" x2="268.5" y2="584.5"/>
-                  <line x1="281" y1="572" x2="290" y2="563"/>
-                </g>
-                <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
-                  <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
-                  <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
-                  <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
-                  <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
-                </g>
-                <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
-                  <circle cx="330" cy="129" r="19"/>
-                  <circle cx="330" cy="295" r="19"/>
-                  <circle cx="247" cy="212" r="19"/>
-                  <circle cx="413" cy="212" r="19"/>
-                  <circle cx="330" cy="212" r="19"/>
-                </g>
-                <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
-                  <text x="330" y="137.4" font-family="sans-serif">1</text>
-                  <text x="330" y="303.4" font-family="sans-serif">2</text>
-                  <text x="247" y="220.4" font-family="sans-serif">3</text>
-                  <text x="413" y="220.4" font-family="sans-serif">4</text>
-                  <text x="330" y="220.4" font-family="sans-serif">5</text>
-                </g>
-              </svg>
-            </td>
-            <td class="list">
-              <ol>
-                <li value="1"><strong>Swipe up.</strong> Shows the cover full screen, in the cover view.</li>
-                <li value="2"><strong>Swipe down.</strong> Shows the tracklist view.</li>
-                <li value="3"><strong>Swipe left.</strong> Goes to the previous side. At the first side, nothing changes.</li>
-                <li value="4"><strong>Swipe right.</strong> Goes to the next side. At the last side, nothing changes.</li>
-                <li value="5"><strong>Press the clickpad.</strong> With the “Halo” button highlighted, press to switch the halo on or off. Otherwise, press to flip to the next side. At the last side, nothing changes.</li>
-              </ol>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+        </div>
+      </section>
 
-      <h2>“Data provided by Discogs”</h2>
-      <p><em>Screenshot coming soon.</em></p>
-      <p>This is the QR code (a square pattern a phone camera can read) that opens the record’s page on discogs.com. The code is shown full screen, with the words “Scan with your phone”.</p>
-      <p>On the tracklist view, select the “Data provided by Discogs” line under the cover details. Scan the code with a phone to open that page.</p>
-      <h3>Controls</h3>
-      <table class="controls-layout">
-        <caption class="visually-hidden">Controls on the Discogs QR code screen</caption>
-        <tbody>
-          <tr>
-            <td class="drawing">
-              <svg xmlns="http://www.w3.org/2000/svg" width="330" height="493" viewBox="0 0 660 985" role="img" aria-labelledby="qr-t-5 qr-d-5">
-                <title id="qr-t-5">Discogs QR screen (Discogs, the online record database): remote controls</title>
-                <desc id="qr-d-5">QR code screen. The square code links to this release’s page on discogs.com, for a phone to scan. 6 Back (the ‹ button) closes this screen; the Apple TV handles the Back button here.</desc>
-                <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="208.5" y="14" width="243" height="943" rx="42"/>
-                  <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
-                  <line x1="323" y1="61.5" x2="337" y2="61.5"/>
-                  <circle cx="403.5" cy="62" r="21"/>
-                  <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
-                  <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
-                  <circle cx="330" cy="212" r="107.5"/>
-                  <circle cx="330" cy="212" r="58"/>
-                  <circle cx="278" cy="370" r="42.5"/>
-                  <polyline points="284.5,356 272,370 284.5,384"/>
-                  <circle cx="382" cy="370" r="42.5"/>
-                  <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
-                  <line x1="376" y1="381.5" x2="388" y2="381.5"/>
-                  <circle cx="278" cy="472.5" r="42.5"/>
-                  <polygon points="266,461.5 266,483.5 279,472.5"/>
-                  <line x1="284" y1="461.5" x2="284" y2="483.5"/>
-                  <line x1="290" y1="461.5" x2="290" y2="483.5"/>
-                  <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
-                  <line x1="382" y1="461.5" x2="382" y2="483.5"/>
-                  <line x1="371" y1="472.5" x2="393" y2="472.5"/>
-                  <line x1="371" y1="575.5" x2="393" y2="575.5"/>
-                  <circle cx="278" cy="575" r="42.5"/>
-                  <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
-                  <line x1="265" y1="588" x2="268.5" y2="584.5"/>
-                  <line x1="281" y1="572" x2="290" y2="563"/>
-                </g>
-                <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
-                  <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
-                  <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
-                  <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
-                  <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
-                </g>
-                <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
-                  <line x1="59" y1="367" x2="226" y2="367"/>
-                  <circle cx="40" cy="367" r="19"/>
-                </g>
-                <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
-                  <text x="40" y="375.4" font-family="sans-serif">6</text>
-                </g>
-              </svg>
-            </td>
-            <td class="list">
-              <ol>
-                <li value="6"><strong>Back</strong> (the ‹ button). The Apple TV handles this button.</li>
-              </ol>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <section class="chapter" id="covers-in-a-grid">
+        <h2><span class="code">A2</span>Covers in a grid</h2>
+        <div class="chapter-body">
+          <div class="chapter-main">
+            <img class="screen" src="assets/screens/grid.jpg" width="1920" height="1080" alt="The “Grid” view: albums in rows of seven under the toolbar, with the layout button highlighted.">
+            <p>Would you like to see more records at once? The “Grid” layout shows your covers in rows of seven.</p>
+            <p>The background takes on the colours of the highlighted cover. There is no halo in the grid.</p>
+            <p>To switch between “CoverFlow” and “Grid”, use the “Layout” button on <a href="#toolbar">the toolbar</a>.</p>
+          </div>
+              <table class="controls-layout">
+                <caption class="visually-hidden">Controls on the grid</caption>
+                <tbody>
+                  <tr>
+                    <td class="drawing">
+                      <p class="card-label">Controls</p>
+                      <div class="panel">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="330" height="493" viewBox="0 0 660 985" role="img" aria-labelledby="grid-t-2 grid-d-2">
+                          <title id="grid-t-2">Gallery, “Grid” view: remote controls</title>
+                          <desc id="grid-d-2">Numbers used on this screen: 1 clickpad (the touch pad on top of the remote) up, up a row, or to the toolbar from the top row. 2 clickpad down, down a row. 3 clickpad left, previous cover. 4 clickpad right, next cover. 5 clickpad press, open the record.</desc>
+                          <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="208.5" y="14" width="243" height="943" rx="42"/>
+                          <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
+                          <line x1="323" y1="61.5" x2="337" y2="61.5"/>
+                          <circle cx="403.5" cy="62" r="21"/>
+                          <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
+                          <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
+                          <circle cx="330" cy="212" r="107.5"/>
+                          <circle cx="330" cy="212" r="58"/>
+                          <circle cx="278" cy="370" r="42.5"/>
+                          <polyline points="284.5,356 272,370 284.5,384"/>
+                          <circle cx="382" cy="370" r="42.5"/>
+                          <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
+                          <line x1="376" y1="381.5" x2="388" y2="381.5"/>
+                          <circle cx="278" cy="472.5" r="42.5"/>
+                          <polygon points="266,461.5 266,483.5 279,472.5"/>
+                          <line x1="284" y1="461.5" x2="284" y2="483.5"/>
+                          <line x1="290" y1="461.5" x2="290" y2="483.5"/>
+                          <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
+                          <line x1="382" y1="461.5" x2="382" y2="483.5"/>
+                          <line x1="371" y1="472.5" x2="393" y2="472.5"/>
+                          <line x1="371" y1="575.5" x2="393" y2="575.5"/>
+                          <circle cx="278" cy="575" r="42.5"/>
+                          <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
+                          <line x1="265" y1="588" x2="268.5" y2="584.5"/>
+                          <line x1="281" y1="572" x2="290" y2="563"/>
+                          </g>
+                          <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
+                          <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
+                          <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
+                          <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
+                          <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
+                          </g>
+                          <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+                          <circle cx="330" cy="129" r="19"/>
+                          <circle cx="330" cy="295" r="19"/>
+                          <circle cx="247" cy="212" r="19"/>
+                          <circle cx="413" cy="212" r="19"/>
+                          <circle cx="330" cy="212" r="19"/>
+                          </g>
+                          <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
+                          <text x="330" y="137.4" font-family="sans-serif">1</text>
+                          <text x="330" y="303.4" font-family="sans-serif">2</text>
+                          <text x="247" y="220.4" font-family="sans-serif">3</text>
+                          <text x="413" y="220.4" font-family="sans-serif">4</text>
+                          <text x="330" y="220.4" font-family="sans-serif">5</text>
+                          </g>
+                        </svg>
+                      </div>
+                    </td>
+                    <td class="list">
+                      <ol>
+                    <li value="1"><strong>Swipe up.</strong> Moves up one row. From the top row, it moves to the toolbar.</li>
+                    <li value="2"><strong>Swipe down.</strong> Moves down one row, if there is one.</li>
+                    <li value="3"><strong>Swipe left.</strong> Moves to the cover on the left. At the start of a row, nothing happens.</li>
+                    <li value="4"><strong>Swipe right.</strong> Moves to the cover on the right. At the end of a row, nothing happens.</li>
+                    <li value="5"><strong>Press the clickpad.</strong> Opens the highlighted record.</li>
+                      </ol>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
 
-      <h2 id="settings">The “Settings menu”</h2>
-      <p><em>Screenshot coming soon.</em></p>
-      <p>Gear: see the gallery toolbar. It lists these items, from top to bottom.</p>
-      <ul>
-        <li id="refresh-your-collection"><strong>“Refresh collection”</strong> reads the whole collection again. It adds new records, removes the ones you have taken off Discogs and updates the rest. Its progress shows at the bottom of the gallery, for example “Refreshing… 120/800”.</li>
-        <li><strong>“Engage halo automatically”</strong> is on by default. With “Engage halo automatically” off, the halo follows the “Halo” button, which is off each time you open the app. See the <a href="#turn-the-halo-on-or-off">record screen</a> section.</li>
-        <li><strong>“Account”</strong> shows the Discogs username you are signed in with.</li>
-        <li><strong>“Sign out (keep library)”</strong> removes the Discogs sign-in from this Apple TV and keeps your library here. Signing in again with the same account shows the library at once.</li>
-        <li><strong>“Sign out &amp; erase library”</strong>, the fifth item, is below “Sign out (keep library)”. It removes the sign-in and deletes the library at once, with no confirmation. Your layout, sort order and halo settings stay.</li>
-        <li>The app version, then <strong>“About”</strong>, which opens the “About” screen.</li>
-      </ul>
-      <h3>Controls</h3>
-      <table class="controls-layout">
-        <caption class="visually-hidden">Controls on the “Settings menu”</caption>
-        <tbody>
-          <tr>
-            <td class="drawing">
-              <svg xmlns="http://www.w3.org/2000/svg" width="330" height="493" viewBox="0 0 660 985" role="img" aria-labelledby="settings-t-6 settings-d-6">
-                <title id="settings-t-6">“Settings menu”: remote controls</title>
-                <desc id="settings-d-6">Numbers used on this screen: 5 clickpad (the touch pad on top of the remote) press, choose the highlighted (selected) item. 6 Back (the ‹ button) closes this screen; the Apple TV handles the Back button here.</desc>
-                <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="208.5" y="14" width="243" height="943" rx="42"/>
-                  <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
-                  <line x1="323" y1="61.5" x2="337" y2="61.5"/>
-                  <circle cx="403.5" cy="62" r="21"/>
-                  <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
-                  <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
-                  <circle cx="330" cy="212" r="107.5"/>
-                  <circle cx="330" cy="212" r="58"/>
-                  <circle cx="278" cy="370" r="42.5"/>
-                  <polyline points="284.5,356 272,370 284.5,384"/>
-                  <circle cx="382" cy="370" r="42.5"/>
-                  <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
-                  <line x1="376" y1="381.5" x2="388" y2="381.5"/>
-                  <circle cx="278" cy="472.5" r="42.5"/>
-                  <polygon points="266,461.5 266,483.5 279,472.5"/>
-                  <line x1="284" y1="461.5" x2="284" y2="483.5"/>
-                  <line x1="290" y1="461.5" x2="290" y2="483.5"/>
-                  <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
-                  <line x1="382" y1="461.5" x2="382" y2="483.5"/>
-                  <line x1="371" y1="472.5" x2="393" y2="472.5"/>
-                  <line x1="371" y1="575.5" x2="393" y2="575.5"/>
-                  <circle cx="278" cy="575" r="42.5"/>
-                  <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
-                  <line x1="265" y1="588" x2="268.5" y2="584.5"/>
-                  <line x1="281" y1="572" x2="290" y2="563"/>
-                </g>
-                <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
-                  <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
-                  <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
-                  <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
-                  <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
-                </g>
-                <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
-                  <circle cx="330" cy="212" r="19"/>
-                  <line x1="59" y1="367" x2="226" y2="367"/>
-                  <circle cx="40" cy="367" r="19"/>
-                </g>
-                <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
-                  <text x="330" y="220.4" font-family="sans-serif">5</text>
-                  <text x="40" y="375.4" font-family="sans-serif">6</text>
-                </g>
-              </svg>
-            </td>
-            <td class="list">
-              <ul class="moves">
-                <li>Swipe up or down to move between items.</li>
-              </ul>
-              <ol>
-                <li value="5"><strong>Press the clickpad.</strong> Chooses the highlighted item, such as “Refresh collection” or “Sign out &amp; erase library”, which deletes the library straight away, with no confirmation.</li>
-                <li value="6"><strong>Back</strong> (the ‹ button). The Apple TV handles this button.</li>
-              </ol>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+        </div>
+      </section>
 
-      <h2>“About”</h2>
-      <p><em>Screenshot coming soon.</em></p>
-      <p>“About” shows the app name and version, the privacy policy, support and email addresses, and the Discogs notice. Nothing on this screen can be selected. The addresses are plain text, to type on a phone or computer, because the Apple TV has no browser.</p>
-      <h3>Controls</h3>
-      <table class="controls-layout">
-        <caption class="visually-hidden">Controls on the “About” screen</caption>
-        <tbody>
-          <tr>
-            <td class="drawing">
-              <svg xmlns="http://www.w3.org/2000/svg" width="330" height="493" viewBox="0 0 660 985" role="img" aria-labelledby="about-t-7 about-d-7">
-                <title id="about-t-7">About screen: remote controls</title>
-                <desc id="about-d-7">Numbers used on this screen: 6 Back (the ‹ button) closes this screen; the Apple TV handles the Back button here.</desc>
-                <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="208.5" y="14" width="243" height="943" rx="42"/>
-                  <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
-                  <line x1="323" y1="61.5" x2="337" y2="61.5"/>
-                  <circle cx="403.5" cy="62" r="21"/>
-                  <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
-                  <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
-                  <circle cx="330" cy="212" r="107.5"/>
-                  <circle cx="330" cy="212" r="58"/>
-                  <circle cx="278" cy="370" r="42.5"/>
-                  <polyline points="284.5,356 272,370 284.5,384"/>
-                  <circle cx="382" cy="370" r="42.5"/>
-                  <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
-                  <line x1="376" y1="381.5" x2="388" y2="381.5"/>
-                  <circle cx="278" cy="472.5" r="42.5"/>
-                  <polygon points="266,461.5 266,483.5 279,472.5"/>
-                  <line x1="284" y1="461.5" x2="284" y2="483.5"/>
-                  <line x1="290" y1="461.5" x2="290" y2="483.5"/>
-                  <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
-                  <line x1="382" y1="461.5" x2="382" y2="483.5"/>
-                  <line x1="371" y1="472.5" x2="393" y2="472.5"/>
-                  <line x1="371" y1="575.5" x2="393" y2="575.5"/>
-                  <circle cx="278" cy="575" r="42.5"/>
-                  <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
-                  <line x1="265" y1="588" x2="268.5" y2="584.5"/>
-                  <line x1="281" y1="572" x2="290" y2="563"/>
-                </g>
-                <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
-                  <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
-                  <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
-                  <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
-                  <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
-                </g>
-                <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
-                  <line x1="59" y1="367" x2="226" y2="367"/>
-                  <circle cx="40" cy="367" r="19"/>
-                </g>
-                <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
-                  <text x="40" y="375.4" font-family="sans-serif">6</text>
-                </g>
-              </svg>
-            </td>
-            <td class="list">
-              <ol>
-                <li value="6"><strong>Back</strong> (the ‹ button). The Apple TV handles this button.</li>
-              </ol>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <section class="chapter" id="toolbar">
+        <h2><span class="code">A3</span>The toolbar</h2>
+        <div class="chapter-body">
+          <div class="chapter-main">
+            <p class="badge">Screenshot coming soon</p>
+            <p id="sort-filter-suggest">The toolbar is the row of buttons at the top of the gallery. To reach it, swipe up from the covers. In the grid, swipe up from the top row.</p>
+            <p>Here is what each button does, from left to right.</p>
+            <table class="items">
+              <caption class="visually-hidden">Gallery toolbar buttons</caption>
+              <tbody>
+                <tr>
+                  <th scope="row">“Suggest”</th>
+                  <td>Can’t decide? This opens a record picked at random. If you have chosen a genre, it picks from that genre only.</td>
+                </tr>
+                <tr>
+                  <th scope="row">“Sort”</th>
+                  <td>Changes the order of your records. You can choose “Recently added”, which is the order the app starts with, or “Artist”, “Album” or “Year”.</td>
+                </tr>
+                <tr>
+                  <th scope="row">“Genre”</th>
+                  <td>Shows only the records of one genre or style. Choose “All genres” to see everything again. This button appears only if your records have genre or style tags on Discogs.</td>
+                </tr>
+                <tr>
+                  <th scope="row">“Layout”</th>
+                  <td>Switches between “CoverFlow”, the row of covers, and “Grid”.</td>
+                </tr>
+                <tr>
+                  <th scope="row">The gear</th>
+                  <td>Opens <a href="#settings">the settings menu</a>. It is the last button on the right.</td>
+                </tr>
+              </tbody>
+            </table>
+            <p>“Suggest”, “Sort” and “Layout” appear once your library has records in it.</p>
+            <p>The app remembers your sort order and layout for next time. It does not remember the genre, so you see all genres again when you reopen the app.</p>
+          </div>
+              <table class="controls-layout">
+                <caption class="visually-hidden">Controls on the gallery toolbar</caption>
+                <tbody>
+                  <tr>
+                    <td class="drawing">
+                      <p class="card-label">Controls</p>
+                      <div class="panel">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="330" height="493" viewBox="0 0 660 985" role="img" aria-labelledby="toolbar-t-3 toolbar-d-3">
+                          <title id="toolbar-t-3">Gallery toolbar: remote controls</title>
+                          <desc id="toolbar-d-3">Gallery toolbar, the row of on-screen buttons at the top. 3 clickpad (the touch pad on top of the remote) left, previous button. 4 clickpad right, next button. 5 clickpad press, open the highlighted (selected) button.</desc>
+                          <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="208.5" y="14" width="243" height="943" rx="42"/>
+                          <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
+                          <line x1="323" y1="61.5" x2="337" y2="61.5"/>
+                          <circle cx="403.5" cy="62" r="21"/>
+                          <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
+                          <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
+                          <circle cx="330" cy="212" r="107.5"/>
+                          <circle cx="330" cy="212" r="58"/>
+                          <circle cx="278" cy="370" r="42.5"/>
+                          <polyline points="284.5,356 272,370 284.5,384"/>
+                          <circle cx="382" cy="370" r="42.5"/>
+                          <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
+                          <line x1="376" y1="381.5" x2="388" y2="381.5"/>
+                          <circle cx="278" cy="472.5" r="42.5"/>
+                          <polygon points="266,461.5 266,483.5 279,472.5"/>
+                          <line x1="284" y1="461.5" x2="284" y2="483.5"/>
+                          <line x1="290" y1="461.5" x2="290" y2="483.5"/>
+                          <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
+                          <line x1="382" y1="461.5" x2="382" y2="483.5"/>
+                          <line x1="371" y1="472.5" x2="393" y2="472.5"/>
+                          <line x1="371" y1="575.5" x2="393" y2="575.5"/>
+                          <circle cx="278" cy="575" r="42.5"/>
+                          <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
+                          <line x1="265" y1="588" x2="268.5" y2="584.5"/>
+                          <line x1="281" y1="572" x2="290" y2="563"/>
+                          </g>
+                          <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
+                          <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
+                          <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
+                          <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
+                          <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
+                          </g>
+                          <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+                          <circle cx="247" cy="212" r="19"/>
+                          <circle cx="413" cy="212" r="19"/>
+                          <circle cx="330" cy="212" r="19"/>
+                          </g>
+                          <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
+                          <text x="247" y="220.4" font-family="sans-serif">3</text>
+                          <text x="413" y="220.4" font-family="sans-serif">4</text>
+                          <text x="330" y="220.4" font-family="sans-serif">5</text>
+                          </g>
+                        </svg>
+                      </div>
+                    </td>
+                    <td class="list">
+                      <ol>
+                    <li value="3"><strong>Swipe left.</strong> Moves to the button on the left.</li>
+                    <li value="4"><strong>Swipe right.</strong> Moves to the button on the right.</li>
+                    <li value="5"><strong>Press the clickpad.</strong> Chooses the highlighted button.</li>
+                      </ol>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
 
-      <h2>Sign-in: “Welcome”</h2>
-      <img class="screen" src="assets/screens/onboarding/welcome.jpg" width="1600" height="900" alt="The welcome screen: the app name, a line about displaying the collection on the big screen, and the “Sign in with Discogs” button.">
-      <p>The welcome screen has the “Sign in with Discogs” button. If Discogs stops accepting the app’s access, this screen returns with a notice, and your library stays on the Apple TV.</p>
-      <p>Back (the ‹ button) is handled by the Apple TV, not by this app.</p>
-      <h3>Controls</h3>
-      <table class="controls-layout">
-        <caption class="visually-hidden">Controls on the Welcome screen</caption>
-        <tbody>
-          <tr>
-            <td class="drawing">
-              <svg xmlns="http://www.w3.org/2000/svg" width="330" height="493" viewBox="0 0 660 985" role="img" aria-labelledby="signin-t-8 signin-d-8">
-                <title id="signin-t-8">Welcome screen</title>
-                <desc id="signin-d-8">Numbers used on this screen: 5 clickpad (the touch pad on top of the remote) press, on the highlighted “Sign in with Discogs” button.</desc>
-                <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="208.5" y="14" width="243" height="943" rx="42"/>
-                  <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
-                  <line x1="323" y1="61.5" x2="337" y2="61.5"/>
-                  <circle cx="403.5" cy="62" r="21"/>
-                  <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
-                  <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
-                  <circle cx="330" cy="212" r="107.5"/>
-                  <circle cx="330" cy="212" r="58"/>
-                  <circle cx="278" cy="370" r="42.5"/>
-                  <polyline points="284.5,356 272,370 284.5,384"/>
-                  <circle cx="382" cy="370" r="42.5"/>
-                  <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
-                  <line x1="376" y1="381.5" x2="388" y2="381.5"/>
-                  <circle cx="278" cy="472.5" r="42.5"/>
-                  <polygon points="266,461.5 266,483.5 279,472.5"/>
-                  <line x1="284" y1="461.5" x2="284" y2="483.5"/>
-                  <line x1="290" y1="461.5" x2="290" y2="483.5"/>
-                  <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
-                  <line x1="382" y1="461.5" x2="382" y2="483.5"/>
-                  <line x1="371" y1="472.5" x2="393" y2="472.5"/>
-                  <line x1="371" y1="575.5" x2="393" y2="575.5"/>
-                  <circle cx="278" cy="575" r="42.5"/>
-                  <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
-                  <line x1="265" y1="588" x2="268.5" y2="584.5"/>
-                  <line x1="281" y1="572" x2="290" y2="563"/>
-                </g>
-                <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
-                  <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
-                  <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
-                  <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
-                  <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
-                </g>
-                <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
-                  <circle cx="330" cy="212" r="19"/>
-                </g>
-                <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
-                  <text x="330" y="220.4" font-family="sans-serif">5</text>
-                </g>
-              </svg>
-            </td>
-            <td class="list">
-              <ol>
-                <li value="5"><strong>Press the clickpad.</strong> Chooses the highlighted button, “Sign in with Discogs”.</li>
-              </ol>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+        </div>
+      </section>
 
-      <h2>Sign-in: “Verification code”</h2>
-      <img class="screen" src="assets/screens/onboarding/authorize.jpg" width="1600" height="900" alt="The code screen: a QR code to scan with a phone, three steps to sign in, a Verification code box and a Continue button.">
-      <p>The code screen shows a QR code to scan with a phone, and three steps to follow on the phone. Enter the code that Discogs shows you in the “Verification code” box. “Continue” is unavailable until a code is typed.</p>
-      <h3>Controls</h3>
-      <table class="controls-layout">
-        <caption class="visually-hidden">Controls on the Code screen</caption>
-        <tbody>
-          <tr>
-            <td class="drawing">
-              <svg xmlns="http://www.w3.org/2000/svg" width="330" height="493" viewBox="0 0 660 985" role="img" aria-labelledby="signin-t-9 signin-d-9">
-                <title id="signin-t-9">Verification code screen</title>
-                <desc id="signin-d-9">Numbers used on this screen: 5 clickpad press, to choose “Continue” once the code is typed.</desc>
-                <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="208.5" y="14" width="243" height="943" rx="42"/>
-                  <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
-                  <line x1="323" y1="61.5" x2="337" y2="61.5"/>
-                  <circle cx="403.5" cy="62" r="21"/>
-                  <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
-                  <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
-                  <circle cx="330" cy="212" r="107.5"/>
-                  <circle cx="330" cy="212" r="58"/>
-                  <circle cx="278" cy="370" r="42.5"/>
-                  <polyline points="284.5,356 272,370 284.5,384"/>
-                  <circle cx="382" cy="370" r="42.5"/>
-                  <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
-                  <line x1="376" y1="381.5" x2="388" y2="381.5"/>
-                  <circle cx="278" cy="472.5" r="42.5"/>
-                  <polygon points="266,461.5 266,483.5 279,472.5"/>
-                  <line x1="284" y1="461.5" x2="284" y2="483.5"/>
-                  <line x1="290" y1="461.5" x2="290" y2="483.5"/>
-                  <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
-                  <line x1="382" y1="461.5" x2="382" y2="483.5"/>
-                  <line x1="371" y1="472.5" x2="393" y2="472.5"/>
-                  <line x1="371" y1="575.5" x2="393" y2="575.5"/>
-                  <circle cx="278" cy="575" r="42.5"/>
-                  <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
-                  <line x1="265" y1="588" x2="268.5" y2="584.5"/>
-                  <line x1="281" y1="572" x2="290" y2="563"/>
-                </g>
-                <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
-                  <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
-                  <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
-                  <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
-                  <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
-                </g>
-                <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
-                  <circle cx="330" cy="212" r="19"/>
-                </g>
-                <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
-                  <text x="330" y="220.4" font-family="sans-serif">5</text>
-                </g>
-              </svg>
-            </td>
-            <td class="list">
-              <ul class="moves">
-                <li>Swipe up or down to move between the “Verification code” box and “Continue”.</li>
-              </ul>
-              <ol>
-                <li value="5"><strong>Press the clickpad.</strong> Chooses the highlighted item: the “Verification code” box or “Continue”.</li>
-              </ol>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="side-divider">
+        <span class="side-label">Side B</span>
+        <span class="side-rule" aria-hidden="true"></span>
+        <span class="side-name">A record</span>
+      </div>
 
-      <h2>Sign-in: the on-screen keyboard</h2>
-      <img class="screen" src="assets/screens/onboarding/keyboard.jpg" width="1600" height="900" alt="The on-screen keyboard for the Verification code box, with the “done” key below the letters.">
-      <p>The Apple TV shows its on-screen keyboard for the “Verification code” box. Choose “done” when the code is typed.</p>
-      <h3>Controls</h3>
-      <table class="controls-layout">
-        <caption class="visually-hidden">Controls on the Keyboard screen</caption>
-        <tbody>
-          <tr>
-            <td class="drawing">
-              <svg xmlns="http://www.w3.org/2000/svg" width="330" height="493" viewBox="0 0 660 985" role="img" aria-labelledby="signin-t-10 signin-d-10">
-                <title id="signin-t-10">Keyboard screen</title>
-                <desc id="signin-d-10">Numbers used on this screen: 5 clickpad press, to press a key on the on-screen keyboard.</desc>
-                <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="208.5" y="14" width="243" height="943" rx="42"/>
-                  <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
-                  <line x1="323" y1="61.5" x2="337" y2="61.5"/>
-                  <circle cx="403.5" cy="62" r="21"/>
-                  <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
-                  <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
-                  <circle cx="330" cy="212" r="107.5"/>
-                  <circle cx="330" cy="212" r="58"/>
-                  <circle cx="278" cy="370" r="42.5"/>
-                  <polyline points="284.5,356 272,370 284.5,384"/>
-                  <circle cx="382" cy="370" r="42.5"/>
-                  <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
-                  <line x1="376" y1="381.5" x2="388" y2="381.5"/>
-                  <circle cx="278" cy="472.5" r="42.5"/>
-                  <polygon points="266,461.5 266,483.5 279,472.5"/>
-                  <line x1="284" y1="461.5" x2="284" y2="483.5"/>
-                  <line x1="290" y1="461.5" x2="290" y2="483.5"/>
-                  <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
-                  <line x1="382" y1="461.5" x2="382" y2="483.5"/>
-                  <line x1="371" y1="472.5" x2="393" y2="472.5"/>
-                  <line x1="371" y1="575.5" x2="393" y2="575.5"/>
-                  <circle cx="278" cy="575" r="42.5"/>
-                  <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
-                  <line x1="265" y1="588" x2="268.5" y2="584.5"/>
-                  <line x1="281" y1="572" x2="290" y2="563"/>
-                </g>
-                <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
-                  <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
-                  <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
-                  <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
-                  <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
-                </g>
-                <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
-                  <circle cx="330" cy="212" r="19"/>
-                </g>
-                <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
-                  <text x="330" y="220.4" font-family="sans-serif">5</text>
-                </g>
-              </svg>
-            </td>
-            <td class="list">
-              <ul class="moves">
-                <li>Swipe to move between keys. The Apple TV handles the on-screen keyboard.</li>
-              </ul>
-              <ol>
-                <li value="5"><strong>Press the clickpad.</strong> The Apple TV handles this button.</li>
-              </ol>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <section class="chapter" id="record-screen">
+        <h2><span class="code">B1</span>The record screen</h2>
+        <div class="chapter-body">
+          <div class="chapter-main">
+            <img class="screen" src="assets/screens/record.jpg" width="1920" height="1080" alt="The record screen in the tracklist view: the cover on the left with its title, artist and tags, and the tracklist for Side A on the right, with the side selector above it.">
+            <p id="open-a-record">Press the clickpad on any record in the gallery to open it. You see its cover and details on the left, and its tracklist, the list of songs, on the right.</p>
+            <h3>Sides</h3>
+            <p>A vinyl record has songs on both of its faces. Each face is called a side. The side selector above the tracklist shows them, starting with “Side A”, and highlights the one you are looking at. Swipe left or right to change side.</p>
+            <h3>The cover on its own</h3>
+            <p>Swipe up to see the cover by itself, centred on a black background. This is the cover view. Swipe down to return to the tracklist.</p>
+            <p>When you change side in the cover view, a short message appears for 2 seconds.</p>
+            <p class="badge">Cover view screenshot coming soon</p>
+            <h3 id="turn-the-halo-on-or-off">The halo</h3>
+            <p>In the cover view, the halo appears by itself after a short pause. Any swipe hides it, and it returns 3 seconds after your last swipe.</p>
+            <p>The tracklist has no halo. After 15 seconds without a swipe, the blurred background starts to drift.</p>
+            <h3>To keep the halo off</h3>
+            <ol>
+              <li>Press Back to return to the gallery.</li>
+              <li>Swipe up to the toolbar, swipe right until the gear is highlighted, then press the clickpad. The settings menu opens.</li>
+              <li>Swipe to “Engage halo automatically” and press the clickpad. Check that the tick beside it is gone.</li>
+              <li>Press Back.</li>
+            </ol>
+            <p>From now on the halo follows the “Halo” button, and it starts switched off each time you open the app. To use the button, open a record and swipe up to show the cover. Swipe up again until the “Halo” button under the cover is highlighted, then press the clickpad. The button is filled white when the halo is on, and plain glass when it is off.</p>
+            <h3 id="cover-art">Covers that improve</h3>
+            <p>The app first shows the cover image from Discogs. When it finds a better one, it swaps it in, so a cover can change while you watch. It looks for better covers at MusicBrainz, an open music database, and the Cover Art Archive.</p>
+          </div>
+              <table class="controls-layout">
+                <caption class="visually-hidden">Controls on the record screen</caption>
+                <tbody>
+                  <tr>
+                    <td class="drawing">
+                      <p class="card-label">Controls</p>
+                      <div class="panel">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="330" height="493" viewBox="0 0 660 985" role="img" aria-labelledby="record-t-4 record-d-4">
+                          <title id="record-t-4">Record screen: remote controls</title>
+                          <desc id="record-d-4">3 clickpad (the touch pad on top of the remote) left, previous side (side A, side B and so on, as the record defines them). 4 clickpad right, next side. 5 clickpad press, flip to the next side. 1 up, show the cover. 2 down, show the tracklist (the list of songs).</desc>
+                          <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="208.5" y="14" width="243" height="943" rx="42"/>
+                          <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
+                          <line x1="323" y1="61.5" x2="337" y2="61.5"/>
+                          <circle cx="403.5" cy="62" r="21"/>
+                          <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
+                          <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
+                          <circle cx="330" cy="212" r="107.5"/>
+                          <circle cx="330" cy="212" r="58"/>
+                          <circle cx="278" cy="370" r="42.5"/>
+                          <polyline points="284.5,356 272,370 284.5,384"/>
+                          <circle cx="382" cy="370" r="42.5"/>
+                          <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
+                          <line x1="376" y1="381.5" x2="388" y2="381.5"/>
+                          <circle cx="278" cy="472.5" r="42.5"/>
+                          <polygon points="266,461.5 266,483.5 279,472.5"/>
+                          <line x1="284" y1="461.5" x2="284" y2="483.5"/>
+                          <line x1="290" y1="461.5" x2="290" y2="483.5"/>
+                          <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
+                          <line x1="382" y1="461.5" x2="382" y2="483.5"/>
+                          <line x1="371" y1="472.5" x2="393" y2="472.5"/>
+                          <line x1="371" y1="575.5" x2="393" y2="575.5"/>
+                          <circle cx="278" cy="575" r="42.5"/>
+                          <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
+                          <line x1="265" y1="588" x2="268.5" y2="584.5"/>
+                          <line x1="281" y1="572" x2="290" y2="563"/>
+                          </g>
+                          <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
+                          <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
+                          <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
+                          <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
+                          <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
+                          </g>
+                          <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+                          <circle cx="330" cy="129" r="19"/>
+                          <circle cx="330" cy="295" r="19"/>
+                          <circle cx="247" cy="212" r="19"/>
+                          <circle cx="413" cy="212" r="19"/>
+                          <circle cx="330" cy="212" r="19"/>
+                          </g>
+                          <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
+                          <text x="330" y="137.4" font-family="sans-serif">1</text>
+                          <text x="330" y="303.4" font-family="sans-serif">2</text>
+                          <text x="247" y="220.4" font-family="sans-serif">3</text>
+                          <text x="413" y="220.4" font-family="sans-serif">4</text>
+                          <text x="330" y="220.4" font-family="sans-serif">5</text>
+                          </g>
+                        </svg>
+                      </div>
+                    </td>
+                    <td class="list">
+                      <ol>
+                    <li value="1"><strong>Swipe up.</strong> Shows the cover on its own.</li>
+                    <li value="2"><strong>Swipe down.</strong> Shows the tracklist.</li>
+                    <li value="3"><strong>Swipe left.</strong> Goes to the previous side. At the first side, nothing happens.</li>
+                    <li value="4"><strong>Swipe right.</strong> Goes to the next side. At the last side, nothing happens.</li>
+                    <li value="5"><strong>Press the clickpad.</strong> Flips to the next side. If the “Halo” button is highlighted, it switches the halo on or off instead.</li>
+                      </ol>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
 
-      <h2>Sign-in: “Building your library”</h2>
-      <p><em>Screenshot coming soon.</em></p>
-      <p>After your first sign-in, or after you erase the library, the app loads your library. The screen counts the progress, for example “Fetching 247/812 albums…”. If loading fails, swipe up or down to move between “Retry” and “Continue anyway”. “Retry” starts it again, and “Continue anyway” opens the gallery.</p>
-      <h3>Controls</h3>
-      <table class="controls-layout">
-        <caption class="visually-hidden">Controls on the Building your library screen</caption>
-        <tbody>
-          <tr>
-            <td class="drawing">
-              <svg xmlns="http://www.w3.org/2000/svg" width="330" height="493" viewBox="0 0 660 985" role="img" aria-labelledby="signin-t-11 signin-d-11">
-                <title id="signin-t-11">Building your library screen</title>
-                <desc id="signin-d-11">Numbers used on this screen: 5 clickpad press, to choose “Retry” or “Continue anyway” when loading fails.</desc>
-                <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="208.5" y="14" width="243" height="943" rx="42"/>
-                  <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
-                  <line x1="323" y1="61.5" x2="337" y2="61.5"/>
-                  <circle cx="403.5" cy="62" r="21"/>
-                  <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
-                  <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
-                  <circle cx="330" cy="212" r="107.5"/>
-                  <circle cx="330" cy="212" r="58"/>
-                  <circle cx="278" cy="370" r="42.5"/>
-                  <polyline points="284.5,356 272,370 284.5,384"/>
-                  <circle cx="382" cy="370" r="42.5"/>
-                  <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
-                  <line x1="376" y1="381.5" x2="388" y2="381.5"/>
-                  <circle cx="278" cy="472.5" r="42.5"/>
-                  <polygon points="266,461.5 266,483.5 279,472.5"/>
-                  <line x1="284" y1="461.5" x2="284" y2="483.5"/>
-                  <line x1="290" y1="461.5" x2="290" y2="483.5"/>
-                  <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
-                  <line x1="382" y1="461.5" x2="382" y2="483.5"/>
-                  <line x1="371" y1="472.5" x2="393" y2="472.5"/>
-                  <line x1="371" y1="575.5" x2="393" y2="575.5"/>
-                  <circle cx="278" cy="575" r="42.5"/>
-                  <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
-                  <line x1="265" y1="588" x2="268.5" y2="584.5"/>
-                  <line x1="281" y1="572" x2="290" y2="563"/>
-                </g>
-                <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
-                  <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
-                  <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
-                  <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
-                  <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
-                </g>
-                <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
-                  <circle cx="330" cy="212" r="19"/>
-                </g>
-                <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
-                  <text x="330" y="220.4" font-family="sans-serif">5</text>
-                </g>
-              </svg>
-            </td>
-            <td class="list">
-              <ul class="moves">
-                <li>If loading fails, swipe up or down to move between “Retry” and “Continue anyway”.</li>
-              </ul>
-              <ol>
-                <li value="5"><strong>Press the clickpad.</strong> Chooses the highlighted button.</li>
-              </ol>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+        </div>
+      </section>
+
+      <div class="side-divider">
+        <span class="side-label">Side C</span>
+        <span class="side-rule" aria-hidden="true"></span>
+        <span class="side-name">Settings</span>
+      </div>
+
+      <section class="chapter" id="settings">
+        <h2><span class="code">C1</span>The settings menu</h2>
+        <div class="chapter-body">
+          <div class="chapter-main">
+            <p class="badge">Screenshot coming soon</p>
+            <p>The settings menu is behind the gear, the last button on <a href="#toolbar">the toolbar</a>. Swipe up to the toolbar, swipe right until the gear is highlighted, then press the clickpad.</p>
+            <p>Here is what each item does, from top to bottom.</p>
+            <table class="items">
+              <caption class="visually-hidden">Settings menu items</caption>
+              <tbody>
+                <tr id="refresh-your-collection">
+                  <th scope="row">“Refresh collection”</th>
+                  <td>Use this after you add or remove records on Discogs. The app reads your whole collection again. It adds new records, removes the ones you have taken off Discogs and updates the rest. You can follow the progress at the bottom of the gallery, for example “Refreshing… 120/800”.</td>
+                </tr>
+                <tr>
+                  <th scope="row">“Engage halo automatically”</th>
+                  <td>This is on to begin with, and the halo appears by itself. When it is off, the halo shows only when you switch it on with the “Halo” button on <a href="#record-screen">the record screen</a>.</td>
+                </tr>
+                <tr>
+                  <th scope="row">“Account”</th>
+                  <td>Shows the Discogs username you are signed in with.</td>
+                </tr>
+                <tr>
+                  <th scope="row">“Sign out (keep library)”</th>
+                  <td>Signs you out of Discogs on this Apple TV and keeps your library here. When you sign in again with the same account, your library is there at once.</td>
+                </tr>
+                <tr>
+                  <th scope="row">“Sign out &amp; erase library”</th>
+                  <td><span class="careful">Careful</span>Signs you out and deletes the library from this Apple TV. It happens straight away, and the app does not ask you to confirm. Your collection on Discogs is not touched, and your layout, sort order and halo settings stay.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Version and “About”</th>
+                  <td>The app’s version number, then “About”, which opens <a href="#about">the “About” screen</a>.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+              <table class="controls-layout">
+                <caption class="visually-hidden">Controls on the “Settings menu”</caption>
+                <tbody>
+                  <tr>
+                    <td class="drawing">
+                      <p class="card-label">Controls</p>
+                      <div class="panel">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="330" height="493" viewBox="0 0 660 985" role="img" aria-labelledby="settings-t-6 settings-d-6">
+                          <title id="settings-t-6">“Settings menu”: remote controls</title>
+                          <desc id="settings-d-6">Numbers used on this screen: 5 clickpad (the touch pad on top of the remote) press, choose the highlighted (selected) item. 6 Back (the ‹ button) closes this screen; the Apple TV handles the Back button here.</desc>
+                          <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="208.5" y="14" width="243" height="943" rx="42"/>
+                          <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
+                          <line x1="323" y1="61.5" x2="337" y2="61.5"/>
+                          <circle cx="403.5" cy="62" r="21"/>
+                          <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
+                          <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
+                          <circle cx="330" cy="212" r="107.5"/>
+                          <circle cx="330" cy="212" r="58"/>
+                          <circle cx="278" cy="370" r="42.5"/>
+                          <polyline points="284.5,356 272,370 284.5,384"/>
+                          <circle cx="382" cy="370" r="42.5"/>
+                          <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
+                          <line x1="376" y1="381.5" x2="388" y2="381.5"/>
+                          <circle cx="278" cy="472.5" r="42.5"/>
+                          <polygon points="266,461.5 266,483.5 279,472.5"/>
+                          <line x1="284" y1="461.5" x2="284" y2="483.5"/>
+                          <line x1="290" y1="461.5" x2="290" y2="483.5"/>
+                          <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
+                          <line x1="382" y1="461.5" x2="382" y2="483.5"/>
+                          <line x1="371" y1="472.5" x2="393" y2="472.5"/>
+                          <line x1="371" y1="575.5" x2="393" y2="575.5"/>
+                          <circle cx="278" cy="575" r="42.5"/>
+                          <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
+                          <line x1="265" y1="588" x2="268.5" y2="584.5"/>
+                          <line x1="281" y1="572" x2="290" y2="563"/>
+                          </g>
+                          <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
+                          <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
+                          <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
+                          <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
+                          <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
+                          </g>
+                          <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+                          <circle cx="330" cy="212" r="19"/>
+                          <line x1="59" y1="367" x2="226" y2="367"/>
+                          <circle cx="40" cy="367" r="19"/>
+                          </g>
+                          <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
+                          <text x="330" y="220.4" font-family="sans-serif">5</text>
+                          <text x="40" y="375.4" font-family="sans-serif">6</text>
+                          </g>
+                        </svg>
+                      </div>
+                    </td>
+                    <td class="list">
+                  <ul class="moves">
+                    <li>Swipe up or down to move between items.</li>
+                  </ul>
+                      <ol>
+                    <li value="5"><strong>Press the clickpad.</strong> Chooses the highlighted item. Take care with “Sign out &amp; erase library”: it deletes the library straight away.</li>
+                    <li value="6"><strong>Back.</strong> Closes the menu.</li>
+                      </ol>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+        </div>
+      </section>
+
+      <div class="side-divider">
+        <span class="side-label">Bonus tracks</span>
+        <span class="side-rule" aria-hidden="true"></span>
+        <span class="side-name">Good to know</span>
+      </div>
+
+      <div class="bonus-grid">
+        <section class="bonus-card" id="discogs-qr" aria-labelledby="discogs-title">
+          <p class="badge">Screenshot coming soon</p>
+          <h2 id="discogs-title"><span class="code">+1</span>Open a record on Discogs</h2>
+          <p>Every record has its own page on discogs.com. The Apple TV has no web browser, so the app helps you open that page on your phone instead.</p>
+          <ol>
+            <li>On the record screen, with the tracklist showing, select the line “Data provided by Discogs” under the cover details.</li>
+            <li>A QR code fills the screen, with the words “Scan with your phone”. A QR code is a square pattern that a phone camera can read.</li>
+            <li>Point your phone’s camera at the code and open the link it offers.</li>
+            <li>Press Back on the remote when you are done.</li>
+          </ol>
+              <table class="controls-layout">
+                <caption class="visually-hidden">Controls on the Discogs QR code screen</caption>
+                <tbody>
+                  <tr>
+                    <td class="drawing">
+                      <p class="card-label">Controls</p>
+                      <div class="panel">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="330" height="493" viewBox="0 0 660 985" role="img" aria-labelledby="qr-t-5 qr-d-5">
+                          <title id="qr-t-5">Discogs QR screen (Discogs, the online record database): remote controls</title>
+                          <desc id="qr-d-5">QR code screen. The square code links to this release’s page on discogs.com, for a phone to scan. 6 Back (the ‹ button) closes this screen; the Apple TV handles the Back button here.</desc>
+                          <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="208.5" y="14" width="243" height="943" rx="42"/>
+                          <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
+                          <line x1="323" y1="61.5" x2="337" y2="61.5"/>
+                          <circle cx="403.5" cy="62" r="21"/>
+                          <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
+                          <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
+                          <circle cx="330" cy="212" r="107.5"/>
+                          <circle cx="330" cy="212" r="58"/>
+                          <circle cx="278" cy="370" r="42.5"/>
+                          <polyline points="284.5,356 272,370 284.5,384"/>
+                          <circle cx="382" cy="370" r="42.5"/>
+                          <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
+                          <line x1="376" y1="381.5" x2="388" y2="381.5"/>
+                          <circle cx="278" cy="472.5" r="42.5"/>
+                          <polygon points="266,461.5 266,483.5 279,472.5"/>
+                          <line x1="284" y1="461.5" x2="284" y2="483.5"/>
+                          <line x1="290" y1="461.5" x2="290" y2="483.5"/>
+                          <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
+                          <line x1="382" y1="461.5" x2="382" y2="483.5"/>
+                          <line x1="371" y1="472.5" x2="393" y2="472.5"/>
+                          <line x1="371" y1="575.5" x2="393" y2="575.5"/>
+                          <circle cx="278" cy="575" r="42.5"/>
+                          <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
+                          <line x1="265" y1="588" x2="268.5" y2="584.5"/>
+                          <line x1="281" y1="572" x2="290" y2="563"/>
+                          </g>
+                          <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
+                          <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
+                          <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
+                          <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
+                          <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
+                          </g>
+                          <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+                          <line x1="59" y1="367" x2="226" y2="367"/>
+                          <circle cx="40" cy="367" r="19"/>
+                          </g>
+                          <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
+                          <text x="40" y="375.4" font-family="sans-serif">6</text>
+                          </g>
+                        </svg>
+                      </div>
+                    </td>
+                    <td class="list">
+                      <ol>
+                    <li value="6"><strong>Back.</strong> Returns to the previous screen.</li>
+                      </ol>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+        </section>
+
+        <section class="bonus-card" id="about" aria-labelledby="about-title">
+          <p class="badge">Screenshot coming soon</p>
+          <h2 id="about-title"><span class="code">+2</span>The “About” screen</h2>
+          <p>“About” is the last item in <a href="#settings">the settings menu</a>. It shows the app’s name and version, the privacy policy, the support and email addresses, and the Discogs notice.</p>
+          <p>There is nothing to select on this screen. The addresses are plain text for you to type into a phone or computer, because the Apple TV has no web browser.</p>
+              <table class="controls-layout">
+                <caption class="visually-hidden">Controls on the “About” screen</caption>
+                <tbody>
+                  <tr>
+                    <td class="drawing">
+                      <p class="card-label">Controls</p>
+                      <div class="panel">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="330" height="493" viewBox="0 0 660 985" role="img" aria-labelledby="about-t-7 about-d-7">
+                          <title id="about-t-7">About screen: remote controls</title>
+                          <desc id="about-d-7">Numbers used on this screen: 6 Back (the ‹ button) closes this screen; the Apple TV handles the Back button here.</desc>
+                          <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="208.5" y="14" width="243" height="943" rx="42"/>
+                          <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
+                          <line x1="323" y1="61.5" x2="337" y2="61.5"/>
+                          <circle cx="403.5" cy="62" r="21"/>
+                          <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
+                          <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
+                          <circle cx="330" cy="212" r="107.5"/>
+                          <circle cx="330" cy="212" r="58"/>
+                          <circle cx="278" cy="370" r="42.5"/>
+                          <polyline points="284.5,356 272,370 284.5,384"/>
+                          <circle cx="382" cy="370" r="42.5"/>
+                          <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
+                          <line x1="376" y1="381.5" x2="388" y2="381.5"/>
+                          <circle cx="278" cy="472.5" r="42.5"/>
+                          <polygon points="266,461.5 266,483.5 279,472.5"/>
+                          <line x1="284" y1="461.5" x2="284" y2="483.5"/>
+                          <line x1="290" y1="461.5" x2="290" y2="483.5"/>
+                          <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
+                          <line x1="382" y1="461.5" x2="382" y2="483.5"/>
+                          <line x1="371" y1="472.5" x2="393" y2="472.5"/>
+                          <line x1="371" y1="575.5" x2="393" y2="575.5"/>
+                          <circle cx="278" cy="575" r="42.5"/>
+                          <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
+                          <line x1="265" y1="588" x2="268.5" y2="584.5"/>
+                          <line x1="281" y1="572" x2="290" y2="563"/>
+                          </g>
+                          <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
+                          <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
+                          <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
+                          <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
+                          <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
+                          </g>
+                          <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+                          <line x1="59" y1="367" x2="226" y2="367"/>
+                          <circle cx="40" cy="367" r="19"/>
+                          </g>
+                          <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
+                          <text x="40" y="375.4" font-family="sans-serif">6</text>
+                          </g>
+                        </svg>
+                      </div>
+                    </td>
+                    <td class="list">
+                      <ol>
+                    <li value="6"><strong>Back.</strong> Returns to the previous screen.</li>
+                      </ol>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+        </section>
+      </div>
+
+      <div class="side-divider">
+        <span class="side-label">Sign in</span>
+        <span class="side-rule" aria-hidden="true"></span>
+      </div>
+
+      <section class="chapter">
+        <h2>Sign-in: “Welcome”</h2>
+        <div class="chapter-body">
+          <div class="chapter-main">
+            <img class="screen" src="assets/screens/onboarding/welcome.jpg" width="1600" height="900" alt="The welcome screen: the app name, a line about displaying the collection on the big screen, and the “Sign in with Discogs” button.">
+            <p>The welcome screen has the “Sign in with Discogs” button. If Discogs stops accepting the app’s access, this screen returns with a notice, and your library stays on the Apple TV.</p>
+            <p>Back (the ‹ button) is handled by the Apple TV, not by this app.</p>
+          </div>
+              <table class="controls-layout">
+                <caption class="visually-hidden">Controls on the Welcome screen</caption>
+                <tbody>
+                  <tr>
+                    <td class="drawing">
+                      <p class="card-label">Controls</p>
+                      <div class="panel">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="330" height="493" viewBox="0 0 660 985" role="img" aria-labelledby="signin-t-8 signin-d-8">
+                          <title id="signin-t-8">Welcome screen</title>
+                          <desc id="signin-d-8">Numbers used on this screen: 5 clickpad (the touch pad on top of the remote) press, on the highlighted “Sign in with Discogs” button.</desc>
+                          <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="208.5" y="14" width="243" height="943" rx="42"/>
+                          <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
+                          <line x1="323" y1="61.5" x2="337" y2="61.5"/>
+                          <circle cx="403.5" cy="62" r="21"/>
+                          <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
+                          <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
+                          <circle cx="330" cy="212" r="107.5"/>
+                          <circle cx="330" cy="212" r="58"/>
+                          <circle cx="278" cy="370" r="42.5"/>
+                          <polyline points="284.5,356 272,370 284.5,384"/>
+                          <circle cx="382" cy="370" r="42.5"/>
+                          <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
+                          <line x1="376" y1="381.5" x2="388" y2="381.5"/>
+                          <circle cx="278" cy="472.5" r="42.5"/>
+                          <polygon points="266,461.5 266,483.5 279,472.5"/>
+                          <line x1="284" y1="461.5" x2="284" y2="483.5"/>
+                          <line x1="290" y1="461.5" x2="290" y2="483.5"/>
+                          <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
+                          <line x1="382" y1="461.5" x2="382" y2="483.5"/>
+                          <line x1="371" y1="472.5" x2="393" y2="472.5"/>
+                          <line x1="371" y1="575.5" x2="393" y2="575.5"/>
+                          <circle cx="278" cy="575" r="42.5"/>
+                          <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
+                          <line x1="265" y1="588" x2="268.5" y2="584.5"/>
+                          <line x1="281" y1="572" x2="290" y2="563"/>
+                          </g>
+                          <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
+                          <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
+                          <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
+                          <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
+                          <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
+                          </g>
+                          <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+                          <circle cx="330" cy="212" r="19"/>
+                          </g>
+                          <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
+                          <text x="330" y="220.4" font-family="sans-serif">5</text>
+                          </g>
+                        </svg>
+                      </div>
+                    </td>
+                    <td class="list">
+                      <ol>
+                    <li value="5"><strong>Press the clickpad.</strong> Chooses the highlighted button, “Sign in with Discogs”.</li>
+                      </ol>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+        </div>
+      </section>
+
+      <section class="chapter">
+        <h2>Sign-in: “Verification code”</h2>
+        <div class="chapter-body">
+          <div class="chapter-main">
+            <img class="screen" src="assets/screens/onboarding/authorize.jpg" width="1600" height="900" alt="The code screen: a QR code to scan with a phone, three steps to sign in, a Verification code box and a Continue button.">
+            <p>The code screen shows a QR code to scan with a phone, and three steps to follow on the phone. Enter the code that Discogs shows you in the “Verification code” box. “Continue” is unavailable until a code is typed.</p>
+          </div>
+              <table class="controls-layout">
+                <caption class="visually-hidden">Controls on the Code screen</caption>
+                <tbody>
+                  <tr>
+                    <td class="drawing">
+                      <p class="card-label">Controls</p>
+                      <div class="panel">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="330" height="493" viewBox="0 0 660 985" role="img" aria-labelledby="signin-t-9 signin-d-9">
+                          <title id="signin-t-9">Verification code screen</title>
+                          <desc id="signin-d-9">Numbers used on this screen: 5 clickpad press, to choose “Continue” once the code is typed.</desc>
+                          <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="208.5" y="14" width="243" height="943" rx="42"/>
+                          <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
+                          <line x1="323" y1="61.5" x2="337" y2="61.5"/>
+                          <circle cx="403.5" cy="62" r="21"/>
+                          <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
+                          <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
+                          <circle cx="330" cy="212" r="107.5"/>
+                          <circle cx="330" cy="212" r="58"/>
+                          <circle cx="278" cy="370" r="42.5"/>
+                          <polyline points="284.5,356 272,370 284.5,384"/>
+                          <circle cx="382" cy="370" r="42.5"/>
+                          <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
+                          <line x1="376" y1="381.5" x2="388" y2="381.5"/>
+                          <circle cx="278" cy="472.5" r="42.5"/>
+                          <polygon points="266,461.5 266,483.5 279,472.5"/>
+                          <line x1="284" y1="461.5" x2="284" y2="483.5"/>
+                          <line x1="290" y1="461.5" x2="290" y2="483.5"/>
+                          <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
+                          <line x1="382" y1="461.5" x2="382" y2="483.5"/>
+                          <line x1="371" y1="472.5" x2="393" y2="472.5"/>
+                          <line x1="371" y1="575.5" x2="393" y2="575.5"/>
+                          <circle cx="278" cy="575" r="42.5"/>
+                          <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
+                          <line x1="265" y1="588" x2="268.5" y2="584.5"/>
+                          <line x1="281" y1="572" x2="290" y2="563"/>
+                          </g>
+                          <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
+                          <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
+                          <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
+                          <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
+                          <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
+                          </g>
+                          <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+                          <circle cx="330" cy="212" r="19"/>
+                          </g>
+                          <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
+                          <text x="330" y="220.4" font-family="sans-serif">5</text>
+                          </g>
+                        </svg>
+                      </div>
+                    </td>
+                    <td class="list">
+                  <ul class="moves">
+                    <li>Swipe up or down to move between the “Verification code” box and “Continue”.</li>
+                  </ul>
+                      <ol>
+                    <li value="5"><strong>Press the clickpad.</strong> Chooses the highlighted item: the “Verification code” box or “Continue”.</li>
+                      </ol>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+        </div>
+      </section>
+
+      <section class="chapter">
+        <h2>Sign-in: the on-screen keyboard</h2>
+        <div class="chapter-body">
+          <div class="chapter-main">
+            <img class="screen" src="assets/screens/onboarding/keyboard.jpg" width="1600" height="900" alt="The on-screen keyboard for the Verification code box, with the “done” key below the letters.">
+            <p>The Apple TV shows its on-screen keyboard for the “Verification code” box. Choose “done” when the code is typed.</p>
+          </div>
+              <table class="controls-layout">
+                <caption class="visually-hidden">Controls on the Keyboard screen</caption>
+                <tbody>
+                  <tr>
+                    <td class="drawing">
+                      <p class="card-label">Controls</p>
+                      <div class="panel">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="330" height="493" viewBox="0 0 660 985" role="img" aria-labelledby="signin-t-10 signin-d-10">
+                          <title id="signin-t-10">Keyboard screen</title>
+                          <desc id="signin-d-10">Numbers used on this screen: 5 clickpad press, to press a key on the on-screen keyboard.</desc>
+                          <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="208.5" y="14" width="243" height="943" rx="42"/>
+                          <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
+                          <line x1="323" y1="61.5" x2="337" y2="61.5"/>
+                          <circle cx="403.5" cy="62" r="21"/>
+                          <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
+                          <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
+                          <circle cx="330" cy="212" r="107.5"/>
+                          <circle cx="330" cy="212" r="58"/>
+                          <circle cx="278" cy="370" r="42.5"/>
+                          <polyline points="284.5,356 272,370 284.5,384"/>
+                          <circle cx="382" cy="370" r="42.5"/>
+                          <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
+                          <line x1="376" y1="381.5" x2="388" y2="381.5"/>
+                          <circle cx="278" cy="472.5" r="42.5"/>
+                          <polygon points="266,461.5 266,483.5 279,472.5"/>
+                          <line x1="284" y1="461.5" x2="284" y2="483.5"/>
+                          <line x1="290" y1="461.5" x2="290" y2="483.5"/>
+                          <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
+                          <line x1="382" y1="461.5" x2="382" y2="483.5"/>
+                          <line x1="371" y1="472.5" x2="393" y2="472.5"/>
+                          <line x1="371" y1="575.5" x2="393" y2="575.5"/>
+                          <circle cx="278" cy="575" r="42.5"/>
+                          <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
+                          <line x1="265" y1="588" x2="268.5" y2="584.5"/>
+                          <line x1="281" y1="572" x2="290" y2="563"/>
+                          </g>
+                          <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
+                          <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
+                          <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
+                          <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
+                          <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
+                          </g>
+                          <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+                          <circle cx="330" cy="212" r="19"/>
+                          </g>
+                          <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
+                          <text x="330" y="220.4" font-family="sans-serif">5</text>
+                          </g>
+                        </svg>
+                      </div>
+                    </td>
+                    <td class="list">
+                  <ul class="moves">
+                    <li>Swipe to move between keys. The Apple TV handles the on-screen keyboard.</li>
+                  </ul>
+                      <ol>
+                    <li value="5"><strong>Press the clickpad.</strong> The Apple TV handles this button.</li>
+                      </ol>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+        </div>
+      </section>
+
+      <section class="chapter">
+        <h2>Sign-in: “Building your library”</h2>
+        <div class="chapter-body">
+          <div class="chapter-main">
+            <p class="badge">Screenshot coming soon</p>
+            <p>After your first sign-in, or after you erase the library, the app loads your library. The screen counts the progress, for example “Fetching 247/812 albums…”. If loading fails, swipe up or down to move between “Retry” and “Continue anyway”. “Retry” starts it again, and “Continue anyway” opens the gallery.</p>
+          </div>
+              <table class="controls-layout">
+                <caption class="visually-hidden">Controls on the Building your library screen</caption>
+                <tbody>
+                  <tr>
+                    <td class="drawing">
+                      <p class="card-label">Controls</p>
+                      <div class="panel">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="330" height="493" viewBox="0 0 660 985" role="img" aria-labelledby="signin-t-11 signin-d-11">
+                          <title id="signin-t-11">Building your library screen</title>
+                          <desc id="signin-d-11">Numbers used on this screen: 5 clickpad press, to choose “Retry” or “Continue anyway” when loading fails.</desc>
+                          <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="208.5" y="14" width="243" height="943" rx="42"/>
+                          <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
+                          <line x1="323" y1="61.5" x2="337" y2="61.5"/>
+                          <circle cx="403.5" cy="62" r="21"/>
+                          <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
+                          <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
+                          <circle cx="330" cy="212" r="107.5"/>
+                          <circle cx="330" cy="212" r="58"/>
+                          <circle cx="278" cy="370" r="42.5"/>
+                          <polyline points="284.5,356 272,370 284.5,384"/>
+                          <circle cx="382" cy="370" r="42.5"/>
+                          <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
+                          <line x1="376" y1="381.5" x2="388" y2="381.5"/>
+                          <circle cx="278" cy="472.5" r="42.5"/>
+                          <polygon points="266,461.5 266,483.5 279,472.5"/>
+                          <line x1="284" y1="461.5" x2="284" y2="483.5"/>
+                          <line x1="290" y1="461.5" x2="290" y2="483.5"/>
+                          <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
+                          <line x1="382" y1="461.5" x2="382" y2="483.5"/>
+                          <line x1="371" y1="472.5" x2="393" y2="472.5"/>
+                          <line x1="371" y1="575.5" x2="393" y2="575.5"/>
+                          <circle cx="278" cy="575" r="42.5"/>
+                          <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
+                          <line x1="265" y1="588" x2="268.5" y2="584.5"/>
+                          <line x1="281" y1="572" x2="290" y2="563"/>
+                          </g>
+                          <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
+                          <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
+                          <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
+                          <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
+                          <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
+                          </g>
+                          <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+                          <circle cx="330" cy="212" r="19"/>
+                          </g>
+                          <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
+                          <text x="330" y="220.4" font-family="sans-serif">5</text>
+                          </g>
+                        </svg>
+                      </div>
+                    </td>
+                    <td class="list">
+                  <ul class="moves">
+                    <li>If loading fails, swipe up or down to move between “Retry” and “Continue anyway”.</li>
+                  </ul>
+                      <ol>
+                    <li value="5"><strong>Press the clickpad.</strong> Chooses the highlighted button.</li>
+                      </ol>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+        </div>
+      </section>
     </article>
   </main>
 

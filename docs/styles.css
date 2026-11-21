@@ -396,59 +396,6 @@ section + section { border-top: 1px solid var(--surface-border); }
   border: 1px solid var(--surface-border);
 }
 
-/* Controls on how-to-use.html: each screen has a layout table, with the
-   remote drawing beside its numbered list. Under 600px the two cells stack,
-   one under the other. The table is a layout, so its cells are not headers. */
-.content .controls-layout {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 0 0 8px;
-}
-.content .controls-layout td {
-  vertical-align: top;
-  padding: 0;
-  border: 0;
-  background: none;
-}
-.content .controls-layout td.drawing { padding-right: 28px; }
-.content .controls-layout svg {
-  display: block;
-  width: 330px;
-  max-width: 330px;
-  height: auto;
-}
-.content .controls-layout ol,
-.content .controls-layout ul {
-  margin: 0;
-  padding-left: 1.6em;
-}
-.content .controls-layout ul { padding-left: 1.2em; margin-bottom: 12px; }
-.content .controls-layout li {
-  font-size: 0.97rem;
-  line-height: 1.5;
-  margin-bottom: 10px;
-}
-.content .controls-layout li:last-child { margin-bottom: 0; }
-.content .controls-layout ul.moves li { margin-bottom: 6px; }
-/* The numbers on the drawings take the same yolk colour as the lists. Only
-   the digits change; the outline strokes keep their own colour. */
-.content .controls-layout svg text { fill: var(--yolk); }
-
-@media (max-width: 599px) {
-  .content .controls-layout,
-  .content .controls-layout tbody,
-  .content .controls-layout tr,
-  .content .controls-layout td {
-    display: block;
-    width: 100%;
-  }
-  .content .controls-layout td.drawing { padding: 0 0 18px; }
-  .content .controls-layout svg {
-    width: min(330px, 100%);
-    max-width: min(330px, 100%);
-  }
-}
-
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -556,4 +503,376 @@ footer {
   .nav-links { gap: 18px; font-size: 0.9rem; }
   .cta-row { flex-direction: column; align-items: stretch; }
   .cta-row .btn { justify-content: center; }
+}
+
+/* --- How to use (how-to-use.html) ---
+   Every rule is scoped to .how-to, the class on that page's article.
+   Remote drawings: the inline SVGs keep their own width and height attributes;
+   CSS sizes them and colours the number badges. The outline strokes are not changed. */
+.how-to {
+  --serif: "Instrument Serif", Georgia, "Times New Roman", serif;
+  --sans: Inter, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --ink: #faf7f2;
+  --ink-body: rgba(250, 247, 242, 0.76);
+  --ink-faint: rgba(250, 247, 242, 0.5);
+  --rule: rgba(255, 247, 233, 0.12);
+  --panel-bg: #0c0b09;
+  --card-bg: #15120e;
+  --badge-ink: #0a0908;
+  max-width: calc(1120px + 2 * var(--content-pad));
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.6;
+}
+.how-to p,
+.how-to li,
+.how-to td { color: var(--ink-body); font-size: 17px; line-height: 1.6; }
+.how-to strong { color: var(--ink); font-weight: 600; }
+.how-to h1,
+.how-to h2,
+.how-to h3 { font-family: var(--serif); font-weight: 400; letter-spacing: -0.01em; color: var(--ink); }
+.how-to section { padding: 0; }
+.how-to img { max-width: 100%; }
+
+/* Hero */
+.how-to .intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 48px;
+  align-items: center;
+  padding-top: clamp(4px, 2vw, 24px);
+}
+.how-to .intro h1 {
+  font-size: clamp(4rem, 10.5vw, 9.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  margin: 0 0 28px;
+}
+.how-to .intro h1 .accent { font-style: italic; color: var(--yolk); }
+.how-to .subtitle {
+  font-family: var(--serif);
+  font-size: clamp(1.6rem, 2.4vw, 2rem);
+  line-height: 1.2;
+  color: var(--ink);
+  margin: 0 0 28px;
+  max-width: 22em;
+}
+.how-to .intro p:not(.subtitle) { max-width: 36em; }
+.how-to .hero-art {
+  display: block;
+  width: min(300px, 70vw);
+  height: auto;
+  justify-self: end;
+}
+
+/* Small mono labels */
+.how-to .index-label,
+.how-to .kicker,
+.how-to .side-label,
+.how-to .card-label,
+.how-to .badge,
+.how-to .careful {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+.how-to .index-label,
+.how-to .kicker,
+.how-to .side-label { color: var(--yolk); }
+.how-to .card-label { color: var(--ink-faint); margin: 0 0 14px; display: block; }
+.how-to .badge {
+  display: inline-block;
+  margin: 0 0 28px;
+  padding: 8px 14px;
+  border: 1px dashed rgba(255, 247, 233, 0.28);
+  border-radius: 999px;
+  color: var(--ink-faint);
+  font-size: 11px;
+  line-height: 1.2;
+}
+.how-to .careful { display: block; color: var(--yolk); font-size: 11px; margin-bottom: 8px; }
+
+/* Chapter index */
+.how-to .chapter-index {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 32px 36px;
+  margin-top: 64px;
+  padding-top: 32px;
+  border-top: 1px solid var(--rule);
+}
+.how-to .index-title {
+  font-family: var(--serif);
+  font-size: 1.9rem;
+  line-height: 1.1;
+  color: var(--ink);
+  margin: 8px 0 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--rule);
+}
+.how-to .index-group ul { list-style: none; margin: 0; padding: 0; }
+.how-to .index-group li { border-bottom: 1px solid var(--rule); margin: 0; }
+.how-to .index-group a {
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+  padding: 12px 0;
+  color: var(--ink);
+  border: 0;
+  font-size: 16px;
+}
+.how-to .index-group a:hover { color: var(--yolk); }
+.how-to .index-group .code { color: var(--ink-faint); }
+
+/* Codes (A1, B1, +1 ...) */
+.how-to .code {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--yolk);
+  flex: 0 0 auto;
+  min-width: 2.4em;
+}
+
+/* Side dividers */
+.how-to .side-divider {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin: 96px 0 28px;
+}
+.how-to .side-rule { flex: 1 1 auto; height: 1px; background: var(--rule); }
+.how-to .side-name {
+  flex: 0 0 auto;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1.5rem;
+  color: var(--ink-faint);
+}
+
+/* Meet the remote card */
+.how-to .meet {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 56px;
+  align-items: center;
+  margin-top: 72px;
+  padding: 44px;
+  border: 1px solid var(--rule);
+  border-radius: 22px;
+  background: var(--card-bg);
+}
+.how-to .meet h2 { font-size: clamp(2.6rem, 4.6vw, 3.6rem); line-height: 1.05; margin: 0 0 20px; }
+.how-to .meet .kicker { margin: 0 0 12px; display: block; }
+.how-to .meet-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 32px;
+  list-style: none;
+  margin: 24px 0;
+  padding: 0;
+}
+.how-to .meet-list li { position: relative; padding-left: 38px; margin: 0; }
+.how-to .meet .lead { color: var(--ink); font-size: 1.1rem; }
+.how-to .meet .small { font-size: 15px; color: var(--ink-faint); margin: 0; }
+
+/* Drawing panel: the drawing sits in a dark panel, cropped at the bottom like the mockup */
+.how-to .panel {
+  position: relative;
+  height: 263px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--panel-bg);
+}
+.how-to .panel svg {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(320px, 100%);
+  height: auto;
+}
+/* Number badges on the drawings: yolk discs with dark digits. Only the numbered
+   circles (stroke-width 1.2) change; the remote outlines keep their stroke colour. */
+.how-to svg g[stroke-width="1.2"] circle { fill: var(--yolk); stroke: var(--yolk); }
+.how-to svg text { fill: var(--badge-ink); }
+
+/* Chapter layout */
+.how-to .chapter { padding: 64px 0 24px; border-top: 1px solid var(--rule); }
+.how-to .side-divider + .chapter { border-top: 0; padding-top: 0; }
+.how-to .chapter h2,
+.how-to .bonus-card h2 {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  font-size: clamp(2.5rem, 4.6vw, 3.6rem);
+  line-height: 1.05;
+  margin: 0 0 36px;
+}
+.how-to .chapter-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 56px;
+  align-items: start;
+}
+.how-to .chapter-main { min-width: 0; }
+.how-to .chapter-main > p,
+.how-to .chapter-main > ol,
+.how-to .chapter-main > table { max-width: 40em; }
+.how-to .chapter-main > table { max-width: 46em; }
+.how-to .chapter-main h3 { font-size: 1.7rem; line-height: 1.2; margin: 40px 0 12px; }
+.how-to .chapter-main img.screen {
+  width: 100%;
+  height: auto;
+  margin: 0 0 32px;
+  border-radius: 16px;
+  border: 1px solid var(--rule);
+}
+.how-to .chapter-main ol { padding-left: 1.6em; margin: 0 0 1em; }
+.how-to .chapter-main ol li::marker { color: var(--yolk); font-family: var(--mono); font-size: 14px; }
+.how-to .chapter-main ol li { margin-bottom: 10px; }
+
+/* Settings and toolbar item tables (visually hidden captions) */
+.how-to .items { width: 100%; border-collapse: collapse; margin: 8px 0 28px; }
+.how-to .items th,
+.how-to .items td {
+  text-align: left;
+  vertical-align: top;
+  padding: 20px 24px 20px 0;
+  border-top: 1px solid var(--rule);
+}
+.how-to .items tr:last-child th,
+.how-to .items tr:last-child td { border-bottom: 1px solid var(--rule); }
+.how-to .items th {
+  width: 13.5em;
+  font-family: var(--sans);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.how-to .items td { font-size: 16px; line-height: 1.6; }
+.how-to .items a { color: var(--yolk); }
+
+/* Controls card (table kept as the layout; stacked: drawing above list) */
+.how-to .controls-layout {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 22px;
+  border: 1px solid var(--rule);
+  border-radius: 18px;
+  background: var(--card-bg);
+  border-collapse: separate;
+}
+.how-to .controls-layout tbody,
+.how-to .controls-layout tr,
+.how-to .controls-layout td { display: block; width: 100%; padding: 0; border: 0; background: none; }
+.how-to .controls-layout td.drawing { margin-bottom: 22px; }
+.how-to .controls-layout ol,
+.how-to .controls-layout ul { list-style: none; margin: 0; padding: 0; }
+.how-to .controls-layout li {
+  position: relative;
+  padding-left: 38px;
+  margin: 0 0 14px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.how-to .controls-layout li:last-child { margin-bottom: 0; }
+.how-to .controls-layout li::before,
+.how-to .meet-list li::before {
+  content: attr(value);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--yolk);
+  color: var(--badge-ink);
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 24px;
+  text-align: center;
+}
+.how-to .controls-layout ul.moves { margin-bottom: 14px; }
+.how-to .controls-layout ul.moves li { padding-left: 38px; margin-bottom: 0; }
+.how-to .controls-layout ul.moves li::before {
+  content: "";
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: none;
+  border: 1.5px solid rgba(255, 247, 233, 0.5);
+}
+
+/* Bonus tracks */
+.how-to .bonus-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin-top: 8px;
+}
+.how-to .bonus-card {
+  padding: 36px;
+  border: 1px solid var(--rule);
+  border-radius: 22px;
+  background: var(--card-bg);
+}
+.how-to .bonus-card h2 { font-size: clamp(2.1rem, 3.4vw, 2.8rem); margin-bottom: 20px; }
+.how-to .bonus-card > ol { padding-left: 1.6em; margin: 0 0 1em; }
+.how-to .bonus-card > ol li::marker { color: var(--yolk); font-family: var(--mono); font-size: 14px; }
+.how-to .bonus-card > ol li { margin-bottom: 10px; }
+.how-to .bonus-card .controls-layout {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  padding: 24px 0 0;
+  margin-top: 28px;
+  border-top: 1px solid var(--rule);
+  border-radius: 0;
+}
+.how-to .bonus-card .controls-layout .list li { font-size: 16px; }
+
+/* Narrow screens: cards stack, the drawing sits above its list */
+@media (max-width: 899px) {
+  .how-to .intro { grid-template-columns: 1fr; gap: 32px; }
+  .how-to .hero-art { justify-self: start; }
+  .how-to .chapter-index { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .how-to .chapter-body { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .how-to .chapter-main > table,
+  .how-to .chapter-main > p,
+  .how-to .chapter-main > ol { max-width: none; }
+  .how-to .meet { grid-template-columns: minmax(0, 1fr); gap: 32px; padding: 32px; }
+  .how-to .meet .panel { width: 100%; max-width: 320px; }
+  .how-to .bonus-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 599px) {
+  .how-to { --content-pad: 16px; font-size: 16px; }
+  .how-to p,
+  .how-to li,
+  .how-to td { font-size: 16px; }
+  .how-to .chapter-index { grid-template-columns: minmax(0, 1fr); }
+  .how-to .intro h1 { font-size: clamp(3.4rem, 18vw, 4.6rem); }
+  .how-to .chapter h2,
+  .how-to .bonus-card h2 { font-size: clamp(2.2rem, 11vw, 2.8rem); gap: 12px; }
+  .how-to .meet { padding: 24px; }
+  .how-to .meet-list { grid-template-columns: minmax(0, 1fr); }
+  .how-to .side-divider { margin: 72px 0 24px; }
+  .how-to .bonus-card { padding: 24px; }
+  .how-to .controls-layout { padding: 18px; }
+  .how-to .items,
+  .how-to .items tbody,
+  .how-to .items tr,
+  .how-to .items th,
+  .how-to .items td { display: block; width: 100%; }
+  .how-to .items th { width: auto; padding: 18px 0 6px; border-top: 1px solid var(--rule); }
+  .how-to .items td { padding: 0 0 18px; border-top: 0; }
+  .how-to .items tr:last-child td { border-bottom: 0; }
+  .how-to .items tr:last-child th { border-bottom: 0; }
 }
