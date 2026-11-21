@@ -710,6 +710,8 @@ footer {
    circles (stroke-width 1.2) change; the remote outlines keep their stroke colour. */
 .how-to svg g[stroke-width="1.2"] circle { fill: var(--yolk); stroke: var(--yolk); }
 .how-to svg text { fill: var(--badge-ink); }
+/* The Back button is highlighted in the drawings that show its number 6 */
+.how-to svg .back-ring { stroke: var(--yolk); }
 
 /* Chapter layout */
 .how-to .chapter { padding: 64px 0 24px; border-top: 1px solid var(--rule); }
