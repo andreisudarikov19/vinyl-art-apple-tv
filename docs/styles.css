@@ -422,6 +422,70 @@ section + section { border-top: 1px solid var(--surface-border); }
   left: 0;
   background: var(--bg);
 }
+/* Screens table on how-to-use.html: one row per screen. The drawings are
+   inline SVG, so they take the text colour of the page. On phones the table
+   scrolls sideways inside .table-wrap and the Screen column stays in view. */
+.content .screens th,
+.content .screens td {
+  padding: 16px 12px;
+}
+.content .screens th[scope="row"] {
+  width: 9rem;
+  line-height: 1.4;
+}
+.content .screens td.shot { width: 46%; }
+.content .screens td.controls { width: 200px; }
+.content .screens img.screen {
+  margin: 0 0 12px;
+}
+.content .screens td p {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0 0 10px;
+}
+.content .screens td p:last-child { margin-bottom: 0; }
+.content .screens td em { color: var(--text-faint); }
+.content .screens ul {
+  margin: 8px 0 0;
+  padding-left: 1.2em;
+}
+.content .screens ul li {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+.content .screens ul li:last-child { margin-bottom: 0; }
+.content .screens .controls svg {
+  display: block;
+  width: 100%;
+  max-width: 180px;
+  height: auto;
+  margin: 0 0 12px;
+}
+.content .screens .controls ol {
+  margin: 0;
+  padding-left: 1.6em;
+}
+.content .screens .controls li {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+.content .screens .controls li:last-child { margin-bottom: 0; }
+
+@media (max-width: 600px) {
+  .content .screens { min-width: 40rem; }
+  .content .screens th:first-child,
+  .content .screens td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--bg);
+  }
+  .content .screens td.controls { min-width: 12rem; width: 12rem; }
+  .content .screens .controls svg { max-width: 100%; }
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

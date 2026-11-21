@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>How to use — Vinyl for Apple TV</title>
-  <meta name="description" content="How to move around the gallery and the record screen with the Siri Remote, and how the halo, cover art, Settings and refresh work.">
+  <meta name="description" content="Each screen of Vinyl for Apple TV, what it shows and the Siri Remote controls you use on it.">
   <meta name="theme-color" content="#0a0908">
   <meta property="og:title" content="How to use — Vinyl for Apple TV">
-  <meta property="og:description" content="How to move around the gallery and the record screen with the Siri Remote, and how the halo, cover art, Settings and refresh work.">
+  <meta property="og:description" content="Each screen of Vinyl for Apple TV, what it shows and the Siri Remote controls you use on it.">
   <meta property="og:image" content="https://andreisudarikov19.github.io/vinyl-art-apple-tv/assets/icon.png">
   <meta property="og:type" content="website">
   <link rel="icon" type="image/png" href="assets/icon.png">
@@ -34,129 +34,538 @@
   <main>
     <article class="container content">
       <h1>How to use</h1>
-      <p class="subtitle">The Siri Remote, the screens and the controls.</p>
+      <p class="subtitle">Each screen of the app, what it shows and the Siri Remote controls you use on it.</p>
 
-      <h2 id="your-siri-remote">1 Your Siri Remote</h2>
-      <p><strong>You need:</strong> an Apple TV and its Siri Remote.</p>
-      <figure>
-        <img class="screen" src="assets/how-to/siri-remote.svg" width="100%" alt="Siri Remote drawing with labels 1 to 8: clickpad, Back, TV, Play/Pause, Volume, Mute, Power, Siri. Numbers match the key list below.">
-        <figcaption>Figure 1-1. The Siri Remote, numbered 1 to 8. The numbers match the key list below.</figcaption>
-      </figure>
-      <ol>
-        <li><strong>Clickpad.</strong> The pad on top of the remote. Swipe on it to move the focus, the highlighted item, then press it to choose.</li>
-        <li><strong>Back</strong> (‹) takes you back one step on most screens. What it does on the first screen depends on the Apple TV.</li>
-        <li><strong>TV.</strong> Not used by this app.</li>
-        <li><strong>Play/Pause.</strong> Not used by this app.</li>
-        <li><strong>Volume.</strong> Not used by this app.</li>
-        <li><strong>Mute.</strong> Not used by this app.</li>
-        <li><strong>Power.</strong> Not used by this app.</li>
-        <li><strong>Siri.</strong> Not used by this app.</li>
-      </ol>
-      <p>The gallery has two views: “CoverFlow”, which shows one cover large in the centre, and Grid, which shows rows of covers. The record screen shows one record. The halo is the soft colour glow around the cover.</p>
+      <p>Each row of the table is one screen. The drawing in the Controls column shows the Siri Remote, numbered for that screen only. The list under the drawing says what each numbered control does there.</p>
+      <p>The clickpad is the touch pad on top of the remote. A swipe is a slide of your thumb across it, and a press is a click. The highlight is the selected item, the one that a press chooses. Back (the ‹ button) is number 6 on the drawings.</p>
+      <p>The app shows the records in your collection on Discogs (the online record database). A tracklist is the list of songs on one side. A side is one face of a record, such as Side A or Side B, as the record defines them. The toolbar is the row of on-screen buttons at the top of the gallery.</p>
 
-      <h3 id="the-clickpad">1.1 The clickpad</h3>
-      <p>Swipe moves the focus. The focus is the highlight that shows which item a press will act on. Press the clickpad to choose the focused item.</p>
-
-      <h3 id="select-an-item">1.2 Select an item</h3>
-      <ol>
-        <li>Swipe left or right to move along a row. Swipe up or down to move to another row. The highlighted item is the focus. <strong>What you see:</strong> the highlight moves to that item.</li>
-        <li>Press the clickpad. <strong>What you see:</strong> the item acts, for example it opens a record or turns the halo on.</li>
-      </ol>
-
-      <h3 id="gestures-on-each-screen">1.3 Gestures on each screen</h3>
-      <p>A swipe is a slide of your thumb across the clickpad. A side is one face of a record, such as “Side A”. The table shows what each gesture does on each screen.</p>
       <div class="table-wrap">
-        <table>
-          <caption class="visually-hidden">Gestures on each screen</caption>
+        <table class="screens">
+          <caption class="visually-hidden">Each screen of the app, with its screenshot, description and controls</caption>
           <thead>
-            <tr><th scope="col">Gesture</th><th scope="col">“CoverFlow”</th><th scope="col">“Grid”</th><th scope="col">Record screen</th></tr>
+            <tr><th scope="col">Screen</th><th scope="col">Screenshot with description</th><th scope="col">Controls</th></tr>
           </thead>
           <tbody>
-            <tr><th scope="row">Swipe left or right</th><td>Move to the previous or next record. At either end, nothing changes.</td><td>Move to the previous or next record in the row. At the start or end of each row, nothing changes.</td><td>Change side. At either end of the sides, nothing changes.</td></tr>
-            <tr><th scope="row">Swipe up</th><td>Move the focus to the toolbar, the row of controls above the covers.</td><td>Move up one row. From the top row, move the focus to the toolbar.</td><td>Show the cover full screen. If you have turned off “Engage halo automatically”, swipe up again to reach the “Halo” button.</td></tr>
-            <tr><th scope="row">Swipe down</th><td>Nothing</td><td>Move down one row, if there is a row below.</td><td>Show the tracklist.</td></tr>
-            <tr><th scope="row">Press</th><td>Open the highlighted record.</td><td>Open the highlighted record.</td><td>Go to the next side. On the last side, nothing changes.</td></tr>
+            <tr>
+              <th scope="row">Gallery, “CoverFlow” view (default)</th>
+              <td class="shot">
+                <img class="screen" src="assets/screens/gallery.jpg" alt="The CoverFlow gallery: the highlighted cover in the centre, larger than the others, with the toolbar above it and its artist and title below.">
+                <p>CoverFlow is the default view. The highlighted record sits in the centre, with its artist and title below it. Its colours tint the background.</p>
+                <p>Swipe left or right to move one record at a time.</p>
+              </td>
+              <td class="controls">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 985" role="img" aria-labelledby="cover-flow-t cover-flow-d">
+                  <title id="cover-flow-t">Gallery, CoverFlow view: remote controls</title>
+                  <desc id="cover-flow-d">Numbers used on this screen: 1 clickpad (the touch pad on top of the remote) up, move to the toolbar. 3 clickpad left, previous record. 4 clickpad right, next record. 5 clickpad press, open the record.</desc>
+                  <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="208.5" y="14" width="243" height="943" rx="42"/>
+                    <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
+                    <line x1="323" y1="61.5" x2="337" y2="61.5"/>
+                    <circle cx="403.5" cy="62" r="21"/>
+                    <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
+                    <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
+                    <circle cx="330" cy="212" r="107.5"/>
+                    <circle cx="330" cy="212" r="58"/>
+                    <circle cx="278" cy="370" r="42.5"/>
+                    <polyline points="284.5,356 272,370 284.5,384"/>
+                    <circle cx="382" cy="370" r="42.5"/>
+                    <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
+                    <line x1="376" y1="381.5" x2="388" y2="381.5"/>
+                    <circle cx="278" cy="472.5" r="42.5"/>
+                    <polygon points="266,461.5 266,483.5 279,472.5"/>
+                    <line x1="284" y1="461.5" x2="284" y2="483.5"/>
+                    <line x1="290" y1="461.5" x2="290" y2="483.5"/>
+                    <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
+                    <line x1="382" y1="461.5" x2="382" y2="483.5"/>
+                    <line x1="371" y1="472.5" x2="393" y2="472.5"/>
+                    <line x1="371" y1="575.5" x2="393" y2="575.5"/>
+                    <circle cx="278" cy="575" r="42.5"/>
+                    <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
+                    <line x1="265" y1="588" x2="268.5" y2="584.5"/>
+                    <line x1="281" y1="572" x2="290" y2="563"/>
+                  </g>
+                  <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
+                    <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
+                    <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
+                    <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
+                    <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
+                  </g>
+                  <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+                    <circle cx="330" cy="129" r="19"/>
+                    <circle cx="247" cy="212" r="19"/>
+                    <circle cx="413" cy="212" r="19"/>
+                    <circle cx="330" cy="212" r="19"/>
+                  </g>
+                  <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
+                    <text x="330" y="137.4" font-family="sans-serif">1</text>
+                    <text x="247" y="220.4" font-family="sans-serif">3</text>
+                    <text x="413" y="220.4" font-family="sans-serif">4</text>
+                    <text x="330" y="220.4" font-family="sans-serif">5</text>
+                  </g>
+                </svg>
+                <ol>
+                  <li value="1"><strong>Swipe up.</strong> Moves the highlight to the toolbar.</li>
+                  <li value="3"><strong>Swipe left.</strong> Brings the previous record to the centre. At the first record, nothing changes.</li>
+                  <li value="4"><strong>Swipe right.</strong> Brings the next record to the centre. At the last record, nothing changes.</li>
+                  <li value="5"><strong>Press the clickpad.</strong> Opens the highlighted record.</li>
+                </ol>
+              </td>
+            </tr>
+
+            <tr>
+              <th scope="row">Gallery, “Grid” view</th>
+              <td class="shot">
+                <img class="screen" src="assets/screens/grid.jpg" alt="The Grid view: albums in rows of seven under the toolbar, with the layout button highlighted.">
+                <p>Grid shows seven albums in each row. The highlighted album grows and shows its artist and title in a panel below it. The grid never shows the halo.</p>
+              </td>
+              <td class="controls">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 985" role="img" aria-labelledby="grid-t grid-d">
+                  <title id="grid-t">Gallery, Grid view: remote controls</title>
+                  <desc id="grid-d">Numbers used on this screen: 1 clickpad (the touch pad on top of the remote) up, up a row, or to the toolbar from the top row. 2 clickpad down, down a row. 3 clickpad left, previous cover. 4 clickpad right, next cover. 5 clickpad press, open the record.</desc>
+                  <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="208.5" y="14" width="243" height="943" rx="42"/>
+                    <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
+                    <line x1="323" y1="61.5" x2="337" y2="61.5"/>
+                    <circle cx="403.5" cy="62" r="21"/>
+                    <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
+                    <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
+                    <circle cx="330" cy="212" r="107.5"/>
+                    <circle cx="330" cy="212" r="58"/>
+                    <circle cx="278" cy="370" r="42.5"/>
+                    <polyline points="284.5,356 272,370 284.5,384"/>
+                    <circle cx="382" cy="370" r="42.5"/>
+                    <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
+                    <line x1="376" y1="381.5" x2="388" y2="381.5"/>
+                    <circle cx="278" cy="472.5" r="42.5"/>
+                    <polygon points="266,461.5 266,483.5 279,472.5"/>
+                    <line x1="284" y1="461.5" x2="284" y2="483.5"/>
+                    <line x1="290" y1="461.5" x2="290" y2="483.5"/>
+                    <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
+                    <line x1="382" y1="461.5" x2="382" y2="483.5"/>
+                    <line x1="371" y1="472.5" x2="393" y2="472.5"/>
+                    <line x1="371" y1="575.5" x2="393" y2="575.5"/>
+                    <circle cx="278" cy="575" r="42.5"/>
+                    <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
+                    <line x1="265" y1="588" x2="268.5" y2="584.5"/>
+                    <line x1="281" y1="572" x2="290" y2="563"/>
+                  </g>
+                  <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
+                    <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
+                    <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
+                    <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
+                    <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
+                  </g>
+                  <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+                    <circle cx="330" cy="129" r="19"/>
+                    <circle cx="330" cy="295" r="19"/>
+                    <circle cx="247" cy="212" r="19"/>
+                    <circle cx="413" cy="212" r="19"/>
+                    <circle cx="330" cy="212" r="19"/>
+                  </g>
+                  <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
+                    <text x="330" y="137.4" font-family="sans-serif">1</text>
+                    <text x="330" y="303.4" font-family="sans-serif">2</text>
+                    <text x="247" y="220.4" font-family="sans-serif">3</text>
+                    <text x="413" y="220.4" font-family="sans-serif">4</text>
+                    <text x="330" y="220.4" font-family="sans-serif">5</text>
+                  </g>
+                </svg>
+                <ol>
+                  <li value="1"><strong>Swipe up.</strong> Moves up one row. From the top row, moves the highlight to the toolbar.</li>
+                  <li value="2"><strong>Swipe down.</strong> Moves down one row, if there is a row below.</li>
+                  <li value="3"><strong>Swipe left.</strong> Moves to the previous album in the row. At the start of a row, nothing changes.</li>
+                  <li value="4"><strong>Swipe right.</strong> Moves to the next album in the row. At the end of a row, nothing changes.</li>
+                  <li value="5"><strong>Press the clickpad.</strong> Opens the highlighted album.</li>
+                </ol>
+              </td>
+            </tr>
+
+            <tr id="sort-filter-suggest">
+              <th scope="row">Gallery toolbar: “Suggest”, “Sort”, “Genre”, “Layout” and “Settings”</th>
+              <td class="shot">
+                <p><em>Screenshot to follow</em></p>
+                <p>The toolbar sits at the top of the gallery. “Suggest”, “Sort”, “Genre” and the layout button appear once the library has records. The gear at the end opens the “Settings menu”.</p>
+                <p>“Suggest” opens a random record from the records shown, after any genre filter.</p>
+                <p>“Sort” puts the records in order by “Recently added” (the default), “Artist”, “Album” or “Year”.</p>
+                <p>“Genre” lists every genre and style in your collection. Choosing one shows the records that have it. “All genres” clears the filter.</p>
+                <p>The layout button switches between CoverFlow and Grid. The sort and layout are remembered between launches; the genre filter is not.</p>
+              </td>
+              <td class="controls">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 985" role="img" aria-labelledby="toolbar-t toolbar-d">
+                  <title id="toolbar-t">Gallery toolbar: remote controls</title>
+                  <desc id="toolbar-d">Gallery toolbar, the row of on-screen buttons at the top. 3 clickpad (the touch pad on top of the remote) left, previous button. 4 clickpad right, next button. 5 clickpad press, open the highlighted (selected) button.</desc>
+                  <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="208.5" y="14" width="243" height="943" rx="42"/>
+                    <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
+                    <line x1="323" y1="61.5" x2="337" y2="61.5"/>
+                    <circle cx="403.5" cy="62" r="21"/>
+                    <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
+                    <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
+                    <circle cx="330" cy="212" r="107.5"/>
+                    <circle cx="330" cy="212" r="58"/>
+                    <circle cx="278" cy="370" r="42.5"/>
+                    <polyline points="284.5,356 272,370 284.5,384"/>
+                    <circle cx="382" cy="370" r="42.5"/>
+                    <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
+                    <line x1="376" y1="381.5" x2="388" y2="381.5"/>
+                    <circle cx="278" cy="472.5" r="42.5"/>
+                    <polygon points="266,461.5 266,483.5 279,472.5"/>
+                    <line x1="284" y1="461.5" x2="284" y2="483.5"/>
+                    <line x1="290" y1="461.5" x2="290" y2="483.5"/>
+                    <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
+                    <line x1="382" y1="461.5" x2="382" y2="483.5"/>
+                    <line x1="371" y1="472.5" x2="393" y2="472.5"/>
+                    <line x1="371" y1="575.5" x2="393" y2="575.5"/>
+                    <circle cx="278" cy="575" r="42.5"/>
+                    <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
+                    <line x1="265" y1="588" x2="268.5" y2="584.5"/>
+                    <line x1="281" y1="572" x2="290" y2="563"/>
+                  </g>
+                  <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
+                    <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
+                    <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
+                    <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
+                    <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
+                  </g>
+                  <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+                    <circle cx="247" cy="212" r="19"/>
+                    <circle cx="413" cy="212" r="19"/>
+                    <circle cx="330" cy="212" r="19"/>
+                  </g>
+                  <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
+                    <text x="247" y="220.4" font-family="sans-serif">3</text>
+                    <text x="413" y="220.4" font-family="sans-serif">4</text>
+                    <text x="330" y="220.4" font-family="sans-serif">5</text>
+                  </g>
+                </svg>
+                <ol>
+                  <li value="3"><strong>Swipe left.</strong> Moves the highlight to the button on its left.</li>
+                  <li value="4"><strong>Swipe right.</strong> Moves the highlight to the button on its right.</li>
+                  <li value="5"><strong>Press the clickpad.</strong> Chooses the highlighted button. “Suggest” opens a record. “Sort” and “Genre” open menus. The layout button switches between CoverFlow and Grid. The gear opens the “Settings menu”.</li>
+                </ol>
+              </td>
+            </tr>
+
+            <tr id="open-a-record">
+              <th scope="row">Record screen (tracklist view and cover view)</th>
+              <td class="shot">
+                <img class="screen" src="assets/screens/record.jpg" alt="The record screen in the tracklist view: the cover on the left with its title, artist and tags, and the tracklist for Side A on the right, with the side selector above it.">
+                <p>A record opens on its tracklist view. The side selector above the tracklist shows Side A, Side B and so on, with the current side highlighted.</p>
+                <p>The cover view shows the cover full screen. After a change of side, a short message such as “Side B” appears for 2 seconds.</p>
+                <p id="turn-the-halo-on-or-off">The halo is a soft glow of colour from the cover. It turns off with each swipe and comes back after a pause. On the record screen’s cover view, it returns 3 seconds after the last swipe. In CoverFlow, it returns 60 seconds after the last swipe. This happens when “Engage halo automatically” is on, which is the default.</p>
+                <p>With “Engage halo automatically” off, the cover view shows a “Halo” button under the cover. Swipe up on the cover view to reach it, then press to turn the halo on or off. CoverFlow shows no halo in this mode.</p>
+                <p id="cover-art">The app first shows the Discogs image. It then swaps in a better cover when it finds one. It finds covers through MusicBrainz (an open music database) and the Cover Art Archive, which holds cover images.</p>
+              </td>
+              <td class="controls">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 985" role="img" aria-labelledby="record-t record-d">
+                  <title id="record-t">Record screen: remote controls</title>
+                  <desc id="record-d">3 clickpad (the touch pad on top of the remote) left, previous side (side A, side B and so on, as the record defines them). 4 clickpad right, next side. 5 clickpad press, flip to the next side. 1 up, show the cover. 2 down, show the tracklist (the list of songs).</desc>
+                  <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="208.5" y="14" width="243" height="943" rx="42"/>
+                    <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
+                    <line x1="323" y1="61.5" x2="337" y2="61.5"/>
+                    <circle cx="403.5" cy="62" r="21"/>
+                    <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
+                    <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
+                    <circle cx="330" cy="212" r="107.5"/>
+                    <circle cx="330" cy="212" r="58"/>
+                    <circle cx="278" cy="370" r="42.5"/>
+                    <polyline points="284.5,356 272,370 284.5,384"/>
+                    <circle cx="382" cy="370" r="42.5"/>
+                    <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
+                    <line x1="376" y1="381.5" x2="388" y2="381.5"/>
+                    <circle cx="278" cy="472.5" r="42.5"/>
+                    <polygon points="266,461.5 266,483.5 279,472.5"/>
+                    <line x1="284" y1="461.5" x2="284" y2="483.5"/>
+                    <line x1="290" y1="461.5" x2="290" y2="483.5"/>
+                    <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
+                    <line x1="382" y1="461.5" x2="382" y2="483.5"/>
+                    <line x1="371" y1="472.5" x2="393" y2="472.5"/>
+                    <line x1="371" y1="575.5" x2="393" y2="575.5"/>
+                    <circle cx="278" cy="575" r="42.5"/>
+                    <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
+                    <line x1="265" y1="588" x2="268.5" y2="584.5"/>
+                    <line x1="281" y1="572" x2="290" y2="563"/>
+                  </g>
+                  <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
+                    <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
+                    <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
+                    <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
+                    <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
+                  </g>
+                  <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+                    <circle cx="330" cy="129" r="19"/>
+                    <circle cx="330" cy="295" r="19"/>
+                    <circle cx="247" cy="212" r="19"/>
+                    <circle cx="413" cy="212" r="19"/>
+                    <circle cx="330" cy="212" r="19"/>
+                  </g>
+                  <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
+                    <text x="330" y="137.4" font-family="sans-serif">1</text>
+                    <text x="330" y="303.4" font-family="sans-serif">2</text>
+                    <text x="247" y="220.4" font-family="sans-serif">3</text>
+                    <text x="413" y="220.4" font-family="sans-serif">4</text>
+                    <text x="330" y="220.4" font-family="sans-serif">5</text>
+                  </g>
+                </svg>
+                <ol>
+                  <li value="1"><strong>Swipe up.</strong> Shows the cover full screen, in the cover view.</li>
+                  <li value="2"><strong>Swipe down.</strong> Shows the tracklist view.</li>
+                  <li value="3"><strong>Swipe left.</strong> Goes to the previous side. At the first side, nothing changes.</li>
+                  <li value="4"><strong>Swipe right.</strong> Goes to the next side. At the last side, nothing changes.</li>
+                  <li value="5"><strong>Press the clickpad.</strong> Goes to the next side. At the last side, nothing changes.</li>
+                </ol>
+              </td>
+            </tr>
+
+            <tr>
+              <th scope="row">Discogs QR code (opened from the record screen)</th>
+              <td class="shot">
+                <p><em>Screenshot to follow</em></p>
+                <p>On the tracklist view, select the “Data provided by Discogs” line under the cover details. The screen shows a QR code of the record’s page on discogs.com, with the words “Scan with your phone”.</p>
+                <p>Scan the code with a phone to open that page.</p>
+              </td>
+              <td class="controls">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 985" role="img" aria-labelledby="qr-t qr-d">
+                  <title id="qr-t">Discogs QR screen (Discogs, the online record database): remote controls</title>
+                  <desc id="qr-d">QR code screen. The square code links to this release’s page on discogs.com, for a phone to scan. 6 Back (the ‹ button) closes this screen; the Apple TV handles the Back button here.</desc>
+                  <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="208.5" y="14" width="243" height="943" rx="42"/>
+                    <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
+                    <line x1="323" y1="61.5" x2="337" y2="61.5"/>
+                    <circle cx="403.5" cy="62" r="21"/>
+                    <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
+                    <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
+                    <circle cx="330" cy="212" r="107.5"/>
+                    <circle cx="330" cy="212" r="58"/>
+                    <circle cx="278" cy="370" r="42.5"/>
+                    <polyline points="284.5,356 272,370 284.5,384"/>
+                    <circle cx="382" cy="370" r="42.5"/>
+                    <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
+                    <line x1="376" y1="381.5" x2="388" y2="381.5"/>
+                    <circle cx="278" cy="472.5" r="42.5"/>
+                    <polygon points="266,461.5 266,483.5 279,472.5"/>
+                    <line x1="284" y1="461.5" x2="284" y2="483.5"/>
+                    <line x1="290" y1="461.5" x2="290" y2="483.5"/>
+                    <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
+                    <line x1="382" y1="461.5" x2="382" y2="483.5"/>
+                    <line x1="371" y1="472.5" x2="393" y2="472.5"/>
+                    <line x1="371" y1="575.5" x2="393" y2="575.5"/>
+                    <circle cx="278" cy="575" r="42.5"/>
+                    <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
+                    <line x1="265" y1="588" x2="268.5" y2="584.5"/>
+                    <line x1="281" y1="572" x2="290" y2="563"/>
+                  </g>
+                  <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
+                    <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
+                    <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
+                    <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
+                    <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
+                  </g>
+                  <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+                    <line x1="59" y1="367" x2="226" y2="367"/>
+                    <circle cx="40" cy="367" r="19"/>
+                  </g>
+                  <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
+                    <text x="40" y="375.4" font-family="sans-serif">6</text>
+                  </g>
+                </svg>
+                <ol>
+                  <li value="6"><strong>Back</strong> (the ‹ button). The Apple TV handles this button.</li>
+                </ol>
+              </td>
+            </tr>
+
+            <tr id="settings">
+              <th scope="row">Settings menu</th>
+              <td class="shot">
+                <p><em>Screenshot to follow</em></p>
+                <p>The Settings menu opens from the gear at the end of the toolbar. It lists these items, from top to bottom.</p>
+                <ul>
+                  <li id="refresh-your-collection"><strong>“Refresh collection”</strong> reads the whole collection again. It adds new records, removes the ones you have taken off Discogs and updates the rest. Its progress shows at the bottom of the gallery, for example “Refreshing… 120/800”.</li>
+                  <li><strong>“Engage halo automatically”</strong> is on by default. Turn it off for manual halo mode, which the <a href="#turn-the-halo-on-or-off">record screen</a> row explains.</li>
+                  <li><strong>“Account”</strong> shows the Discogs username you are signed in with.</li>
+                  <li><strong>“Sign out (keep library)”</strong> removes the Discogs sign-in from this Apple TV and keeps your library here. Signing in again with the same account shows the library at once.</li>
+                  <li><strong>“Sign out &amp; erase library”</strong> removes the sign-in and deletes the library from this Apple TV. Your layout, sort and halo settings stay.</li>
+                  <li>The app version, then <strong>“About”</strong>, which opens the About screen.</li>
+                </ul>
+              </td>
+              <td class="controls">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 985" role="img" aria-labelledby="settings-t settings-d">
+                  <title id="settings-t">Settings menu: remote controls</title>
+                  <desc id="settings-d">Numbers used on this screen: 5 clickpad (the touch pad on top of the remote) press, choose the highlighted (selected) item. 6 Back (the ‹ button) closes this screen; the Apple TV handles the Back button here.</desc>
+                  <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="208.5" y="14" width="243" height="943" rx="42"/>
+                    <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
+                    <line x1="323" y1="61.5" x2="337" y2="61.5"/>
+                    <circle cx="403.5" cy="62" r="21"/>
+                    <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
+                    <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
+                    <circle cx="330" cy="212" r="107.5"/>
+                    <circle cx="330" cy="212" r="58"/>
+                    <circle cx="278" cy="370" r="42.5"/>
+                    <polyline points="284.5,356 272,370 284.5,384"/>
+                    <circle cx="382" cy="370" r="42.5"/>
+                    <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
+                    <line x1="376" y1="381.5" x2="388" y2="381.5"/>
+                    <circle cx="278" cy="472.5" r="42.5"/>
+                    <polygon points="266,461.5 266,483.5 279,472.5"/>
+                    <line x1="284" y1="461.5" x2="284" y2="483.5"/>
+                    <line x1="290" y1="461.5" x2="290" y2="483.5"/>
+                    <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
+                    <line x1="382" y1="461.5" x2="382" y2="483.5"/>
+                    <line x1="371" y1="472.5" x2="393" y2="472.5"/>
+                    <line x1="371" y1="575.5" x2="393" y2="575.5"/>
+                    <circle cx="278" cy="575" r="42.5"/>
+                    <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
+                    <line x1="265" y1="588" x2="268.5" y2="584.5"/>
+                    <line x1="281" y1="572" x2="290" y2="563"/>
+                  </g>
+                  <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
+                    <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
+                    <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
+                    <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
+                    <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
+                  </g>
+                  <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+                    <circle cx="330" cy="212" r="19"/>
+                    <line x1="59" y1="367" x2="226" y2="367"/>
+                    <circle cx="40" cy="367" r="19"/>
+                  </g>
+                  <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
+                    <text x="330" y="220.4" font-family="sans-serif">5</text>
+                    <text x="40" y="375.4" font-family="sans-serif">6</text>
+                  </g>
+                </svg>
+                <ol>
+                  <li value="5"><strong>Press the clickpad.</strong> Chooses the highlighted item, such as “Refresh collection” or “Sign out (keep library)”.</li>
+                  <li value="6"><strong>Back</strong> (the ‹ button). The Apple TV handles this button.</li>
+                </ol>
+              </td>
+            </tr>
+
+            <tr>
+              <th scope="row">About</th>
+              <td class="shot">
+                <p><em>Screenshot to follow</em></p>
+                <p>About shows the app name and version, the privacy policy, support and email addresses, and the Discogs notice. Nothing on this screen can be selected. The addresses are plain text, to type on a phone or computer, because the Apple TV has no browser.</p>
+              </td>
+              <td class="controls">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 985" role="img" aria-labelledby="about-t about-d">
+                  <title id="about-t">About screen: remote controls</title>
+                  <desc id="about-d">Numbers used on this screen: 6 Back (the ‹ button) closes this screen; the Apple TV handles the Back button here.</desc>
+                  <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="208.5" y="14" width="243" height="943" rx="42"/>
+                    <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
+                    <line x1="323" y1="61.5" x2="337" y2="61.5"/>
+                    <circle cx="403.5" cy="62" r="21"/>
+                    <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
+                    <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
+                    <circle cx="330" cy="212" r="107.5"/>
+                    <circle cx="330" cy="212" r="58"/>
+                    <circle cx="278" cy="370" r="42.5"/>
+                    <polyline points="284.5,356 272,370 284.5,384"/>
+                    <circle cx="382" cy="370" r="42.5"/>
+                    <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
+                    <line x1="376" y1="381.5" x2="388" y2="381.5"/>
+                    <circle cx="278" cy="472.5" r="42.5"/>
+                    <polygon points="266,461.5 266,483.5 279,472.5"/>
+                    <line x1="284" y1="461.5" x2="284" y2="483.5"/>
+                    <line x1="290" y1="461.5" x2="290" y2="483.5"/>
+                    <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
+                    <line x1="382" y1="461.5" x2="382" y2="483.5"/>
+                    <line x1="371" y1="472.5" x2="393" y2="472.5"/>
+                    <line x1="371" y1="575.5" x2="393" y2="575.5"/>
+                    <circle cx="278" cy="575" r="42.5"/>
+                    <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
+                    <line x1="265" y1="588" x2="268.5" y2="584.5"/>
+                    <line x1="281" y1="572" x2="290" y2="563"/>
+                  </g>
+                  <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
+                    <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
+                    <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
+                    <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
+                    <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
+                  </g>
+                  <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+                    <line x1="59" y1="367" x2="226" y2="367"/>
+                    <circle cx="40" cy="367" r="19"/>
+                  </g>
+                  <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
+                    <text x="40" y="375.4" font-family="sans-serif">6</text>
+                  </g>
+                </svg>
+                <ol>
+                  <li value="6"><strong>Back</strong> (the ‹ button). The Apple TV handles this button.</li>
+                </ol>
+              </td>
+            </tr>
+
+            <tr>
+              <th scope="row">Sign-in (welcome, code and building your library)</th>
+              <td class="shot">
+                <img class="screen" src="assets/screens/onboarding/welcome.jpg" alt="The welcome screen: the app name, a line about displaying the collection on the big screen, and the “Sign in with Discogs” button.">
+                <p>The welcome screen has the “Sign in with Discogs” button. If Discogs stops accepting the app’s access, this screen returns with a notice. Your library stays on the Apple TV.</p>
+                <img class="screen" src="assets/screens/onboarding/authorize.jpg" alt="The code screen: a QR code to scan with a phone, three steps to sign in, a Verification code box and a Continue button.">
+                <p>The code screen shows a QR code to scan with a phone, and three steps to follow on the phone. Enter the code that Discogs shows you in the “Verification code” box. “Continue” is unavailable until a code is typed.</p>
+                <img class="screen" src="assets/screens/onboarding/keyboard.jpg" alt="The on-screen keyboard for the Verification code box, with the done key below the letters.">
+                <p>The Apple TV shows its on-screen keyboard for the “Verification code” box. Choose done when the code is typed.</p>
+                <p><em>Screenshot to follow</em></p>
+                <p>After your first sign in, or after you erase the library, the app builds your library. The screen counts the progress, for example “Fetching 247/812 albums…”. If the build fails, “Retry” starts it again, and “Continue anyway” opens the gallery.</p>
+              </td>
+              <td class="controls">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 985" role="img" aria-labelledby="signin-t signin-d">
+                  <title id="signin-t">Sign-in screens: remote controls</title>
+                  <desc id="signin-d">Sign-in screen. 5 clickpad (the touch pad on top of the remote) press opens the highlighted (selected) button: “Sign in with Discogs”, “Continue” or “Try again”. Discogs is the online record database that this app reads.</desc>
+                  <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="208.5" y="14" width="243" height="943" rx="42"/>
+                    <rect x="446.5" y="161" width="9" height="102" rx="4.5"/>
+                    <line x1="323" y1="61.5" x2="337" y2="61.5"/>
+                    <circle cx="403.5" cy="62" r="21"/>
+                    <path d="M407.04 58.79 A5.5 5.5 0 1 1 399.96 58.79"/>
+                    <line x1="403.5" y1="55.5" x2="403.5" y2="62.5"/>
+                    <circle cx="330" cy="212" r="107.5"/>
+                    <circle cx="330" cy="212" r="58"/>
+                    <circle cx="278" cy="370" r="42.5"/>
+                    <polyline points="284.5,356 272,370 284.5,384"/>
+                    <circle cx="382" cy="370" r="42.5"/>
+                    <rect x="370" y="358.5" width="24" height="15" rx="2.5"/>
+                    <line x1="376" y1="381.5" x2="388" y2="381.5"/>
+                    <circle cx="278" cy="472.5" r="42.5"/>
+                    <polygon points="266,461.5 266,483.5 279,472.5"/>
+                    <line x1="284" y1="461.5" x2="284" y2="483.5"/>
+                    <line x1="290" y1="461.5" x2="290" y2="483.5"/>
+                    <rect x="339.5" y="430" width="85" height="188" rx="42.5"/>
+                    <line x1="382" y1="461.5" x2="382" y2="483.5"/>
+                    <line x1="371" y1="472.5" x2="393" y2="472.5"/>
+                    <line x1="371" y1="575.5" x2="393" y2="575.5"/>
+                    <circle cx="278" cy="575" r="42.5"/>
+                    <polygon points="265,570 271,570 279,563 279,587 271,580 265,580"/>
+                    <line x1="265" y1="588" x2="268.5" y2="584.5"/>
+                    <line x1="281" y1="572" x2="290" y2="563"/>
+                  </g>
+                  <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7">
+                    <line x1="371.01" y1="170.99" x2="406.01" y2="135.99"/>
+                    <line x1="371.01" y1="253.01" x2="406.01" y2="288.01"/>
+                    <line x1="288.99" y1="253.01" x2="253.99" y2="288.01"/>
+                    <line x1="288.99" y1="170.99" x2="253.99" y2="135.99"/>
+                  </g>
+                  <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+                    <circle cx="330" cy="212" r="19"/>
+                  </g>
+                  <g fill="currentColor" font-family="sans-serif" font-size="24" text-anchor="middle">
+                    <text x="330" y="220.4" font-family="sans-serif">5</text>
+                  </g>
+                </svg>
+                <ol>
+                  <li value="5"><strong>Press the clickpad.</strong> Chooses the highlighted button, such as “Sign in with Discogs”, “Continue”, “Try again”, “Retry” or “Continue anyway”.</li>
+                </ol>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
-
-      <h2 id="gallery-toolbar">Use the gallery toolbar</h2>
-      <p>The toolbar sits at the top of the gallery. Move left or right along it to reach a control, then press the clickpad to choose it. Suggest, sort, genre and layout appear once your library has records.</p>
-      <ul>
-        <li><strong>Suggest</strong> opens a random record from the records you can see.</li>
-        <li><strong>Sort</strong> sets the order: Recently added, Artist, Album or Year.</li>
-        <li><strong>Genre</strong> filters the gallery by a genre or style.</li>
-        <li><strong>Layout</strong> switches between CoverFlow and the grid.</li>
-        <li><strong>Settings</strong>, the gear at the end of the toolbar, holds refresh, the halo setting, sign-out and About.</li>
-      </ul>
-
-      <h2 id="move-around-the-gallery">Move around the gallery</h2>
-      <p>The gallery opens in CoverFlow. The focused cover sits in the centre, with its artist and title below it. Its colours tint the background. Swipe left or right to move between covers, and press the clickpad to open the record.</p>
-      <p>Choose the layout button to switch to the grid. The grid shows seven covers in each row. The focused cover opens into a lens with its title, and the background takes its colour.</p>
-      <figure>
-        <img class="screen" src="assets/screens/gallery.jpg" alt="CoverFlow gallery: the focused cover in the centre, the toolbar above, and the artist and title below.">
-        <figcaption>CoverFlow, the default layout, with the toolbar above it.</figcaption>
-      </figure>
-      <figure>
-        <img class="screen" src="assets/screens/grid.jpg" alt="Grid view: covers in rows of seven under the toolbar, with the layout button focused.">
-        <figcaption>The grid, with the toolbar above it.</figcaption>
-      </figure>
-
-      <h2 id="sort-filter-suggest">Sort, filter and Suggest</h2>
-      <ul>
-        <li>The sort options are Recently added, which is the default, Artist, Album and Year.</li>
-        <li>The genre menu lists every genre and style in your collection. Choosing one shows the records that have it as a genre or a style.</li>
-        <li>Choose <strong>All genres</strong> to clear the filter.</li>
-      </ul>
-      <p>The sort and layout are remembered between launches. The genre filter is not.</p>
-
-      <h2 id="open-a-record">Open a record</h2>
-      <p>A record opens on its tracklist. The cover is on the left, with the title, the artist and tags for the year, genres and styles.</p>
-      <p>Records are split into sides, which the tuner above the tracklist shows as Side A, Side B and so on. Swipe left or right, or press the clickpad, to move to the next side.</p>
-      <p>A multi-disc release continues the side letters. Disc 2 of a double LP appears as sides C and D. Credits such as <em>Composed by</em> or <em>Vocals by</em> appear under each track title. Producer and engineer credits are not shown.</p>
-      <p>Swipe up to see the cover full screen. There, a message such as Side B appears for two seconds after each change.</p>
-      <figure>
-        <img class="screen" src="assets/screens/record.jpg" alt="The record screen on the tracklist: the cover with its title, artist and tags on the left, and the tracklist for Side A with a side selector above it.">
-        <figcaption>The tracklist, with the side selector above it.</figcaption>
-      </figure>
-
-      <h2 id="turn-the-halo-on-or-off">Turn the halo on or off</h2>
-      <p>The halo is a soft glow of colour from the cover, shown around the cover. Any swipe turns it off. A press on the clickpad to change side does not.</p>
-      <p><strong>Automatic halo</strong> is the default. On a record’s cover view, the halo returns 3 seconds after your last swipe, and it fades in over 3 seconds. In CoverFlow, the halo returns 60 seconds after your last swipe.</p>
-      <p><strong>Manual halo</strong> lets you decide. Turn off <strong>Engage halo automatically</strong> in the Settings menu. A <strong>Halo</strong> button then appears under the cover on a record’s cover view.</p>
-      <p>Press the clickpad on the Halo button to turn the halo on or off. CoverFlow shows no halo in manual mode, and the button starts off each time you open the app.</p>
-      <p>The grid never shows a halo.</p>
-      <p>While the halo is on, the screensaver stays off. On a record’s tracklist, the blurred cover drifts after 15 seconds without a swipe, and the screensaver stays off while it drifts.</p>
-      <figure>
-        <img class="screen" src="assets/screens/halo.jpg" alt="The cover full screen on a dark background, with a soft halo of colour from the cover around it.">
-        <figcaption>A record’s cover view, with the halo on.</figcaption>
-      </figure>
-
-      <h2 id="cover-art">Cover art</h2>
-      <p>The app first shows the Discogs image for each record. It then looks for a better cover in two free services. <strong>MusicBrainz</strong> is an open music database. The <strong>Cover Art Archive</strong> holds cover images for MusicBrainz releases.</p>
-      <p>For each record, the app searches MusicBrainz using the title, the artist and, when there is one, the catalogue number. It accepts only a close match, scored 90 or more out of 100.</p>
-      <p>If the Cover Art Archive has an image for the matched release, the app shows it. If not, it checks the release group. If neither has an image, the Discogs cover stays.</p>
-      <p>MusicBrainz asks clients to make no more than one request a second, so the app waits 1.1 seconds between searches. At that pace, 800 records need about 15 minutes of searches alone.</p>
-      <p>Each record is looked up once, and the result is saved, so later launches skip it. A lookup that fails because a service is busy is tried again. A record is given up after three such failures and keeps its Discogs cover.</p>
-
-      <h2 id="settings">Use the Settings menu</h2>
-      <p>Choose the gear at the end of the toolbar to open Settings. It holds these items.</p>
-      <ul>
-        <li><strong>Refresh collection</strong> reads your collection again. See <a href="#refresh-your-collection">Refresh your collection</a>.</li>
-        <li><strong>Engage halo automatically</strong> is on by default. Turn it off for manual halo mode. See <a href="#turn-the-halo-on-or-off">Turn the halo on or off</a>.</li>
-        <li><strong>Account</strong> shows the Discogs username you are signed in with.</li>
-        <li><strong>Sign out (keep library)</strong> removes the Discogs sign-in from this Apple TV and keeps your library here. Signing in again with the same account shows the library at once.</li>
-        <li><strong>Sign out &amp; erase library</strong> removes the Discogs sign-in and deletes the library from this Apple TV. Your layout, sort and halo settings stay.</li>
-        <li><strong>The app version</strong>, then <strong>About</strong>, which lists the privacy policy and support addresses.</li>
-      </ul>
-      <p>If Discogs stops accepting the app’s access, the app returns to the sign-in screen with a notice. Your library stays on the Apple TV.</p>
-      <p>For what each sign-out option keeps and removes, see <a href="privacy.html#your-choices">Your choices</a> in the privacy policy.</p>
-
-      <h2 id="refresh-your-collection">Refresh your collection</h2>
-      <p>When the app opens, it adds the records you have added on Discogs since the last sync. It reads your newest records and stops once it reaches records it already has.</p>
-      <p>Removals and edits are not picked up at launch. To pick them up, choose <strong>Refresh collection</strong> in the Settings menu. It reads the whole collection, removes the records you have taken off it, and updates the details of the rest.</p>
-      <p>A pill at the bottom of the gallery shows the progress as <code>Refreshing… 120/800</code>. When it finishes, the pill shows <code>Updated</code> and the number of vinyl records stored. If the refresh fails, the pill shows <code>Refresh failed.</code> and the reason for five seconds.</p>
-      <p>A new Discogs image for a record shows after a refresh, unless the Cover Art Archive already has a cover for that record.</p>
     </article>
   </main>
 
