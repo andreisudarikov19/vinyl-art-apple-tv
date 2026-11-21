@@ -59,6 +59,8 @@ targets:
       - path: Tests
     dependencies:
       - target: VinylForAppleTV
+      # Same reason as the app target: Xcode runs the App Intents extractor here too.
+      - sdk: AppIntents.framework
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.andreisudarikov.VinylForAppleTVTests
