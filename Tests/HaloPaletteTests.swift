@@ -55,16 +55,16 @@ struct HaloPaletteTests {
 
     @Test func keepsTheLargestColourFirstThenTheMostDifferent() {
         #expect(palette.colours.count == 3)
-        #expect(close(palette.colours[0], 0.471300, 0.092510, 0.069645))   // the field, #903F28
-        #expect(close(palette.colours[1], 0.660000, 0.014602, 0.123517))   // the gold band, #B78A24
-        #expect(close(palette.colours[2], 0.340000, 0.015688, 0.019514))   // the dark checker, #43342C
+        #expect(close(palette.colours[0], 0.471300, 0.138765, 0.104468))   // the field, #A62300
+        #expect(close(palette.colours[1], 0.680000, 0.021903, 0.185275))   // the gold band, #CE8900
+        #expect(close(palette.colours[2], 0.400000, 0.023532, 0.029271))   // the dark checker, #584235
     }
 
     @Test func takesEdgeColoursRightBottomLeftTop() {
-        #expect(close(palette.edges[0], 0.501414, 0.080807, 0.076542))
-        #expect(close(palette.edges[1], 0.507866, 0.055452, 0.074883))
-        #expect(close(palette.edges[2], 0.512033, 0.073086, 0.078293))
-        #expect(close(palette.edges[3], 0.595317, 0.049904, 0.099106))
+        #expect(close(palette.edges[0], 0.502539, 0.121034, 0.115290))
+        #expect(close(palette.edges[1], 0.511642, 0.089378, 0.114040))
+        #expect(close(palette.edges[2], 0.512201, 0.110969, 0.117770))
+        #expect(close(palette.edges[3], 0.598957, 0.072980, 0.149956))
     }
 
     @Test func isTheSameEveryTime() {
@@ -78,17 +78,40 @@ struct HaloPaletteTests {
         }
         // A bright, strong yellow is pulled down on both counts.
         let toned = HaloPalette.toned(OKLab(rgb(0xFFE000)))
-        #expect(close(toned.l, 0.66))
-        #expect(close(toned.chroma, 0.17))
+        #expect(close(toned.l, 0.68))
+        #expect(close(toned.chroma, 0.21))
+    }
+
+    @Test func liftsColourButInventsNone() {
+        // The field's chroma is lifted by half.
+        let field = OKLab(rgb(0xA5523A))
+        #expect(close(HaloPalette.toned(field).chroma, field.chroma * 1.5))
+        // A grey stays grey.
+        #expect(HaloPalette.toned(OKLab(rgb(0x808080))).chroma < 1e-6)
+    }
+
+    @Test func aColourfulAreaLeadsOverALargerBlackOne() {
+        // Black over most of the sleeve, a blue block over under a fifth of it.
+        var pixels = [RGB](repeating: RGB(r: 0.03, g: 0.03, b: 0.03), count: 32 * 32)
+        for y in 20..<32 {
+            for x in 0..<16 {
+                pixels[y * 32 + x] = RGB(r: 0.1, g: 0.45, b: 0.75)
+            }
+        }
+        let main = HaloPalette(pixels: pixels, side: 32).main
+        #expect(close(main, 0.479585, -0.071289, -0.197529))   // the blue, #0059CC
+        // A grey counts for little, the field for ten times as much.
+        #expect(close(HaloPalette.colourWeight(OKLab(rgb(0x808080))), 0.15, 1e-3))
+        #expect(close(HaloPalette.colourWeight(OKLab(rgb(0xA5523A))), 1.597443, 1e-3))
     }
 
     @Test func blendsEdgeColoursByDirection() {
         #expect(palette.edgeColour(at: 0) == palette.edges[0])
-        #expect(close(palette.edgeColour(at: .pi / 2), 0.507866, 0.055452, 0.074883))
+        #expect(close(palette.edgeColour(at: .pi / 2), 0.511642, 0.089378, 0.114040))
         let between = palette.edgeColour(at: .pi / 4)
-        #expect(close(between.l, (0.501414 + 0.507866) / 2))
+        #expect(close(between.l, (0.502539 + 0.511642) / 2))
         // A full turn comes back to the right edge.
-        #expect(close(palette.edgeColour(at: 2 * .pi + 0.0001), 0.501414, 0.080807, 0.076542, 1e-3))
+        #expect(close(palette.edgeColour(at: 2 * .pi + 0.0001), 0.502539, 0.121034, 0.115290, 1e-3))
     }
 
     @Test func aFlatSleeveGivesOneColourThreeTimes() {
@@ -113,14 +136,14 @@ struct HaloFieldTests {
         #expect(close(patches[0].radius, 174.9440, 1e-3))
         #expect(close(patches[3].dx, 473.5462, 1e-3) && close(patches[3].dy, -617.6572, 1e-3))
         #expect(close(patches[3].radius, 268.7422, 1e-3) && close(patches[3].opacity, 0.182482))
-        #expect(close(patches[3].colour, 0.476195, 0.090796, 0.070802))
+        #expect(close(patches[3].colour, 0.476344, 0.136126, 0.106258))
     }
 
     @Test func patchesLater() {
         let patches = HaloField.patches(at: 12.5, palette: palette)
         #expect(close(patches[0].dx, 505.0294, 1e-3) && close(patches[0].dy, 171.4344, 1e-3))
         #expect(close(patches[0].radius, 211.3907, 1e-3) && close(patches[0].opacity, 0.588583))
-        #expect(close(patches[0].colour, 0.490925, 0.081914, 0.073732))
+        #expect(close(patches[0].colour, 0.491971, 0.123589, 0.111057))
         #expect(close(patches[3].dx, 375.4149, 1e-3) && close(patches[3].dy, -251.0651, 1e-3))
         #expect(close(patches[3].opacity, 0.404076))
     }
