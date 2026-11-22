@@ -7,20 +7,70 @@ import Foundation
 struct ScaleTape: Equatable, Sendable {
     /// The group of each entry, in list order: a year, a letter, a genre.
     let groups: [String]
+    /// Points between neighbouring ticks on this tape. A long list sits at
+    /// the closest pitch; a short one is spread so it still fills the box.
+    let spacing: Double
+    /// Group starts that carry a label. Decided once over the whole tape, not
+    /// over what is on screen, so a label never appears or vanishes as the
+    /// tape scrolls. A label is 80 pt or more from the one before it, and
+    /// further still when that one is wider than that, so long genre names
+    /// do not run into the next.
+    let labelledStarts: [Int]
+    /// `labelledStarts` again, for a quick answer per tick.
+    private let labelled: Set<Int>
 
-    /// Points between neighbouring ticks.
+    /// The closest ticks ever sit: 16 pt.
     static let pitch = 16.0
+    /// The widest a short tape is spread: 40 pt.
+    static let widestPitch = 40.0
+    /// The width of the scale's box, which a short tape is spread to fill.
+    static let boxWidth = 1200.0
     /// A label is skipped if it would start within this distance of the one before it.
-    static let minimumLabelGap = 96.0
+    static let minimumLabelGap = 80.0
     /// Labels are DM Mono Regular 25 pt and the reading DM Mono Medium 36 pt.
     static let labelSize = 25.0
     static let readingSize = 36.0
     /// Room kept between a label and the one after it, or the reading.
     static let textGap = 16.0
+    /// A label nearing the reading fades out over this distance, so it does
+    /// not vanish between one press and the next.
+    static let labelFade = 48.0
+    /// The label of the group under the needle repeats the reading, so it is
+    /// shown only once its tick is this far from the needle, where it marks
+    /// where the group began.
+    static let ownLabelDistance = 200.0
 
     /// The width of a DM Mono line: 0.6 em a character.
     static func textWidth(_ text: String, size: Double) -> Double {
         Double(text.count) * 0.6 * size
+    }
+
+    /// The pitch for a list of `count` entries: the box's width shared out,
+    /// held between 16 and 40 pt. 75 entries or more sit at 16 pt; 30 or
+    /// fewer at 40 pt.
+    static func spacing(forCount count: Int) -> Double {
+        guard count > 0 else { return pitch }
+        return min(widestPitch, max(pitch, boxWidth / Double(count)))
+    }
+
+    init(groups: [String]) {
+        self.init(groups: groups, spacing: Self.spacing(forCount: groups.count))
+    }
+
+    init(groups: [String], spacing: Double) {
+        self.groups = groups
+        self.spacing = spacing
+        var kept: [Int] = []
+        for start in groups.indices where start == 0 || groups[start] != groups[start - 1] {
+            if let last = kept.last {
+                let width = Self.textWidth(groups[last], size: Self.labelSize) + Self.textGap
+                let needed = max(Self.minimumLabelGap, width)
+                if Double(start - last) * spacing < needed { continue }
+            }
+            kept.append(start)
+        }
+        labelledStarts = kept
+        labelled = Set(kept)
     }
 
     struct Label: Equatable, Sendable {
@@ -29,6 +79,18 @@ struct ScaleTape: Equatable, Sendable {
         var index: Int
         /// Points from the needle; negative is left.
         var offset: Double
+        /// 1 in the open, falling to 0 as the label nears the reading.
+        var opacity = 1.0
+    }
+
+    /// What kind of tick an entry gets.
+    enum Tick: Equatable, Sendable {
+        /// A record inside a group: 12 pt.
+        case record
+        /// The first record of a group whose label was skipped: 18 pt.
+        case group
+        /// The first record of a group that carries a label: 24 pt.
+        case labelledGroup
     }
 
     /// The reading at the needle: the group the current entry belongs to.
@@ -41,33 +103,22 @@ struct ScaleTape: Equatable, Sendable {
         groups.indices.filter { $0 == 0 || groups[$0] != groups[$0 - 1] }
     }
 
-    /// Group starts that carry a label. Decided over the whole tape, not
-    /// over what is on screen, so a label never appears or vanishes as the
-    /// tape scrolls. A label is 96 pt or more from the one before it, and
-    /// further still when that one is wider than 96 pt, so long genre names
-    /// do not run into the next.
-    var labelledStarts: [Int] {
-        var kept: [Int] = []
-        for start in groupStarts {
-            if let last = kept.last {
-                let width = Self.textWidth(groups[last], size: Self.labelSize) + Self.textGap
-                let needed = max(Self.minimumLabelGap, width)
-                if Double(start - last) * Self.pitch < needed { continue }
-            }
-            kept.append(start)
-        }
-        return kept
-    }
-
-    /// Whether the tick at `index` is a group tick (24 pt) or a record tick (12 pt).
+    /// Whether the entry at `index` is the first of its group.
     func isGroupStart(_ index: Int) -> Bool {
         index == 0 || (groups.indices.contains(index) && groups[index] != groups[index - 1])
     }
 
+    /// The tick of the entry at `index`. Only a group with a label gets the
+    /// tall tick, so every tall tick on the tape can be read.
+    func tick(at index: Int) -> Tick {
+        if labelled.contains(index) { return .labelledGroup }
+        return isGroupStart(index) ? .group : .record
+    }
+
     /// Where the tick of entry `index` sits when `current` is under the needle.
     /// `current` is fractional while the tape glides between two entries.
-    static func offset(of index: Int, current: Double) -> Double {
-        (Double(index) - current) * pitch
+    func offset(of index: Int, current: Double) -> Double {
+        (Double(index) - current) * spacing
     }
 
     /// The labels to draw when `current` is under the needle.
@@ -79,22 +130,34 @@ struct ScaleTape: Equatable, Sendable {
     ///     A longer label needs its own width.
     ///   - placement: Screen points from the needle for a tick that is this
     ///     many entries away. A style that spreads its ticks (Glass lens)
-    ///     passes its own; the default is the even pitch.
+    ///     passes its own; without one, the tape's even spacing is used.
     func labels(
         current: Double,
         halfWidth: Double = 600,
         readingHalfWidth: Double = 80,
         labelWidth: Double = 96,
-        placement: (Double) -> Double = { ScaleTape.pitch * $0 }
+        placement: ((Double) -> Double)? = nil
     ) -> [Label] {
-        labelledStarts.compactMap { start -> Label? in
-            let offset = placement(Double(start) - current)
+        let pitch = spacing
+        let needleGroup = self.reading(at: Int(current.rounded()))
+        return labelledStarts.compactMap { start -> Label? in
+            let entries = Double(start) - current
+            let offset = placement.map { $0(entries) } ?? pitch * entries
             guard abs(offset) <= halfWidth else { return nil }
             // A label is drawn left-aligned at its tick, so it runs under the
             // reading from further away on the left than on the right.
             let room = max(labelWidth, Self.textWidth(groups[start], size: Self.labelSize))
-            if offset > -(readingHalfWidth + room), offset < readingHalfWidth { return nil }
-            return Label(text: groups[start], index: start, offset: offset)
+            let left = -(readingHalfWidth + room)
+            let right = readingHalfWidth
+            if offset > left, offset < right { return nil }
+            // How far the label stands clear of the reading's ground.
+            let clear = offset <= left ? left - offset : offset - right
+            var opacity = min(1, clear / Self.labelFade)
+            if groups[start] == needleGroup {
+                opacity = min(opacity, (abs(offset) - Self.ownLabelDistance) / Self.labelFade)
+            }
+            guard opacity > 0 else { return nil }
+            return Label(text: groups[start], index: start, offset: offset, opacity: opacity)
         }
     }
 }

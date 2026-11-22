@@ -74,10 +74,7 @@ private struct ScaleCanvas: View {
     var needle: Double
 
     // Shared measures from spec 01.
-    private let pitch = ScaleTape.pitch
-    /// Ticks stand on the bottom edge: group 24 pt, record 12 pt, 2 pt wide.
-    private let groupHeight: CGFloat = 24
-    private let recordHeight: CGFloat = 12
+    /// Ticks stand on the bottom edge, 2 pt wide.
     private let tickWidth: CGFloat = 2
     /// The label row and the reading sit on this line.
     private let labelY: CGFloat = 18
@@ -101,20 +98,28 @@ private struct ScaleCanvas: View {
         context.opacity = ScaleIdleLook.opacity(idleLevel: ScaleIdleLook.tape, idle: idle)
         let centre = size.width / 2
         // Only the entries that can fall inside the box, plus a margin.
-        let reach = Int(size.width / 2 / pitch) + 2
+        let reach = Int(size.width / 2 / tape.spacing) + 2
         let lowest = max(0, Int(position.rounded(.down)) - reach)
         let highest = min(tape.groups.count - 1, Int(position.rounded(.up)) + reach)
         if lowest <= highest {
             for index in lowest...highest {
-                let x = centre + ScaleTape.offset(of: index, current: position)
-                let isGroup = tape.isGroupStart(index)
-                let height = isGroup ? groupHeight : recordHeight
-                let rect = CGRect(x: x - tickWidth / 2, y: size.height - height, width: tickWidth, height: height)
-                context.fill(Path(rect), with: .color(isGroup ? .white : .white.opacity(0.4)))
+                let x = centre + tape.offset(of: index, current: position)
+                let look = ScaleTickLook(tape.tick(at: index))
+                let rect = CGRect(x: x - tickWidth / 2, y: size.height - look.height, width: tickWidth, height: look.height)
+                let kept = ScaleIdleLook.tapeReach(at: Double(x), width: Double(size.width), idle: idle)
+                context.fill(Path(rect), with: .color(.white.opacity(look.opacity * kept)))
             }
         }
-        for label in tape.labels(current: position, readingHalfWidth: max(80, readingHalf)) {
+        let tapeOpacity = context.opacity
+        for label in tape.labels(current: position, readingHalfWidth: readingHalf, labelWidth: 0) {
             let x = centre + label.offset
+            // A label fades by whichever of its two ends is nearer the box's end.
+            let far = Double(x) + ScaleTape.textWidth(label.text, size: ScaleTape.labelSize)
+            let kept = min(
+                ScaleIdleLook.tapeReach(at: Double(x), width: Double(size.width), idle: idle),
+                ScaleIdleLook.tapeReach(at: far, width: Double(size.width), idle: idle)
+            )
+            context.opacity = tapeOpacity * label.opacity * kept
             context.draw(
                 Text(label.text)
                     .font(Theme.mono(Theme.Size.small))
@@ -123,6 +128,7 @@ private struct ScaleCanvas: View {
                 anchor: .leading
             )
         }
+        context.opacity = tapeOpacity
     }
 
     /// The reading: the group under the needle, in yolk. Idle drops it to 70%.

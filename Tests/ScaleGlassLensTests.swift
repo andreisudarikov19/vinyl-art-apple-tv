@@ -45,6 +45,20 @@ struct ScaleGlassLensTests {
         #expect(GlassLens.weight(offset: -GlassLens.halfWidth / 2) == 0.75)
     }
 
+    @Test func aSpreadTapeGetsAWiderLens() {
+        // A 30-record tape sits at 40 pt, so its ticks are 64 pt apart at
+        // the needle and 40 pt apart past the lens's edge.
+        let lens = GlassLens(pitch: 40)
+        #expect(lens.needlePitch == 64)
+        #expect(abs(lens.distance(entries: lens.entriesToEdge) - GlassLens.halfWidth) < 1e-9)
+        #expect(abs(lens.distance(entries: lens.entriesToEdge + 1) - GlassLens.halfWidth - 40) < 1e-9)
+        let first = lens.distance(entries: 1)
+        #expect(first > 62 && first < 64)
+        // The standard lens is the one for the closest pitch.
+        #expect(GlassLens.standard.needlePitch == 44)
+        #expect(GlassLens(pitch: 16).distance(entries: 3) == GlassLens.offset(entries: 3))
+    }
+
     @Test func scaleStylesAndTheDefault() {
         #expect(ScaleStyle.allCases == [.slideRule, .glassLens])
         #expect(UserPreferences().scaleStyle == .slideRule)
