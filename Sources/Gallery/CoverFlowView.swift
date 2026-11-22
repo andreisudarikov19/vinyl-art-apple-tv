@@ -230,6 +230,10 @@ struct CoverFlowView: View {
                     endPoint: .bottom
                 )
                 .frame(height: 160)
+                // The toolbar's ink goes with the toolbar. While the tide moves,
+                // the glow above the cover shows (GalleryIdle.jpg). This departs
+                // from spec 06's "ink fades at every state": see the PR.
+                .opacity(1 - tideOpacity)
                 Spacer(minLength: 0)
                 LinearGradient(
                     stops: [
@@ -263,13 +267,16 @@ struct CoverFlowView: View {
 
     /// "214 / 612", DM Mono 25 in quiet, right-aligned at the 80 pt margin and
     /// centred on the scale's box. Counts the browsed list, so a genre filter
-    /// shows its own total. VoiceOver hears the count from the scale.
+    /// shows its own total. VoiceOver hears the count from the scale. Idle
+    /// drops it with the reading, so the whole scale block goes down together.
     private var countLabel: some View {
         HStack {
             Spacer(minLength: 0)
             Text("\(selectedIndex + 1) / \(releases.count)")
                 .font(Theme.mono(Theme.Size.small))
                 .foregroundStyle(Theme.quiet)
+                .opacity(tideEngaged ? ScaleIdleLook.count : 1)
+                .animation(.easeInOut(duration: 0.8), value: tideEngaged)
         }
         .padding(.trailing, Theme.safeSide)
         .frame(height: scaleBoxHeight)
@@ -357,18 +364,16 @@ struct CoverFlowView: View {
         selectedIndex = next
     }
 
-    /// Refreshes the tide's colour when the focused cover changes. Also
-    /// restarts the idle countdown: a focus change is "user input", so a
-    /// running tide stops and starts again only after a minute without
-    /// further navigation (switch on only).
+    /// Refreshes the tide's colour when the focused cover changes. It does not
+    /// touch the idle countdown: that counts from the last press (Left, Right)
+    /// or focus change, not from when a cover image arrives. A slow image
+    /// used to push the countdown back by its whole load time.
     private func refreshBackdrop() async {
         guard let url = current?.preferredCoverURL,
               let image = try? await ImagePipeline.shared.image(for: url) else {
-            restartHaloIdleTimer()
             return
         }
         tidePalette = HaloPalette.sleeve(from: image) ?? .placeholder
-        restartHaloIdleTimer()
     }
 
     /// Cancels any in-flight idle countdown and starts a fresh wait.

@@ -98,7 +98,7 @@ private struct ScaleCanvas: View {
         // A long reading keeps more of the tape clear around it.
         let reading = tape.reading(at: Int(position.rounded())) ?? ""
         let readingHalf = ScaleTape.textWidth(reading, size: ScaleTape.readingSize) / 2 + ScaleTape.textGap
-        context.opacity = 1 - 0.7 * idle
+        context.opacity = ScaleIdleLook.opacity(idleLevel: ScaleIdleLook.tape, idle: idle)
         let centre = size.width / 2
         // Only the entries that can fall inside the box, plus a margin.
         let reach = Int(size.width / 2 / pitch) + 2
@@ -127,7 +127,7 @@ private struct ScaleCanvas: View {
 
     /// The reading: the group under the needle, in yolk. Idle drops it to 70%.
     private func drawReading(into context: inout GraphicsContext, size: CGSize) {
-        context.opacity = 1 - 0.3 * idle
+        context.opacity = ScaleIdleLook.opacity(idleLevel: ScaleIdleLook.reading, idle: idle)
         guard let reading = tape.reading(at: Int(position.rounded())) else { return }
         context.draw(
             Text(reading)
@@ -138,11 +138,12 @@ private struct ScaleCanvas: View {
         )
     }
 
-    /// The needle: 4 pt yolk with a soft glow. Idle halves the glow.
+    /// The needle: 4 pt yolk with a soft glow. Idle drops it to 70% and halves the glow.
     private func drawNeedle(into context: GraphicsContext, size: CGSize) {
         var needleContext = context
-        needleContext.opacity = (1 - 0.3 * idle) * needle
-        needleContext.addFilter(.shadow(color: Theme.yolk.opacity(0.6), radius: 8 * (1 - 0.5 * idle)))
+        needleContext.opacity = ScaleIdleLook.opacity(idleLevel: ScaleIdleLook.needle, idle: idle) * needle
+        let glow = ScaleIdleLook.opacity(idleLevel: ScaleIdleLook.glow, idle: idle)
+        needleContext.addFilter(.shadow(color: Theme.yolk.opacity(0.6 * glow), radius: 8))
         let rect = CGRect(
             x: size.width / 2 - needleWidth / 2,
             y: needleTop,
