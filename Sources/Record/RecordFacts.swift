@@ -42,9 +42,16 @@ enum RecordFacts {
     /// "1976 · Netherlands", "1976", "Netherlands", or nil when neither is
     /// known. Discogs gives 0 for an unknown year; the country is shown as
     /// Discogs spells it.
-    static func published(year: Int, country: String?) -> String? {
+    ///
+    /// When Discogs has no year for the pressing but the album's year was
+    /// found elsewhere, the row says so: "Netherlands · album from 1959" or
+    /// "Album from 1959". That year need not be the year of this pressing.
+    static func published(year: Int, albumYear: Int = 0, country: String?) -> String? {
         let place = country?.trimmingCharacters(in: .whitespaces)
         let hasPlace = !(place ?? "").isEmpty
+        if year <= 0, albumYear > 0 {
+            return hasPlace ? "\(place ?? "") · album from \(albumYear)" : "Album from \(albumYear)"
+        }
         switch (year > 0, hasPlace) {
         case (true, true): return "\(year) · \(place ?? "")"
         case (true, false): return String(year)
@@ -66,6 +73,7 @@ enum RecordFacts {
     ///     rows are then held to one line, so the table clears the Discogs line.
     static func rows(
         year: Int,
+        albumYear: Int = 0,
         country: String?,
         genres: [String],
         styles: [String],
@@ -75,7 +83,7 @@ enum RecordFacts {
     ) -> [RecordFactRow] {
         var rows: [RecordFactRow] = []
         let lines = titleTakesTwoLines ? 1 : 2
-        if let text = Self.published(year: year, country: country) {
+        if let text = Self.published(year: year, albumYear: albumYear, country: country) {
             rows.append(RecordFactRow(label: "PUBLISHED", value: text))
         }
         if !genres.isEmpty {

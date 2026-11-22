@@ -51,6 +51,22 @@ final class CachedRelease {
     /// older rule and is judged once more. Zero for releases never judged.
     var coverRuleVersion: Int = 0
 
+    /// A year for the album found elsewhere, for a release Discogs gives no
+    /// year (`year` is 0): from the Discogs master release, or else from
+    /// MusicBrainz. It is a year of the album, which need not be the year of
+    /// this pressing. Zero when none was found. `ReleaseYearService` owns it.
+    var albumYear: Int = 0
+
+    /// Set once `ReleaseYearService` has a definite answer for this release,
+    /// a year or none, so it isn't asked again on every launch.
+    var yearLookupAttempted: Bool = false
+
+    /// The year to sort and group by: Discogs' year for this pressing, or
+    /// else the album's year from elsewhere. Zero when neither is known.
+    var shownYear: Int {
+        year > 0 ? year : albumYear
+    }
+
     init(
         releaseId: Int,
         instanceId: Int,
@@ -127,7 +143,8 @@ extension CachedRelease {
     /// Refreshes the Discogs-sourced fields from a collection entry on
     /// re-sync, deliberately preserving `resolvedCoverURL`,
     /// `coverLookupAttempted`, `coverLookupFailures` and `coverRuleVersion`,
-    /// which are owned by the cover-art pipeline.
+    /// which are owned by the cover-art pipeline, and `albumYear` and
+    /// `yearLookupAttempted`, which are owned by `ReleaseYearService`.
     func apply(_ release: CollectionRelease) {
         let info = release.basicInformation
         instanceId = release.instanceId

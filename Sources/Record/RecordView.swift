@@ -518,6 +518,7 @@ struct RecordView: View {
     private func factsTable(_ model: RecordViewModel, compact: Bool) -> some View {
         let rows = RecordFacts.rows(
             year: release.year,
+            albumYear: release.albumYear,
             country: model.country,
             genres: release.genres,
             styles: release.styles,

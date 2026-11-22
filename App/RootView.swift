@@ -61,13 +61,19 @@ private struct AuthenticatedRootView: View {
     }
 
     /// Delta refresh on each launch: pulls newly-added releases since the last
-    /// sync, then resolves any covers still pending. Silent — failures (e.g.
+    /// sync, then looks for the years Discogs doesn't give and resolves any
+    /// covers still pending. Silent — failures (e.g.
     /// offline) leave the cached library untouched, and a revoked sign-in
     /// returns to onboarding through the client's `onUnauthorized` hook.
     private func refreshOnLaunch() async {
         let container = modelContext.container
         let syncService = CollectionSyncService(modelContainer: container)
         _ = try? await syncService.sync(using: client)
+        // Years first: there are few of them, and they move records on the
+        // scale, while the covers can take a long time.
+        await ReleaseYearService(modelContainer: container) { [client] id in
+            try await client.masterYear(id: id)
+        }.resolvePending()
         await CoverArtService(modelContainer: container).resolvePending()
     }
 }

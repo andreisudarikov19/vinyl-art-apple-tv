@@ -101,6 +101,12 @@ actor DiscogsClient {
         }
     }
 
+    /// The year of a master release, or nil when Discogs has none for it.
+    func masterYear(id: Int) async throws -> Int? {
+        let master: MasterRelease = try await get(url: URL(string: "https://api.discogs.com/masters/\(id)")!)
+        return master.year > 0 ? master.year : nil
+    }
+
     /// Retries a 429 after each wait in `rateLimitBackoff` (50s in all, most
     /// of Discogs' moving one-minute window) before throwing `.rateLimited`.
     private func get<T: Decodable & Sendable>(url: URL) async throws -> T {

@@ -116,11 +116,11 @@ enum GalleryArranger {
             // Records with no year come last, in their own "Unknown" group.
             return filtered
                 .sorted {
-                    if ($0.year > 0) != ($1.year > 0) { return $0.year > 0 }
-                    if $0.year != $1.year { return $0.year < $1.year }
+                    if ($0.shownYear > 0) != ($1.shownYear > 0) { return $0.shownYear > 0 }
+                    if $0.shownYear != $1.shownYear { return $0.shownYear < $1.shownYear }
                     return $0.artistDisplayName.localizedStandardCompare($1.artistDisplayName) == .orderedAscending
                 }
-                .map { GalleryEntry(release: $0, group: ScaleGroup.year($0.year)) }
+                .map { GalleryEntry(release: $0, group: ScaleGroup.year($0.shownYear)) }
         case .genre:
             return byGenre(filtered, only: filter?.genre)
         }

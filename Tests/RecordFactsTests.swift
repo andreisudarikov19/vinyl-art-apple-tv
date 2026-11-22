@@ -30,6 +30,13 @@ struct RecordFactsTests {
         #expect(RecordFacts.published(year: 0, country: nil) == nil)
     }
 
+    @Test func saysWhenTheYearIsTheAlbumsAndNotThePressings() {
+        #expect(RecordFacts.published(year: 0, albumYear: 1959, country: "Netherlands") == "Netherlands · album from 1959")
+        #expect(RecordFacts.published(year: 0, albumYear: 1959, country: nil) == "Album from 1959")
+        // Discogs' own year for the pressing always wins.
+        #expect(RecordFacts.published(year: 1982, albumYear: 1959, country: nil) == "1982")
+    }
+
     @Test func buildsTheTableInOrder() {
         let rows = RecordFacts.rows(
             year: 1976,
