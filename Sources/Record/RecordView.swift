@@ -58,6 +58,11 @@ struct RecordView: View {
     @FocusState private var pillFocused: Bool
     @FocusState private var discogsNoticeFocused: Bool
     @State private var showingDiscogsQR = false
+    /// How far a side longer than the screen has been scrolled, in points,
+    /// with the heights that decide how far it can go. See `SideScroll`.
+    @State private var listOffset: CGFloat = 0
+    @State private var listContentHeight: CGFloat = 0
+    @State private var listViewportHeight: CGFloat = 0
     /// Drives the cover-focused ken-burns: oscillates 1.0..1.03 with a 60s
     /// total cycle (30s each direction). Imperceptible per second; adds
     /// subtle life over a side of an LP. Disabled in Reduce Motion.
@@ -254,7 +259,7 @@ struct RecordView: View {
         .focusEffectDisabled()
         .focused($screenFocused)
         .accessibilityLabel("\(release.artistDisplayName), \(release.title)")
-        .accessibilityHint("Swipe left or right to change sides. Swipe up for the cover, down for the tracklist.")
+        .accessibilityHint("Swipe left or right to change sides. Swipe down and up to read a long side. Swipe up for the cover, down for the tracklist.")
         .onMoveCommand { direction in
             let wasCoverFocused = model.displayMode == .coverFocused
             switch direction {
@@ -264,10 +269,21 @@ struct RecordView: View {
                     // halo pill that lives below the cover (the focus engine
                     // wouldn't find it through "up" on its own).
                     pillFocused = true
+                } else if !wasCoverFocused, listOffset > 0 {
+                    // A long side that has been scrolled goes back up first;
+                    // Up opens the cover view only from the top of the list.
+                    scrollList(forward: false)
                 } else {
                     setMode(.coverFocused, on: model)
                 }
-            case .down: setMode(.informative, on: model)
+            case .down:
+                if wasCoverFocused {
+                    setMode(.informative, on: model)
+                } else {
+                    // On a side longer than the screen, Down reads on. A side
+                    // that fits does not move.
+                    scrollList(forward: true)
+                }
             case .right: changeSide(on: model, forward: true)
             case .left: changeSide(on: model, forward: false)
             default: break
@@ -319,7 +335,7 @@ struct RecordView: View {
                     .frame(width: RecordLayout.leftWidth, height: leftHeight, alignment: .topLeading)
                     .padding(.top, sleeveDrop)
                 tracklist(model)
-                    .frame(maxWidth: .infinity, alignment: .topLeading)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
             .padding(.leading, max(0, RecordLayout.side - safe.leading))
             .padding(.trailing, max(0, RecordLayout.side - safe.trailing))
@@ -573,10 +589,33 @@ struct RecordView: View {
                         Color.clear
                             .frame(height: RecordLayout.sleeveTop - RecordLayout.dialTop)
                     }
-                    ForEach(Array(side.tracks.enumerated()), id: \.element.id) { index, track in
-                        TrackRow(number: index + 1, title: track.title, credits: track.credits, duration: track.duration, parts: track.parts)
+                    // The list takes the rest of the column. A side taller
+                    // than that is moved under it by Down and Up, and fades
+                    // at the edge where there is more to read.
+                    VStack(alignment: .leading, spacing: 0) {
+                        ForEach(Array(side.tracks.enumerated()), id: \.element.id) { index, track in
+                            TrackRow(number: index + 1, title: track.title, credits: track.credits, duration: track.duration, parts: track.parts)
+                        }
+                        sideTotal(side)
                     }
-                    sideTotal(side)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .onGeometryChange(for: CGFloat.self) { proxy in
+                        proxy.size.height
+                    } action: { height in
+                        listContentHeight = height
+                    }
+                    .offset(y: -listOffset)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .onGeometryChange(for: CGFloat.self) { proxy in
+                        proxy.size.height
+                    } action: { height in
+                        listViewportHeight = height
+                    }
+                    .mask(listFade)
+                }
+                // Each side starts from its top.
+                .onChange(of: model.currentSideIndex) { _, _ in
+                    listOffset = 0
                 }
             } else {
                 Text("No tracklist available.")
@@ -626,7 +665,38 @@ struct RecordView: View {
         }
     }
 
+    /// Hides the list outside its part of the column, and fades its top or
+    /// bottom edge while there is more to read that way.
+    private var listFade: some View {
+        let more = SideScroll.more(offset: listOffset, content: listContentHeight, viewport: listViewportHeight)
+        return LinearGradient(
+            stops: [
+                .init(color: more.above ? .clear : .black, location: 0),
+                .init(color: .black, location: more.above ? SideScroll.topFade : 0),
+                .init(color: .black, location: more.below ? 1 - SideScroll.bottomFade : 1),
+                .init(color: more.below ? .clear : .black, location: 1),
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+    }
+
     // MARK: - Behavior
+
+    /// Moves a side that is longer than the screen. Does nothing to a side
+    /// that fits, or at either end.
+    private func scrollList(forward: Bool) {
+        let next = SideScroll.next(
+            from: listOffset,
+            content: listContentHeight,
+            viewport: listViewportHeight,
+            forward: forward
+        )
+        guard next != listOffset else { return }
+        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.35)) {
+            listOffset = next
+        }
+    }
 
     private func setMode(_ mode: RecordViewModel.DisplayMode, on model: RecordViewModel) {
         withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.4)) {
