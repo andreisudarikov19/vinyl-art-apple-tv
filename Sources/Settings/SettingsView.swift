@@ -75,24 +75,22 @@ struct SettingsView: View {
                     .padding(.top, SettingsLayout.cardTop)
             }
             .padding(.horizontal, Theme.safeSide)
+            // Behind the dialog nothing takes focus.
+            .disabled(showingSignOut)
+            if showingSignOut {
+                SignOutDialog(accountName: accountName, cancel: closeSignOut, signOut: leave)
+                    .transition(.opacity)
+            }
         }
         .ignoresSafeArea()
-        // Menu steps back from a screen inside Settings. On the main screen
-        // it is left alone, and closes Settings.
-        .onExitCommand(perform: page == .main ? nil : { open(.main) })
+        .animation(.easeInOut(duration: 0.2), value: showingSignOut)
+        .onExitCommand(perform: exitAction)
         .onChange(of: focus) { _, stop in
             if let stop { described = stop }
         }
         .onAppear { focusSoon(on: .scaleStyle) }
         .fullScreenCover(isPresented: $showingAbout, onDismiss: { focusSoon(on: .about) }) {
             AboutView()
-        }
-        .confirmationDialog("Sign out of Discogs?", isPresented: $showingSignOut, titleVisibility: .visible) {
-            Button("Sign out and keep library") { leave(erasing: false) }
-            Button("Sign out and erase library", role: .destructive) { leave(erasing: true) }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("You are signed in as \(accountName). Erasing removes the library from this Apple TV. It cannot be undone.")
         }
     }
 
@@ -345,6 +343,21 @@ struct SettingsView: View {
 
     // MARK: - Behaviour
 
+    /// What Menu does. In the sign-out dialog it is the same as Cancel; on a
+    /// screen inside Settings it steps back. On the main screen it is left
+    /// alone, and closes Settings.
+    private var exitAction: (() -> Void)? {
+        if showingSignOut { return closeSignOut }
+        if page != .main { return { open(.main) } }
+        return nil
+    }
+
+    /// Closes the sign-out dialog and puts focus back on its row.
+    private func closeSignOut() {
+        showingSignOut = false
+        focusSoon(on: .signOut)
+    }
+
     /// Moves to another screen of Settings and puts focus on its first row,
     /// or back on the row that opened it.
     private func open(_ next: Page) {
@@ -377,6 +390,7 @@ struct SettingsView: View {
     /// Closes Settings, then signs out, so it does not stay over the
     /// sign-in screen.
     private func leave(erasing: Bool) {
+        showingSignOut = false
         dismiss()
         signOut(erasing)
     }
@@ -596,6 +610,109 @@ private struct SettingsRowLabel: View {
             }
         }
         .contentShape(Capsule())
+    }
+}
+
+/// The sign-out dialog: one question, with Cancel in focus when it opens, so
+/// a stray press never signs out and erasing takes two deliberate moves.
+private struct SignOutDialog: View {
+    let accountName: String
+    let cancel: () -> Void
+    let signOut: (_ erase: Bool) -> Void
+
+    private enum Choice: Hashable {
+        case cancel, keep, erase
+    }
+
+    @FocusState private var focus: Choice?
+
+    var body: some View {
+        ZStack {
+            Theme.ink.opacity(0.78)
+                .ignoresSafeArea()
+            VStack(alignment: .leading, spacing: 0) {
+                Text("Sign out of Discogs?")
+                    .font(Theme.serif(Theme.Size.albumTitle))
+                    .tracking(-Theme.Size.albumTitle * 0.02)
+                    .foregroundStyle(Theme.text)
+                    .accessibilityAddTraits(.isHeader)
+                Text("You are signed in as \(accountName). Your library can stay on this Apple TV, ready for the next time you sign in, or be erased now.")
+                    .font(Theme.sans(Theme.Size.control))
+                    .foregroundStyle(Theme.body)
+                    .lineSpacing(10)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 18)
+                VStack(spacing: 20) {
+                    Button("Cancel", action: cancel)
+                        .buttonStyle(SignOutButtonStyle(title: "Cancel", isDanger: false))
+                        .focused($focus, equals: .cancel)
+                    Button("Sign out and keep library") { signOut(false) }
+                        .buttonStyle(SignOutButtonStyle(title: "Sign out and keep library", isDanger: false))
+                        .focused($focus, equals: .keep)
+                    Button("Sign out and erase library") { signOut(true) }
+                        .buttonStyle(SignOutButtonStyle(title: "Sign out and erase library", isDanger: true))
+                        .focused($focus, equals: .erase)
+                }
+                .padding(.top, 36)
+                Text("Erasing removes the library from this Apple TV. It cannot be undone.")
+                    .font(Theme.sans(Theme.Size.small))
+                    .foregroundStyle(Theme.quiet)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 20)
+            }
+            .padding(.top, 56)
+            .padding(.horizontal, 64)
+            .padding(.bottom, 48)
+            .frame(width: 920)
+            .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.cardRadius))
+            .overlay(RoundedRectangle(cornerRadius: Theme.cardRadius).strokeBorder(Theme.lineStrong, lineWidth: 1))
+        }
+        .defaultFocus($focus, .cancel)
+        .onAppear {
+            // Cancel is in focus when the dialog opens, whatever tvOS would
+            // have picked.
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(100))
+                focus = .cancel
+            }
+        }
+        .accessibilityAddTraits(.isModal)
+    }
+}
+
+/// A button of the sign-out dialog: an 84 pt pill, yolk in focus. The one
+/// that erases is in the danger colour: outlined at rest, filled in focus.
+private struct SignOutButtonStyle: ButtonStyle {
+    let title: LocalizedStringKey
+    let isDanger: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        SignOutButtonLabel(title: title, isDanger: isDanger)
+    }
+}
+
+private struct SignOutButtonLabel: View {
+    let title: LocalizedStringKey
+    let isDanger: Bool
+
+    @Environment(\.isFocused) private var isFocused
+
+    var body: some View {
+        Text(title)
+            .font(Theme.sans(Theme.Size.control, isFocused ? .semibold : .medium))
+            .foregroundStyle(isFocused ? Theme.onYolk : isDanger ? Theme.danger : Theme.text)
+            .frame(maxWidth: .infinity)
+            .frame(height: Theme.rowHeight)
+            .background {
+                if isFocused {
+                    Capsule().fill(isDanger ? Theme.danger : Theme.yolk)
+                } else {
+                    Capsule()
+                        .fill(Theme.surface)
+                        .overlay(Capsule().strokeBorder(isDanger ? Theme.danger.opacity(0.45) : Theme.line, lineWidth: 1))
+                }
+            }
+            .contentShape(Capsule())
     }
 }
 
