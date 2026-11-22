@@ -5,8 +5,10 @@ import SwiftUI
 /// normal pitch. Draws from `ScaleTape`. The look is
 /// design-handoff/reference/ScaleE.jpg; the measures are spec 01.
 ///
-/// On tvOS 26 the lens itself is the system's Liquid Glass. On tvOS 18 to 25,
-/// which have no such material, it is drawn as a grey glass plate.
+/// The lens is a pill that lies over the tape: the ticks pass under the
+/// glass, and the reading and the needle sit on it. On tvOS 26 the pill is
+/// the system's Liquid Glass, which bends the ticks at its round ends. On
+/// tvOS 18 to 25, which have no such material, it is drawn as a glass plate.
 struct GlassLensScale: View {
     let tape: ScaleTape
     /// The entry under the needle.
@@ -25,35 +27,14 @@ struct GlassLensScale: View {
 
     var body: some View {
         ZStack {
-            lensGlass
-            LensCanvas(
-                tape: tape,
-                position: Double(current),
-                idle: idle ? 1 : 0,
-                needle: moving ? 0.75 : 1,
-                drawsGlass: !usesSystemGlass
-            )
-            .frame(width: Self.size.width, height: Self.size.height)
-            // Labels and ticks fade at the ends of the box, never by changing colour.
-            .mask(
-                LinearGradient(
-                    stops: [
-                        .init(color: .clear, location: 0),
-                        .init(color: .white, location: 0.1),
-                        .init(color: .white, location: 0.9),
-                        .init(color: .clear, location: 1),
-                    ],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-            )
-            // The glide: a fixed half second, however far the tape moves. With
-            // Reduce Motion, the tape cross-fades to its new place instead.
-            .id(reduceMotion ? current : 0)
-            .transition(.opacity)
-            .animation(reduceMotion ? .easeInOut(duration: 0.3) : .easeInOut(duration: 0.5), value: current)
-            .animation(.easeInOut(duration: 0.8), value: idle)
-            .animation(.easeInOut(duration: 0.3), value: moving)
+            if usesSystemGlass {
+                // Bottom to top: the tape, the glass, then what sits on it.
+                canvas(.tape)
+                lensGlass
+                canvas(.marks)
+            } else {
+                canvas(.all, drawsGlass: true)
+            }
         }
         .frame(width: Self.size.width, height: Self.size.height)
         .task(id: current) {
@@ -65,6 +46,40 @@ struct GlassLensScale: View {
         .accessibilityLabel(accessibilityText)
     }
 
+    /// One layer of the drawing, with the fades and the glide every layer
+    /// shares, so the tape and what sits on the glass move as one.
+    private func canvas(_ layers: LensCanvas.Layers, drawsGlass: Bool = false) -> some View {
+        LensCanvas(
+            tape: tape,
+            position: Double(current),
+            idle: idle ? 1 : 0,
+            needle: moving ? 0.75 : 1,
+            layers: layers,
+            drawsGlass: drawsGlass
+        )
+        .frame(width: Self.size.width, height: Self.size.height)
+        // Labels and ticks fade at the ends of the box, never by changing colour.
+        .mask(
+            LinearGradient(
+                stops: [
+                    .init(color: .clear, location: 0),
+                    .init(color: .white, location: 0.1),
+                    .init(color: .white, location: 0.9),
+                    .init(color: .clear, location: 1),
+                ],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+        )
+        // The glide: a fixed half second, however far the tape moves. With
+        // Reduce Motion, the tape cross-fades to its new place instead.
+        .id(reduceMotion ? current : 0)
+        .transition(.opacity)
+        .animation(reduceMotion ? .easeInOut(duration: 0.3) : .easeInOut(duration: 0.5), value: current)
+        .animation(.easeInOut(duration: 0.8), value: idle)
+        .animation(.easeInOut(duration: 0.3), value: moving)
+    }
+
     /// Whether the system has Liquid Glass to draw the lens with.
     private var usesSystemGlass: Bool {
         if #available(tvOS 26.0, *) {
@@ -73,15 +88,19 @@ struct GlassLensScale: View {
         return false
     }
 
-    /// The lens as Liquid Glass, under the ticks, the reading and the needle:
-    /// 360 by 72 pt with 20 pt corners, centred on the needle. It stays put
-    /// while the tape glides. Idle drops it to 70%, as the reading.
+    /// The lens as Liquid Glass: a pill 360 by 72 pt, centred on the needle,
+    /// over the tape and under the reading and the needle. It stays put while
+    /// the tape glides. Idle drops it to 70%, as the reading.
+    ///
+    /// The clear variant, so the ticks under it stay sharp; the regular one
+    /// frosts what lies beneath. No tint and not interactive: the lens is
+    /// not a control.
     @ViewBuilder
     private var lensGlass: some View {
         if #available(tvOS 26.0, *) {
             Color.clear
                 .frame(width: 2 * GlassLens.halfWidth, height: Self.size.height)
-                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: GlassLens.cornerRadius))
+                .glassEffect(.clear, in: Capsule())
                 .opacity(idle ? ScaleIdleLook.reading : 1)
                 .animation(.easeInOut(duration: 0.8), value: idle)
         }
@@ -101,7 +120,8 @@ struct GlassLensScale: View {
 struct GlassLens: Equatable, Sendable {
     /// Half the lens's width: 180 pt.
     static let halfWidth = 180.0
-    static let cornerRadius = 20.0
+    /// The lens is a pill: its ends are half circles, 36 pt on a 72 pt box.
+    static let cornerRadius = 36.0
     /// Points between ticks at the needle, and at the lens's edges, on a
     /// tape at the closest pitch.
     static let centrePitch = 44.0
@@ -169,9 +189,21 @@ private struct LensCanvas: View {
     var idle: Double
     /// Brightness of the needle: 1 when settled, lower while the tape moves.
     var needle: Double
+    /// Which parts this canvas draws. On tvOS 26 the tape and the marks are
+    /// two canvases, with the system's glass between them.
+    var layers: Layers = .all
     /// Draw the glass plate and its rim here. False when the system's Liquid
     /// Glass is the lens (tvOS 26).
     var drawsGlass = true
+
+    struct Layers: OptionSet {
+        let rawValue: Int
+        /// The ticks and the labels, which pass under the glass.
+        static let tape = Layers(rawValue: 1)
+        /// The reading and the needle, which sit on the glass.
+        static let marks = Layers(rawValue: 2)
+        static let all: Layers = [.tape, .marks]
+    }
 
     // Shared measures from spec 01.
     /// Outside the lens ticks are as tall as on the Slide rule. Under it,
@@ -186,12 +218,18 @@ private struct LensCanvas: View {
     var body: some View {
         Canvas { context, size in
             guard !tape.groups.isEmpty else { return }
+            if layers.contains(.tape) {
+                // On a copy: the tape leaves its own opacity behind.
+                var tapeContext = context
+                drawTape(into: &tapeContext, size: size)
+            }
             if drawsGlass {
                 drawLens(into: context, size: size)
             }
-            drawTape(into: &context, size: size)
-            drawReading(into: &context, size: size)
-            drawNeedle(into: context, size: size)
+            if layers.contains(.marks) {
+                drawReading(into: &context, size: size)
+                drawNeedle(into: context, size: size)
+            }
             if drawsGlass {
                 drawLensEdge(into: context, size: size)
             }
@@ -202,7 +240,7 @@ private struct LensCanvas: View {
         CGRect(x: 0, y: 0, width: 2 * GlassLens.halfWidth, height: GlassLensScale.size.height)
     }
 
-    /// The glass body, under the ticks: a grey gradient, lightest at the middle.
+    /// The glass body, over the ticks: a grey gradient, lightest at the middle.
     /// Idle drops it to 70%, as the reading, so the glass still reads as a lens.
     private func drawLens(into context: GraphicsContext, size: CGSize) {
         var lens = context
@@ -228,7 +266,7 @@ private struct LensCanvas: View {
         )
     }
 
-    /// The thin light rim of the glass, over the ticks.
+    /// The thin light rim of the glass, over everything.
     private func drawLensEdge(into context: GraphicsContext, size: CGSize) {
         var edge = context
         edge.opacity = ScaleIdleLook.opacity(idleLevel: ScaleIdleLook.reading, idle: idle)
