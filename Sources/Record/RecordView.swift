@@ -48,7 +48,6 @@ struct RecordView: View {
     @State private var toastTask: Task<Void, Never>?
 
     @Query private var preferences: [UserPreferences]
-    @State private var palette: CoverPalette = .placeholder
     /// The sleeve's colours for the track list's tide.
     @State private var tidePalette: HaloPalette = .placeholder
     @State private var autoHaloEngaged: Bool = false
@@ -148,12 +147,10 @@ struct RecordView: View {
     /// so the halo doesn't render with a stale colour from a previous record.
     private func loadPalette() async {
         guard let url = release.preferredCoverURL else {
-            palette = .placeholder
             tidePalette = .placeholder
             return
         }
         if let image = try? await ImagePipeline.shared.image(for: url) {
-            palette = CoverColor.palette(from: image, releaseId: release.releaseId)
             tidePalette = HaloPalette.sleeve(from: image) ?? .placeholder
         }
     }
