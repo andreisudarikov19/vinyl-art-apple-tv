@@ -18,8 +18,8 @@ struct CoverReveal: Equatable {
 }
 
 /// Classic Cover Flow browse mode: a 3D carousel of album covers with mirror
-/// reflections over black, with a soft radial glow tinted by the centered
-/// cover. The whole view is one focusable control — left/right move through
+/// reflections over black, with the tide behind the centered cover (spec 06).
+/// The whole view is one focusable control — left/right move through
 /// covers, center-click opens the record. Only a window of covers around the
 /// selection renders, so it scales to large collections.
 struct CoverFlowView: View {
@@ -35,20 +35,26 @@ struct CoverFlowView: View {
     var onBrowse: (Int) -> Void = { _ in }
     /// The scale under the cover: one group per entry of `releases`.
     var tape = ScaleTape(groups: [])
+    /// True while the tide moves. The gallery toolbar fades with it, so the
+    /// gallery owns the flag and the toolbar reads it.
+    @Binding var tideEngaged: Bool
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var selectedIndex = 0
-    @State private var glowColor: Color = Color(white: 0.15)
     @State private var didGrabInitialFocus = false
     @FocusState private var focused: Bool
 
     @Query private var preferences: [UserPreferences]
-    @State private var palette: CoverPalette = .placeholder
-    @State private var haloEngaged: Bool = false
+    @State private var tidePalette: HaloPalette = .placeholder
+    /// Runs only while the tide moves, so it resumes where it stopped.
+    @State private var tideClock = TideClock()
+    /// The tide's fade: in over three seconds when it starts, out when a press stops it.
+    @State private var tideOpacity: Double = 0
     @State private var haloIdleTask: Task<Void, Never>?
 
+    /// The Gallery's switch, Ambient halo › Gallery. On by default.
     private var isAutoHalo: Bool {
-        preferences.first?.haloAutoEngage ?? true
+        (preferences.first?.haloSettings ?? HaloSettings()).gallery == .on
     }
 
     // Tuning knobs
@@ -63,9 +69,6 @@ struct CoverFlowView: View {
     /// The scale's box, 944 to 1016. The count is centred on it.
     private let scaleBoxTop: CGFloat = 944
     private let scaleBoxHeight: CGFloat = 72
-    // The glow keeps the size it had with the 620 pt cover, so the backdrop
-    // is unchanged by the cover's size.
-    private let glowReference: CGFloat = 620
     private let windowRadius = 6
     private let sideAngle: Double = 58
     private let sideScale: CGFloat = 0.84
@@ -73,10 +76,6 @@ struct CoverFlowView: View {
     var body: some View {
         ZStack(alignment: .top) {
             background
-            // Halo blobs sit between the static radial glow and the cover
-            // row — they originate behind the cover and bloom outward.
-            HaloView(palette: palette, isEngaged: haloEngaged)
-                .ignoresSafeArea()
             fades
             // The layout is placed from the top of the screen, not the safe
             // area, so the numbers in spec 01 apply directly.
@@ -91,6 +90,15 @@ struct CoverFlowView: View {
         .ignoresSafeArea()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .task(id: selectedIndex) { await refreshBackdrop() }
+        .onChange(of: tideEngaged) { _, engaged in
+            if engaged {
+                tideClock.start(at: Date())
+                withAnimation(.easeInOut(duration: TideTiming.galleryFadeIn)) { tideOpacity = 1 }
+            } else {
+                tideClock.stop(at: Date())
+                withAnimation(.easeInOut(duration: TideTiming.galleryFadeOut)) { tideOpacity = 0 }
+            }
+        }
         .onChange(of: focused) { _, isFocused in
             // When focus leaves CoverFlow (e.g. up to the toolbar), the user
             // is no longer browsing here; cancel the idle timer so the halo
@@ -117,7 +125,7 @@ struct CoverFlowView: View {
             guard releases.indices.contains(index) else { return }
             onBrowse(releases[index].releaseId)
         }
-        .suppressesScreensaver(haloEngaged)
+        .suppressesScreensaver(tideEngaged)
     }
 
     /// The focusable carousel: the cover row and the centred record's title
@@ -175,8 +183,25 @@ struct CoverFlowView: View {
 
     // MARK: - Pieces
 
+    /// The tide behind the centre cover (design-handoff/specs/06-ambient-tide.md):
+    /// the still low-tide glow, and the moving tide over it while the switch is
+    /// on and the tide has started.
     private var background: some View {
-        CollectionGlowBackground(glowColor: glowColor, reference: glowReference)
+        ZStack {
+            Theme.ink
+            TideGlow(shape: .gallery, main: tidePalette.main, reach: 0)
+            TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: !tideEngaged)) { context in
+                TideGlow(
+                    shape: .gallery,
+                    main: tidePalette.main,
+                    reach: reduceMotion
+                        ? Tide.reducedMotionReach
+                        : Tide.reach(running: tideClock.running(at: context.date))
+                )
+            }
+            .opacity(tideOpacity)
+        }
+        .ignoresSafeArea()
     }
 
     /// The ink fades (spec 01): the glow darkens to ink toward the left and
@@ -205,6 +230,10 @@ struct CoverFlowView: View {
                     endPoint: .bottom
                 )
                 .frame(height: 160)
+                // The toolbar's ink goes with the toolbar. While the tide moves,
+                // the glow above the cover shows (GalleryIdle.jpg). This departs
+                // from spec 06's "ink fades at every state": see the PR.
+                .opacity(1 - tideOpacity)
                 Spacer(minLength: 0)
                 LinearGradient(
                     stops: [
@@ -227,9 +256,9 @@ struct CoverFlowView: View {
         Group {
             switch preferences.first?.scaleStyle ?? .slideRule {
             case .slideRule:
-                SlideRuleScale(tape: tape, current: selectedIndex, total: releases.count, idle: haloEngaged)
+                SlideRuleScale(tape: tape, current: selectedIndex, total: releases.count, idle: tideEngaged)
             case .glassLens:
-                GlassLensScale(tape: tape, current: selectedIndex, total: releases.count, idle: haloEngaged)
+                GlassLensScale(tape: tape, current: selectedIndex, total: releases.count, idle: tideEngaged)
             }
         }
         .frame(maxWidth: .infinity, alignment: .top)
@@ -238,13 +267,16 @@ struct CoverFlowView: View {
 
     /// "214 / 612", DM Mono 25 in quiet, right-aligned at the 80 pt margin and
     /// centred on the scale's box. Counts the browsed list, so a genre filter
-    /// shows its own total. VoiceOver hears the count from the scale.
+    /// shows its own total. VoiceOver hears the count from the scale. Idle
+    /// drops it with the reading, so the whole scale block goes down together.
     private var countLabel: some View {
         HStack {
             Spacer(minLength: 0)
             Text("\(selectedIndex + 1) / \(releases.count)")
                 .font(Theme.mono(Theme.Size.small))
                 .foregroundStyle(Theme.quiet)
+                .opacity(tideEngaged ? ScaleIdleLook.count : 1)
+                .animation(.easeInOut(duration: 0.8), value: tideEngaged)
         }
         .padding(.trailing, Theme.safeSide)
         .frame(height: scaleBoxHeight)
@@ -332,41 +364,36 @@ struct CoverFlowView: View {
         selectedIndex = next
     }
 
-    /// Refreshes both the radial glow tint and the 3-colour halo palette
-    /// when the focused cover changes. Also restarts the 60s idle countdown
-    /// — a focus change is "user input", so any previously-engaged halo
-    /// disengages immediately and re-engages only after 60s without further
-    /// navigation (auto mode only).
+    /// Refreshes the tide's colour when the focused cover changes. It does not
+    /// touch the idle countdown: that counts from the last press (Left, Right)
+    /// or focus change, not from when a cover image arrives. A slow image
+    /// used to push the countdown back by its whole load time.
     private func refreshBackdrop() async {
         guard let url = current?.preferredCoverURL,
               let image = try? await ImagePipeline.shared.image(for: url) else {
-            restartHaloIdleTimer()
             return
         }
-        let releaseId = current?.releaseId ?? 0
-        glowColor = CoverColor.dominant(from: image, releaseId: releaseId)
-        palette = CoverColor.palette(from: image, releaseId: releaseId)
-        restartHaloIdleTimer()
+        tidePalette = HaloPalette.sleeve(from: image) ?? .placeholder
     }
 
-    /// Cancels any in-flight idle countdown and starts a fresh 60s wait.
-    /// Halo goes off immediately; engages again after 60s of no input.
-    /// No-op when manual mode is on (CoverFlow has no halo in that mode).
+    /// Cancels any in-flight idle countdown and starts a fresh wait.
+    /// The tide stops immediately; it starts again after the idle time of no input.
+    /// No-op when the Gallery's switch is off.
     private func restartHaloIdleTimer() {
         haloIdleTask?.cancel()
-        haloEngaged = false
+        tideEngaged = false
         guard isAutoHalo, focused else { return }
         haloIdleTask = Task { @MainActor in
-            try? await Task.sleep(for: .seconds(60))
+            try? await Task.sleep(for: .seconds(TideTiming.galleryIdle))
             guard !Task.isCancelled else { return }
-            haloEngaged = true
+            tideEngaged = true
         }
     }
 
     private func cancelHaloIdleTimer() {
         haloIdleTask?.cancel()
         haloIdleTask = nil
-        haloEngaged = false
+        tideEngaged = false
     }
 }
 
