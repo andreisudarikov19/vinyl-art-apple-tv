@@ -94,7 +94,7 @@ struct TideTimingTests {
 struct TideGeometryTests {
     @Test func fixedRadiiAreTheLowAndHighEnds() {
         let gallery = TideShape.gallery
-        #expect(gallery.radii(reach: 0, in: screen) == CGSize(width: 820, height: 600))
+        #expect(gallery.radii(reach: 0, in: screen) == CGSize(width: 1000, height: 700))
         let trackList = TideShape.trackList
         #expect(trackList.radii(reach: 0, in: screen) == CGSize(width: 1050, height: 760))
         #expect(trackList.radii(reach: 1, in: screen) == CGSize(width: 2400, height: 1600))
@@ -162,5 +162,33 @@ struct TideStopTests {
         ]
         #expect(close(TideShape.colour(at: 0.25, in: stops), OKLab(l: 0.25, a: 0, b: 0)))
         #expect(close(TideShape.colour(at: 2, in: stops), OKLab(l: 1, a: 0, b: 0)))
+    }
+}
+
+struct TideLightTests {
+    @Test func theRimIsTheMainColourLiftedAndALittleStronger() {
+        let rim = TideLight.rimColour(main: OKLab(l: 0.5, a: 0.1, b: 0.05))
+        #expect(close(rim, OKLab(l: 0.72, a: 0.115, b: 0.0575)))
+    }
+
+    @Test func theRimStopsShortOfWhite() {
+        #expect(TideLight.rimColour(main: OKLab(l: 0.7, a: 0, b: 0)).l == 0.82)
+    }
+
+    @Test func aDarkSleeveStillGetsARimThatCanBeSeen() {
+        #expect(TideLight.rimColour(main: OKLab(l: 0.34, a: -0.05, b: 0.03)).l == 0.66)
+    }
+
+    @Test func theGalleryTideStartsPartWayIn() {
+        // 15 s into the swell: a quarter of the way in, and still rising.
+        let start = Tide.reach(running: TideTiming.galleryHeadStart)
+        #expect(start > 0.2 && start < 0.35)
+        #expect(Tide.reach(running: TideTiming.galleryHeadStart + 5) > start)
+    }
+
+    @Test func theSpillFadesOutAboveTheTitle() {
+        // The title starts at 821 pt of 1080, 76% of the way down.
+        #expect(TideLight.spillFadeStart < TideLight.spillFadeEnd)
+        #expect(TideLight.spillFadeEnd * 1080 < 880)
     }
 }

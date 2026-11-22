@@ -69,6 +69,8 @@ struct CoverFlowView: View {
     /// The scale's box, 944 to 1016. The count is centred on it.
     private let scaleBoxTop: CGFloat = 944
     private let scaleBoxHeight: CGFloat = 72
+    /// The screen in points; the layout above is placed on it directly.
+    private let screenSize = CGSize(width: 1920, height: 1080)
     private let windowRadius = 6
     private let sideAngle: Double = 58
     private let sideScale: CGFloat = 0.84
@@ -191,17 +193,73 @@ struct CoverFlowView: View {
             Theme.ink
             TideGlow(shape: .gallery, main: tidePalette.main, reach: 0)
             TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: !tideEngaged)) { context in
-                TideGlow(
-                    shape: .gallery,
-                    main: tidePalette.main,
-                    reach: reduceMotion
-                        ? Tide.reducedMotionReach
-                        : Tide.reach(running: tideClock.running(at: context.date))
-                )
+                TideGlow(shape: .gallery, main: tidePalette.main, reach: tideReach(at: context.date))
             }
             .opacity(tideOpacity)
         }
         .ignoresSafeArea()
+    }
+
+    /// How far in the tide is at `date`: 0 at low tide, 1 at high tide.
+    private func tideReach(at date: Date) -> Double {
+        reduceMotion
+            ? Tide.reducedMotionReach
+            : Tide.reach(running: TideTiming.galleryHeadStart + tideClock.running(at: date))
+    }
+
+    /// The tide's light on the side covers (GalleryIdle.jpg). The covers fill
+    /// the row, so the glow behind them is hidden; here the same glow is drawn
+    /// again over the side covers and under the centre one, at half strength.
+    /// The side covers sink into the colour and the centre cover stands out.
+    /// A view of no size carries it, so the carousel's layout is untouched.
+    private var tideSpill: some View {
+        Color.clear
+            .frame(width: 0, height: 0)
+            .overlay {
+                TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: !tideEngaged)) { context in
+                    TideGlow(shape: .gallery, main: tidePalette.main, reach: tideReach(at: context.date))
+                }
+                .frame(width: screenSize.width, height: screenSize.height)
+                .mask(
+                    LinearGradient(
+                        stops: [
+                            .init(color: .white, location: 0),
+                            .init(color: .white, location: TideLight.spillFadeStart),
+                            .init(color: .clear, location: TideLight.spillFadeEnd),
+                            .init(color: .clear, location: 1),
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .offset(y: tideSpillOffset)
+                .opacity(TideLight.spill * tideOpacity)
+            }
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+    }
+
+    /// Moves the spill so its glow is centred where the background's is:
+    /// on the centre cover. The carrier sits at the middle of the cover and
+    /// its reflection; the glow's origin sits above the middle of its frame.
+    private var tideSpillOffset: CGFloat {
+        (0.5 - TideShape.gallery.origin.y) * screenSize.height - reflectionHeight / 2
+    }
+
+    /// A rim of light around the centre cover while the tide moves: a
+    /// cover-sized patch of the sleeve's lifted colour, blurred, behind it.
+    private var tideRim: some View {
+        Rectangle()
+            .fill(TideLight.rimColour(main: tidePalette.main).rgb.color)
+            .frame(
+                width: coverSize * CGFloat(TideLight.rimScale),
+                height: coverSize * CGFloat(TideLight.rimScale)
+            )
+            .blur(radius: TideLight.rimBlur)
+            .opacity(TideLight.rimStrength * tideOpacity)
+            .offset(y: -reflectionHeight / 2)
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
     }
 
     /// The ink fades (spec 01): the glow darkens to ink toward the left and
@@ -219,6 +277,8 @@ struct CoverFlowView: View {
                 startPoint: .leading,
                 endPoint: .trailing
             )
+            // While the tide moves, most of the ink at the sides gives way.
+            .opacity(1 - TideLight.sideFadeLift * tideOpacity)
             VStack(spacing: 0) {
                 LinearGradient(
                     stops: [
@@ -268,7 +328,7 @@ struct CoverFlowView: View {
     /// "214 / 612", DM Mono 25 in quiet, right-aligned at the 80 pt margin and
     /// centred on the scale's box. Counts the browsed list, so a genre filter
     /// shows its own total. VoiceOver hears the count from the scale. Idle
-    /// drops it with the reading, so the whole scale block goes down together.
+    /// hides it, as in GalleryIdle.jpg; the first press brings it back.
     private var countLabel: some View {
         HStack {
             Spacer(minLength: 0)
@@ -289,7 +349,12 @@ struct CoverFlowView: View {
         ZStack {
             ForEach(visibleIndices, id: \.self) { index in
                 let d = index - selectedIndex
-                CoverFlowCard(release: releases[index], coverSize: coverSize, prominent: d == 0)
+                CoverFlowCard(
+                    release: releases[index],
+                    coverSize: coverSize,
+                    prominent: d == 0,
+                    lit: d == 0 ? tideOpacity : 0
+                )
                     .scaleEffect(d == 0 ? 1 : sideScale)
                     .rotation3DEffect(
                         .degrees(rotation(for: d)),
@@ -301,6 +366,11 @@ struct CoverFlowView: View {
                     .zIndex(Double(-abs(d)))
                     .opacity(opacity(for: d))
             }
+            // Between the side covers (-1 and below) and the centre cover (0).
+            tideSpill
+                .zIndex(-0.5)
+            tideRim
+                .zIndex(-0.25)
         }
         .animation(reduceMotion ? nil : .spring(response: 0.38, dampingFraction: 0.82), value: selectedIndex)
     }
@@ -402,11 +472,14 @@ private struct CoverFlowCard: View {
     let release: CachedRelease
     let coverSize: CGFloat
     let prominent: Bool
+    /// 0 in use, 1 while the tide's rim of light is behind this cover: its
+    /// dark shadow gives way, or it would ring the cover inside the light.
+    var lit: Double = 0
 
     var body: some View {
         VStack(spacing: 0) {
             coverImage
-                .shadow(color: .black.opacity(0.55), radius: prominent ? 32 : 14, y: 14)
+                .shadow(color: .black.opacity(0.55 * (1 - lit)), radius: prominent ? 32 : 14, y: 14)
             coverImage
                 .scaleEffect(x: 1, y: -1)
                 .frame(width: coverSize, height: coverSize * 0.15, alignment: .top)

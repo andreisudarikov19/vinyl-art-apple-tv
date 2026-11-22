@@ -46,18 +46,25 @@ extension TideShape {
     static let inkHex: UInt32 = 0x0B0A08
 
     /// The Gallery: behind the centre cover, 50% across and 41% down.
+    ///
+    /// Larger and brighter than first drawn. In the running app the covers
+    /// hide the middle of the glow, so what is seen is its outer part: the
+    /// band above the covers and the light on the side covers. At high tide
+    /// the sleeve's main colour now reaches 40% of the way out, where the
+    /// first version was already near ink.
     static let gallery = TideShape(
         origin: CGPoint(x: 0.5, y: 0.41),
-        low: TideEnd(radii: .fixed(CGSize(width: 820, height: 600)), stops: [
+        low: TideEnd(radii: .fixed(CGSize(width: 1000, height: 700)), stops: [
             TideStop(location: 0, hex: 0x8A4A26),
-            TideStop(location: 0.46, hex: 0x3A2118),
+            TideStop(location: 0.46, hex: 0x4A2A1C),
             TideStop(location: 0.82, hex: 0x14110D),
             TideStop(location: 1, hex: inkHex),
         ]),
         high: TideEnd(radii: .farthestCorner, stops: [
             TideStop(location: 0, hex: 0xB8672F),
-            TideStop(location: 0.28, hex: 0x4A2A1C),
-            TideStop(location: 0.62, hex: 0x14110D),
+            TideStop(location: 0.40, hex: 0x8A4A26),
+            TideStop(location: 0.70, hex: 0x4A2A1C),
+            TideStop(location: 0.90, hex: 0x1C1510),
             TideStop(location: 1, hex: inkHex),
         ])
     )
@@ -187,6 +194,35 @@ extension TideShape {
     }
 }
 
+/// What the tide's light does to the Gallery's covers while it moves
+/// (design-handoff/reference/GalleryIdle.jpg). The carousel fills the row
+/// from edge to edge, so the glow behind it can only be seen where it falls
+/// on the covers themselves.
+enum TideLight {
+    /// The glow drawn again over the side covers, under the centre cover, at
+    /// this strength. They sink into the tide and the centre cover stands out.
+    static let spill = 0.5
+    /// The spill ends above the title: full to 72% of the screen's height,
+    /// gone by 80%.
+    static let spillFadeStart = 0.72
+    static let spillFadeEnd = 0.80
+    /// A rim of light around the centre cover: a patch a little larger than
+    /// the cover, blurred.
+    static let rimStrength = 0.7
+    static let rimBlur = 110.0
+    static let rimScale = 1.12
+    /// The Gallery's ink at the left and right edges gives way by this much
+    /// while the tide moves, so the colour reaches the sides of the screen.
+    static let sideFadeLift = 0.6
+
+    /// The rim's colour: the sleeve's main colour, lifted and a little
+    /// stronger. Its lightness is held between 0.66 and 0.82, so a dark
+    /// sleeve still gets a rim that can be seen.
+    static func rimColour(main: OKLab) -> OKLab {
+        OKLab(l: min(0.82, max(0.66, main.l + 0.22)), a: main.a * 1.15, b: main.b * 1.15)
+    }
+}
+
 /// The tide's timings, from the spec.
 enum TideTiming {
     /// Gallery: seconds without a press before the tide starts.
@@ -198,6 +234,10 @@ enum TideTiming {
     /// Gallery: how fast the tide gives way to the still glow on a press. The
     /// spec does not give a number; this is the halo's fade-out today.
     static let galleryFadeOut: TimeInterval = 0.4
+    /// Gallery: the tide starts this far into its swell (about a quarter of
+    /// the way in and rising), so there is something to see as soon as it
+    /// fades in, not half a minute later.
+    static let galleryHeadStart: TimeInterval = 15
 }
 
 /// How long the tide has been moving. It counts only between `start` and

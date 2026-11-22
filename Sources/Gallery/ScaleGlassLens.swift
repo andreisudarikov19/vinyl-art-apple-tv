@@ -4,6 +4,9 @@ import SwiftUI
 /// under the lens and close up toward its edges, where the tape runs at its
 /// normal pitch. Draws from `ScaleTape`. The look is
 /// design-handoff/reference/ScaleE.jpg; the measures are spec 01.
+///
+/// On tvOS 26 the lens itself is the system's Liquid Glass. On tvOS 18 to 25,
+/// which have no such material, it is drawn as a grey glass plate.
 struct GlassLensScale: View {
     let tape: ScaleTape
     /// The entry under the needle.
@@ -21,33 +24,38 @@ struct GlassLensScale: View {
     static let size = CGSize(width: 1200, height: 72)
 
     var body: some View {
-        LensCanvas(
-            tape: tape,
-            position: Double(current),
-            idle: idle ? 1 : 0,
-            needle: moving ? 0.75 : 1
-        )
-        .frame(width: Self.size.width, height: Self.size.height)
-        // Labels and ticks fade at the ends of the box, never by changing colour.
-        .mask(
-            LinearGradient(
-                stops: [
-                    .init(color: .clear, location: 0),
-                    .init(color: .white, location: 0.1),
-                    .init(color: .white, location: 0.9),
-                    .init(color: .clear, location: 1),
-                ],
-                startPoint: .leading,
-                endPoint: .trailing
+        ZStack {
+            lensGlass
+            LensCanvas(
+                tape: tape,
+                position: Double(current),
+                idle: idle ? 1 : 0,
+                needle: moving ? 0.75 : 1,
+                drawsGlass: !usesSystemGlass
             )
-        )
-        // The glide: a fixed half second, however far the tape moves. With
-        // Reduce Motion, the tape cross-fades to its new place instead.
-        .id(reduceMotion ? current : 0)
-        .transition(.opacity)
-        .animation(reduceMotion ? .easeInOut(duration: 0.3) : .easeInOut(duration: 0.5), value: current)
-        .animation(.easeInOut(duration: 0.8), value: idle)
-        .animation(.easeInOut(duration: 0.3), value: moving)
+            .frame(width: Self.size.width, height: Self.size.height)
+            // Labels and ticks fade at the ends of the box, never by changing colour.
+            .mask(
+                LinearGradient(
+                    stops: [
+                        .init(color: .clear, location: 0),
+                        .init(color: .white, location: 0.1),
+                        .init(color: .white, location: 0.9),
+                        .init(color: .clear, location: 1),
+                    ],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
+            // The glide: a fixed half second, however far the tape moves. With
+            // Reduce Motion, the tape cross-fades to its new place instead.
+            .id(reduceMotion ? current : 0)
+            .transition(.opacity)
+            .animation(reduceMotion ? .easeInOut(duration: 0.3) : .easeInOut(duration: 0.5), value: current)
+            .animation(.easeInOut(duration: 0.8), value: idle)
+            .animation(.easeInOut(duration: 0.3), value: moving)
+        }
+        .frame(width: Self.size.width, height: Self.size.height)
         .task(id: current) {
             moving = true
             try? await Task.sleep(for: .milliseconds(500))
@@ -55,6 +63,28 @@ struct GlassLensScale: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityText)
+    }
+
+    /// Whether the system has Liquid Glass to draw the lens with.
+    private var usesSystemGlass: Bool {
+        if #available(tvOS 26.0, *) {
+            return true
+        }
+        return false
+    }
+
+    /// The lens as Liquid Glass, under the ticks, the reading and the needle:
+    /// 360 by 72 pt with 20 pt corners, centred on the needle. It stays put
+    /// while the tape glides. Idle drops it to 70%, as the reading.
+    @ViewBuilder
+    private var lensGlass: some View {
+        if #available(tvOS 26.0, *) {
+            Color.clear
+                .frame(width: 2 * GlassLens.halfWidth, height: Self.size.height)
+                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: GlassLens.cornerRadius))
+                .opacity(idle ? ScaleIdleLook.reading : 1)
+                .animation(.easeInOut(duration: 0.8), value: idle)
+        }
     }
 
     private var accessibilityText: String {
@@ -65,35 +95,61 @@ struct GlassLensScale: View {
 
 /// The lens's geometry. Spacing and tapering are spec 01's Glass lens:
 /// 44 pt between ticks at the needle, 16 pt at the edges of a 360 pt lens.
-enum GlassLens {
+/// A short tape is spread wider than 16 pt (`ScaleTape.spacing`), so a lens
+/// is made for a tape's pitch: the ticks at the needle are then 1.6 times
+/// that pitch apart, and never closer than 44 pt.
+struct GlassLens: Equatable, Sendable {
     /// Half the lens's width: 180 pt.
     static let halfWidth = 180.0
     static let cornerRadius = 20.0
-    /// Points between ticks at the needle, and at the lens's edges.
+    /// Points between ticks at the needle, and at the lens's edges, on a
+    /// tape at the closest pitch.
     static let centrePitch = 44.0
     static let edgePitch = ScaleTape.pitch
+    /// How much wider the ticks at the needle sit on a spread tape.
+    static let magnification = 1.6
+    /// The lens for a tape at the closest pitch.
+    static let standard = GlassLens(pitch: edgePitch)
+
+    /// Points between ticks outside the lens: the tape's own spacing.
+    let pitch: Double
+    /// Points between ticks at the needle.
+    let needlePitch: Double
     /// How much closer the ticks sit at the edges than at the needle.
-    private static let spread = centrePitch - edgePitch
+    private let spread: Double
     /// How many entries lie between the needle and the lens's edge. Inside the
-    /// lens the spacing follows `centrePitch - spread * (x / halfWidth)^2`,
-    /// which integrates to a tanh; outside it is the plain edge pitch.
-    static let edgeEntries = atanh((spread / centrePitch).squareRoot()) * halfWidth
-        / (centrePitch * spread).squareRoot()
+    /// lens the spacing follows `needlePitch - spread * (x / halfWidth)^2`,
+    /// which integrates to a tanh; outside it is the plain pitch.
+    let entriesToEdge: Double
+
+    init(pitch: Double) {
+        let needlePitch = max(Self.centrePitch, pitch * Self.magnification)
+        let spread = needlePitch - pitch
+        self.pitch = pitch
+        self.needlePitch = needlePitch
+        self.spread = spread
+        entriesToEdge = atanh((spread / needlePitch).squareRoot()) * Self.halfWidth
+            / (needlePitch * spread).squareRoot()
+    }
 
     /// Screen points from the needle to a tick `entries` entries away
     /// (negative is left). Continuous, with the spacing on each side of the
     /// edge matching, so the ticks run on past the lens without a jump.
-    static func offset(entries: Double) -> Double {
+    func distance(entries: Double) -> Double {
         let count = abs(entries)
-        let distance: Double
-        if count <= edgeEntries {
-            let scale = halfWidth * (centrePitch / spread).squareRoot()
-            distance = scale * tanh(count * (centrePitch * spread).squareRoot() / halfWidth)
+        let far: Double
+        if count <= entriesToEdge {
+            let scale = Self.halfWidth * (needlePitch / spread).squareRoot()
+            far = scale * tanh(count * (needlePitch * spread).squareRoot() / Self.halfWidth)
         } else {
-            distance = halfWidth + edgePitch * (count - edgeEntries)
+            far = Self.halfWidth + pitch * (count - entriesToEdge)
         }
-        return entries < 0 ? -distance : distance
+        return entries < 0 ? -far : far
     }
+
+    /// The standard lens's edge and offsets, for a tape at the closest pitch.
+    static var edgeEntries: Double { standard.entriesToEdge }
+    static func offset(entries: Double) -> Double { standard.distance(entries: entries) }
 
     /// 1 at the needle, 0 at the lens's edge and beyond. Ticks take their
     /// height and opacity from it.
@@ -113,12 +169,13 @@ private struct LensCanvas: View {
     var idle: Double
     /// Brightness of the needle: 1 when settled, lower while the tape moves.
     var needle: Double
+    /// Draw the glass plate and its rim here. False when the system's Liquid
+    /// Glass is the lens (tvOS 26).
+    var drawsGlass = true
 
     // Shared measures from spec 01.
-    /// Group ticks stand 24 pt high in full white. Record ticks run from 12 pt
-    /// at the lens's edges to 20 pt at the needle.
-    private let groupHeight: CGFloat = 24
-    private let recordHeightAtEdge: CGFloat = 12
+    /// Outside the lens ticks are as tall as on the Slide rule. Under it,
+    /// record ticks grow to 20 pt at the needle.
     private let recordHeightAtNeedle: CGFloat = 20
     private let tickWidth: CGFloat = 2
     /// The label row and the reading sit on this line.
@@ -129,11 +186,15 @@ private struct LensCanvas: View {
     var body: some View {
         Canvas { context, size in
             guard !tape.groups.isEmpty else { return }
-            drawLens(into: context, size: size)
+            if drawsGlass {
+                drawLens(into: context, size: size)
+            }
             drawTape(into: &context, size: size)
             drawReading(into: &context, size: size)
             drawNeedle(into: context, size: size)
-            drawLensEdge(into: context, size: size)
+            if drawsGlass {
+                drawLensEdge(into: context, size: size)
+            }
         }
     }
 
@@ -186,30 +247,46 @@ private struct LensCanvas: View {
         let readingHalf = ScaleTape.textWidth(reading, size: ScaleTape.readingSize) / 2 + ScaleTape.textGap
         context.opacity = ScaleIdleLook.opacity(idleLevel: ScaleIdleLook.tape, idle: idle)
         let centre = size.width / 2
-        // Every tick sits at least 16 pt from its neighbour, so the entries
-        // that can fall inside the box are no more than its half width over 16.
-        let reach = Int(size.width / 2 / GlassLens.edgePitch) + 2
+        // Every tick sits at least the tape's spacing from its neighbour, so
+        // the entries that can fall inside the box are no more than its half
+        // width over that spacing.
+        let lens = GlassLens(pitch: tape.spacing)
+        let reach = Int(size.width / 2 / tape.spacing) + 2
         let lowest = max(0, Int(position.rounded(.down)) - reach)
         let highest = min(tape.groups.count - 1, Int(position.rounded(.up)) + reach)
         if lowest <= highest {
             for index in lowest...highest {
-                let relative = GlassLens.offset(entries: Double(index) - position)
+                let relative = lens.distance(entries: Double(index) - position)
                 let x = centre + relative
                 let weight = GlassLens.weight(offset: relative)
-                let isGroup = tape.isGroupStart(index)
-                let height = isGroup ? groupHeight : recordHeightAtEdge + (recordHeightAtNeedle - recordHeightAtEdge) * weight
-                let opacity = isGroup ? 1 : 0.4 + 0.6 * weight
+                // Outside the lens a tick looks as on the Slide rule. Under
+                // it, record ticks grow to 20 pt and every tick brightens.
+                let look = ScaleTickLook(tape.tick(at: index))
+                let grown = max(look.height, recordHeightAtNeedle)
+                let height = look.height + (grown - look.height) * CGFloat(weight)
+                let opacity = look.opacity + (1 - look.opacity) * weight
                 let rect = CGRect(x: x - tickWidth / 2, y: size.height - height, width: tickWidth, height: height)
-                context.fill(Path(rect), with: .color(.white.opacity(opacity)))
+                let kept = ScaleIdleLook.tapeReach(at: Double(x), width: Double(size.width), idle: idle)
+                context.fill(Path(rect), with: .color(.white.opacity(opacity * kept)))
             }
         }
-        let placement: (Double) -> Double = GlassLens.offset(entries:)
-        for label in tape.labels(
+        let tapeOpacity = context.opacity
+        // Labels stay outside the glass, which holds the reading alone.
+        let labels = tape.labels(
             current: position,
-            readingHalfWidth: max(80, readingHalf),
-            placement: placement
-        ) {
+            readingHalfWidth: max(readingHalf, GlassLens.halfWidth + ScaleTape.textGap),
+            labelWidth: 0,
+            placement: { lens.distance(entries: $0) }
+        )
+        for label in labels {
             let x = centre + label.offset
+            // A label fades by whichever of its two ends is nearer the box's end.
+            let far = Double(x) + ScaleTape.textWidth(label.text, size: ScaleTape.labelSize)
+            let kept = min(
+                ScaleIdleLook.tapeReach(at: Double(x), width: Double(size.width), idle: idle),
+                ScaleIdleLook.tapeReach(at: far, width: Double(size.width), idle: idle)
+            )
+            context.opacity = tapeOpacity * label.opacity * kept
             context.draw(
                 Text(label.text)
                     .font(Theme.mono(Theme.Size.small))
@@ -218,6 +295,7 @@ private struct LensCanvas: View {
                 anchor: .leading
             )
         }
+        context.opacity = tapeOpacity
     }
 
     /// The reading: the group under the needle, in yolk. Idle drops it to 70%.
