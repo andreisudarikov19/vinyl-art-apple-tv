@@ -64,10 +64,12 @@ struct ScaleTickLook: Equatable, Sendable {
 }
 
 /// The needle's mood light, for every scale style. While the ambient halo is
-/// on and the tape is dim, the needle glows warm: a bright core hugging it
-/// and a wide, soft wash around it. It comes up slowly with the halo and goes
+/// on and the tape is dim, the needle glows like a candle: a small bright
+/// core at the needle, a soft halo close around it, and a wide, faint spread
+/// of deeper amber that carries well past the scale. Each ring is fainter and
+/// warmer than the one inside it. It comes up slowly with the halo and goes
 /// out quickly with the first press. Only the needle glows; the reading above
-/// it does not.
+/// it has no light of its own.
 ///
 /// It is a view of its own, not part of the scale's canvas, because a canvas
 /// cuts its drawing off at its edges and the light has to spill past the
@@ -76,24 +78,34 @@ struct ScaleNeedleGlow: View {
     /// The ambient halo is on.
     let idle: Bool
 
-    /// The wash: a warmer, more amber yellow than the needle's yolk.
+    /// The halo close to the needle: a warmer yellow than the needle's yolk.
     private static let warm = Color(hex: 0xFFAE3D)
+    /// The far spread: deeper amber, as a candle's light reddens with distance.
+    private static let amber = Color(hex: 0xFF9430)
     /// The needle runs from 40 pt to the bottom of the 72 pt box, so its
     /// middle is 20 pt below the box's.
     private static let needleCentre: CGFloat = 20
 
     var body: some View {
         ZStack {
+            // The spread: wide and faint.
+            Ellipse()
+                .fill(Self.amber)
+                .frame(width: 300, height: 170)
+                .blur(radius: 60)
+                .opacity(0.2)
+            // The halo close around the needle.
             Ellipse()
                 .fill(Self.warm)
-                .frame(width: 150, height: 104)
-                .blur(radius: 34)
-                .opacity(0.4)
+                .frame(width: 110, height: 84)
+                .blur(radius: 26)
+                .opacity(0.22)
+            // The core, hugging the needle.
             Capsule()
                 .fill(Theme.yolk)
-                .frame(width: 14, height: 44)
-                .blur(radius: 9)
-                .opacity(0.9)
+                .frame(width: 12, height: 42)
+                .blur(radius: 8)
+                .opacity(0.7)
         }
         .offset(y: Self.needleCentre)
         .opacity(idle ? 1 : 0)
