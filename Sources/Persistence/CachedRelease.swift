@@ -45,6 +45,12 @@ final class CachedRelease {
     /// lets SwiftData's lightweight migration fill it for existing stores.
     var coverLookupFailures: Int = 0
 
+    /// The version of the cover rule (`CoverArtService.coverRuleVersion`)
+    /// this release was last judged under. A release with a
+    /// `resolvedCoverURL` below the current version was decided under an
+    /// older rule and is judged once more. Zero for releases never judged.
+    var coverRuleVersion: Int = 0
+
     init(
         releaseId: Int,
         instanceId: Int,
@@ -61,7 +67,8 @@ final class CachedRelease {
         thumbURL: String,
         resolvedCoverURL: String? = nil,
         coverLookupAttempted: Bool = false,
-        coverLookupFailures: Int = 0
+        coverLookupFailures: Int = 0,
+        coverRuleVersion: Int = 0
     ) {
         self.releaseId = releaseId
         self.instanceId = instanceId
@@ -79,6 +86,7 @@ final class CachedRelease {
         self.resolvedCoverURL = resolvedCoverURL
         self.coverLookupAttempted = coverLookupAttempted
         self.coverLookupFailures = coverLookupFailures
+        self.coverRuleVersion = coverRuleVersion
     }
 }
 
@@ -118,8 +126,8 @@ extension CachedRelease {
 
     /// Refreshes the Discogs-sourced fields from a collection entry on
     /// re-sync, deliberately preserving `resolvedCoverURL`,
-    /// `coverLookupAttempted` and `coverLookupFailures`, which are owned by
-    /// the cover-art pipeline.
+    /// `coverLookupAttempted`, `coverLookupFailures` and `coverRuleVersion`,
+    /// which are owned by the cover-art pipeline.
     func apply(_ release: CollectionRelease) {
         let info = release.basicInformation
         instanceId = release.instanceId

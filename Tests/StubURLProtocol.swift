@@ -30,10 +30,16 @@ final class StubURLProtocol: URLProtocol {
 }
 
 enum StubSession {
-    static func make() -> URLSession {
+    /// Ephemeral, with the stub in front of the network. Nuke's data loader
+    /// takes one of these too, so image loads go through the stub.
+    static func configuration() -> URLSessionConfiguration {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [StubURLProtocol.self]
-        return URLSession(configuration: configuration)
+        return configuration
+    }
+
+    static func make() -> URLSession {
+        URLSession(configuration: configuration())
     }
 }
 

@@ -45,13 +45,13 @@ struct CoverArtArchiveTests {
         #expect(cover == "https://archive.example.com/front.jpg")
     }
 
-    @Test func firstImageIsUsedWhenNoneIsFront() async throws {
+    @Test func imageNotMarkedAsTheFrontIsNotUsed() async throws {
         let cover = try await frontCover(listing: coverArtListingJSON(images: [
             (image: "https://archive.example.com/back.jpg", front: false, thumbnails: [:]),
             (image: "https://archive.example.com/inner.jpg", front: false, thumbnails: [:]),
         ]))
 
-        #expect(cover == "https://archive.example.com/back.jpg")
+        #expect(cover == nil)
     }
 
     @Test func emptyListingHasNoCover() async throws {

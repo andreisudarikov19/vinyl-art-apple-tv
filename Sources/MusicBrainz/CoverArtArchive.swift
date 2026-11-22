@@ -2,8 +2,8 @@ import Foundation
 
 /// Looks up front-cover art from the Cover Art Archive for a MusicBrainz
 /// release or release group. Returns nil when there is no art: the JSON
-/// listing endpoint answers 404, or lists no images. Throws when the archive
-/// couldn't answer this time.
+/// listing endpoint answers 404, or lists no image marked as the front.
+/// Throws when the archive couldn't answer this time.
 enum CoverArtArchive {
     static func frontCoverURL(
         forRelease mbid: String,
@@ -32,8 +32,9 @@ enum CoverArtArchive {
             return nil
         }
 
-        let image = listing.images.first(where: { $0.front }) ?? listing.images.first
-        guard let chosen = image else { return nil }
+        // Only the image marked as the front cover. The first image of any
+        // kind is not a cover (spec 07).
+        guard let chosen = listing.images.first(where: { $0.front }) else { return nil }
 
         // Prefer the 1200px render for the full-screen cover view; fall back to
         // the original upload (always present) when no 1200 thumbnail exists.
