@@ -35,6 +35,9 @@ extension EnvironmentValues {
 
 struct RecordView: View {
     let release: CachedRelease
+    /// Set when the record was opened by Suggest: the sleeve then carries an
+    /// "Another suggestion" sticker, and choosing it calls this.
+    var onAnotherSuggestion: (() -> Void)?
 
     @Environment(\.releaseDetailLoader) private var loader
     @Environment(\.coverResolver) private var resolveCover
@@ -57,6 +60,7 @@ struct RecordView: View {
     @FocusState private var screenFocused: Bool
     @FocusState private var pillFocused: Bool
     @FocusState private var discogsNoticeFocused: Bool
+    @FocusState private var stickerFocused: Bool
     @State private var showingDiscogsQR = false
     /// How far a side longer than the screen has been scrolled, in points,
     /// with the heights that decide how far it can go. See `SideScroll`.
@@ -124,6 +128,7 @@ struct RecordView: View {
             guard viewModel == nil else { return }
             let model = RecordViewModel(release: release, loadDetail: loader)
             viewModel = model
+            focusStickerSoon()
             await model.load()
         }
         .task {
@@ -281,7 +286,18 @@ struct RecordView: View {
                     scrollList(forward: true)
                 }
             case .right: changeSide(on: model, forward: true)
-            case .left: changeSide(on: model, forward: false)
+            case .left:
+                if !wasCoverFocused, model.currentSideIndex == 0 {
+                    // Left from the first side goes to the left column: the
+                    // sticker on a suggested record, otherwise the Discogs line.
+                    if onAnotherSuggestion != nil {
+                        stickerFocused = true
+                    } else {
+                        discogsNoticeFocused = true
+                    }
+                } else {
+                    changeSide(on: model, forward: false)
+                }
             default: break
             }
             // Strict "any input -> halo off, 3s idle to re-engage" rule for
@@ -485,6 +501,12 @@ struct RecordView: View {
         return VStack(alignment: .leading, spacing: 0) {
             cover(coverSide)
                 .shadow(color: .black.opacity(0.5), radius: 40, x: 0, y: 30)
+                .overlay(alignment: .topLeading) {
+                    if let onAnotherSuggestion {
+                        suggestionSticker(onAnotherSuggestion)
+                            .padding(20)
+                    }
+                }
             Text(release.title)
                 .font(Theme.serif(Theme.Size.albumTitle))
                 .tracking(-Theme.Size.albumTitle * 0.02)
@@ -551,6 +573,39 @@ struct RecordView: View {
 
     /// The Discogs attribution, at the foot of the left column. Discogs' API terms require it beside its data. Selecting it shows
     /// a QR code of the release page, as tvOS cannot open links.
+    /// "Another suggestion", on the top left corner of a suggested record's
+    /// sleeve like a shop sticker (spec 04). It says the record was suggested
+    /// and offers the next one. Focus starts here; Down goes to the Discogs
+    /// line and Right back to the sides.
+    private func suggestionSticker(_ action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            SuggestionStickerLabel()
+        }
+        .buttonStyle(DiscogsNoticeButtonStyle())
+        .focusEffectDisabled()
+        .focused($stickerFocused)
+        .accessibilityHint("Opens another record picked at random.")
+        .onMoveCommand { direction in
+            switch direction {
+            case .down: discogsNoticeFocused = true
+            case .right: screenFocused = true
+            default: break
+            }
+        }
+    }
+
+    /// Puts focus on the sticker when a suggested record opens. Asked twice,
+    /// a moment apart: the first ask can come before the screen has settled.
+    private func focusStickerSoon() {
+        guard onAnotherSuggestion != nil else { return }
+        Task { @MainActor in
+            for delay in [150, 500] {
+                try? await Task.sleep(for: .milliseconds(delay))
+                if !stickerFocused { stickerFocused = true }
+            }
+        }
+    }
+
     private var discogsNotice: some View {
         Button {
             setDiscogsPanel(!showingDiscogsQR)
@@ -570,6 +625,13 @@ struct RecordView: View {
         // steered while the track list is hidden.
         .onChange(of: discogsNoticeFocused) { _, focused in
             if !focused { setDiscogsPanel(false) }
+        }
+        .onMoveCommand { direction in
+            switch direction {
+            case .up: if onAnotherSuggestion != nil { stickerFocused = true }
+            case .right: screenFocused = true
+            default: break
+            }
         }
         // The label keeps room for its focus pill at the sides; pull it back
         // so the icon lines up with the table's left edge.
@@ -834,6 +896,37 @@ private struct TrackRow: View {
                 .fixedSize()
         }
         .padding(.vertical, 12)
+    }
+}
+
+/// The sticker's label: a sparkle and "Another suggestion" in a pill 58 pt
+/// high with a shadow under it. Yolk in focus, like every control in focus;
+/// the surface colour with a line around it otherwise.
+private struct SuggestionStickerLabel: View {
+    @Environment(\.isFocused) private var isFocused
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "sparkle")
+                .font(.system(size: 22, weight: .semibold))
+                .frame(width: 26, height: 26)
+                .accessibilityHidden(true)
+            Text("Another suggestion")
+                .font(Theme.sans(Theme.Size.control, .semibold))
+        }
+        .foregroundStyle(isFocused ? Theme.onYolk : Theme.text)
+        .padding(.horizontal, 24)
+        .frame(height: 58)
+        .background {
+            if isFocused {
+                Capsule().fill(Theme.yolk)
+            } else {
+                Capsule()
+                    .fill(Theme.surface)
+                    .overlay(Capsule().strokeBorder(Theme.lineStrong, lineWidth: 1))
+            }
+        }
+        .shadow(color: .black.opacity(0.55), radius: 20, x: 0, y: 14)
     }
 }
 

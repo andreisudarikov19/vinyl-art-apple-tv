@@ -21,6 +21,9 @@ struct GalleryView: View {
     @State private var lastToolbarStop: ToolbarFocus = .sort
     @Environment(\.modelContext) private var modelContext
     @State private var selected: CachedRelease?
+    /// The record on screen was opened by Suggest: it carries the "Another
+    /// suggestion" sticker. A record opened from the collection does not.
+    @State private var openedBySuggest = false
     @State private var refresh: RefreshState = .idle
     /// The tide is moving: the toolbar fades out behind it.
     @State private var tideEngaged = false
@@ -55,7 +58,7 @@ struct GalleryView: View {
                     .animation(.easeInOut(duration: tideEngaged ? TideTiming.galleryFadeIn : TideTiming.galleryFadeOut), value: tideEngaged)
             }
             .navigationDestination(item: $selected) { release in
-                RecordView(release: release)
+                recordScreen(for: release)
             }
             .overlay(alignment: .bottom) { refreshHUD }
         }
@@ -110,7 +113,38 @@ struct GalleryView: View {
         // No focus here: the record is on screen, and the cover takes focus
         // when the record is left.
         reveal = CoverReveal(index: index, takesFocus: false)
+        openedBySuggest = true
         selected = arranged[index]
+    }
+
+    /// The sticker on a suggested record: another random record from the
+    /// same list takes its place, never the one on screen.
+    private func suggestAnother() {
+        let current = selected?.releaseId
+        let others = arranged.indices.filter { arranged[$0].releaseId != current }
+        guard let index = others.randomElement() else { return }
+        reveal = CoverReveal(index: index, takesFocus: false)
+        selected = arranged[index]
+    }
+
+    /// The record screen for `release`. Kept out of `body`, whose type the
+    /// compiler could not work out with this built inline. A suggested record
+    /// gets the sticker's action; one opened from the collection gets none.
+    /// Another suggestion swaps the record in place, so each record has its
+    /// own identity and with it a screen of its own.
+    private func recordScreen(for release: CachedRelease) -> some View {
+        var another: (() -> Void)?
+        if openedBySuggest {
+            another = { suggestAnother() }
+        }
+        return RecordView(release: release, onAnotherSuggestion: another)
+            .id(release.releaseId)
+    }
+
+    /// Opens a record chosen in the collection.
+    private func openRecord(_ release: CachedRelease) {
+        openedBySuggest = false
+        selected = release
     }
 
     /// A sort or filter change keeps the record under the needle when it is
@@ -223,7 +257,7 @@ struct GalleryView: View {
                 let entries = browsed
                 CoverFlowView(
                     releases: entries.map(\.release),
-                    onOpen: { selected = $0 },
+                    onOpen: { release in openRecord(release) },
                     onMoveUp: { toolbarFocus = lastToolbarStop },
                     reveal: reveal,
                     onBrowse: { browsedReleaseID = $0 },
@@ -233,7 +267,7 @@ struct GalleryView: View {
             case .grid:
                 MosaicGridView(
                     releases: GalleryArranger.uniqued(arranged),
-                    onOpen: { selected = $0 },
+                    onOpen: { release in openRecord(release) },
                     onMoveUp: { toolbarFocus = lastToolbarStop }
                 )
             }
