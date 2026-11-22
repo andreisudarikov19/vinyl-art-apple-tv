@@ -201,3 +201,34 @@ enum RecordSides {
         key == noSideKey ? "Tracklist" : "Side \(key)"
     }
 }
+
+/// How a side longer than the screen is read: Down and Up move the list by
+/// a share of what is on screen, so a line or two stays in view as a place
+/// marker. Heights are in points.
+enum SideScroll {
+    /// The share of the visible list one press moves it by.
+    static let step: CGFloat = 0.7
+    /// The share of the visible list that fades at its top and bottom edge
+    /// while there is more to read that way.
+    static let topFade: CGFloat = 0.06
+    static let bottomFade: CGFloat = 0.14
+
+    /// The furthest the list can be moved: 0 for a side that fits.
+    static func maximum(content: CGFloat, viewport: CGFloat) -> CGFloat {
+        max(0, content - viewport)
+    }
+
+    /// Where the list stands after one press.
+    static func next(from offset: CGFloat, content: CGFloat, viewport: CGFloat, forward: Bool) -> CGFloat {
+        let limit = maximum(content: content, viewport: viewport)
+        let move = viewport * step
+        let target = forward ? offset + move : offset - move
+        return min(limit, max(0, target))
+    }
+
+    /// Whether there is more of the list above and below what is on screen.
+    static func more(offset: CGFloat, content: CGFloat, viewport: CGFloat) -> (above: Bool, below: Bool) {
+        let limit = maximum(content: content, viewport: viewport)
+        return (offset > 0.5, offset < limit - 0.5)
+    }
+}

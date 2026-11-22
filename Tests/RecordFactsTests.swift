@@ -79,3 +79,34 @@ struct RecordFactsTests {
         #expect(rows.first { $0.label == "STYLE" }?.lineLimit == 1)
     }
 }
+
+struct SideScrollTests {
+    @Test func aSideThatFitsDoesNotMove() {
+        #expect(SideScroll.maximum(content: 600, viewport: 834) == 0)
+        #expect(SideScroll.next(from: 0, content: 600, viewport: 834, forward: true) == 0)
+        let more = SideScroll.more(offset: 0, content: 600, viewport: 834)
+        #expect(!more.above && !more.below)
+    }
+
+    @Test func aLongSideIsReadToItsEndAndBack() {
+        // 20 tracks at 92 pt in an 800 pt list: 1040 pt to go.
+        let content: CGFloat = 1840
+        let viewport: CGFloat = 800
+        var offset: CGFloat = 0
+        let atTop = SideScroll.more(offset: offset, content: content, viewport: viewport)
+        #expect(!atTop.above && atTop.below)
+        offset = SideScroll.next(from: offset, content: content, viewport: viewport, forward: true)
+        #expect(abs(offset - 560) < 0.001)   // 70% of what is on screen
+        let midway = SideScroll.more(offset: offset, content: content, viewport: viewport)
+        #expect(midway.above && midway.below)
+        offset = SideScroll.next(from: offset, content: content, viewport: viewport, forward: true)
+        #expect(offset == 1040)  // stops at the end
+        let atEnd = SideScroll.more(offset: offset, content: content, viewport: viewport)
+        #expect(atEnd.above && !atEnd.below)
+        #expect(SideScroll.next(from: offset, content: content, viewport: viewport, forward: true) == 1040)
+        offset = SideScroll.next(from: offset, content: content, viewport: viewport, forward: false)
+        #expect(abs(offset - 480) < 0.001)
+        offset = SideScroll.next(from: offset, content: content, viewport: viewport, forward: false)
+        #expect(offset == 0)     // and stops at the top
+    }
+}
