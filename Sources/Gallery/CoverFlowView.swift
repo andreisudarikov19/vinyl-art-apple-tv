@@ -31,10 +31,17 @@ struct CoverFlowView: View {
     }
 
     // Tuning knobs
-    // Cover size is ~57% of a 1080p TV's vertical resolution so the centered
-    // cover reads as the room's focal point on a real screen (460pt looked
-    // small on hardware even though it filled the simulator nicely).
-    private let coverSize: CGFloat = 580
+    // The vertical budget is spec 01 (design-handoff/specs/01-gallery-and-scale.md),
+    // in points from the top of a 1080 pt screen. The cover is 552 pt square.
+    private let coverSize: CGFloat = 552
+    /// Cover (166 to 718) and its reflection (to 801): 15% of the cover's height.
+    private var reflectionHeight: CGFloat { coverSize * 0.15 }
+    private let coverTop: CGFloat = 166
+    /// The album title starts 20 pt under the reflection.
+    private let titleGap: CGFloat = 20
+    /// The scale's box, 944 to 1016. The count is centred on it.
+    private let scaleBoxTop: CGFloat = 944
+    private let scaleBoxHeight: CGFloat = 72
     // The glow keeps the size it had with the 620 pt cover, so the backdrop
     // is unchanged by the cover's size.
     private let glowReference: CGFloat = 620
@@ -49,17 +56,17 @@ struct CoverFlowView: View {
             // row — they originate behind the cover and bloom outward.
             HaloView(palette: palette, isEngaged: haloEngaged)
                 .ignoresSafeArea()
-            // Explicit vertical layout: cover row sits a fixed inset below the
-            // safe area (the same gap the toolbar sits below the screen's top
-            // edge, so the bar reads as balanced), and the metadata flows
-            // directly underneath the cover instead of being pinned to the
-            // bottom of the screen.
-            VStack(spacing: 8) {
-                carousel
+            fades
+            // The layout is placed from the top of the screen, not the safe
+            // area, so the numbers in spec 01 apply directly.
+            carousel
+                .padding(.top, releases.isEmpty ? 0 : coverTop)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            if !releases.isEmpty {
+                countLabel
             }
-            .padding(.top, releases.isEmpty ? 0 : 124)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
+        .ignoresSafeArea()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .task(id: selectedIndex) { await refreshBackdrop() }
         .onChange(of: focused) { _, isFocused in
@@ -90,9 +97,11 @@ struct CoverFlowView: View {
                         .font(.title3)
                         .foregroundStyle(.white.opacity(0.5))
                 } else {
-                    VStack(spacing: 20) {
+                    VStack(spacing: 0) {
                         flow
+                            .frame(height: coverSize + reflectionHeight)
                         metadata
+                            .padding(.top, titleGap)
                     }
                 }
             }
@@ -132,6 +141,64 @@ struct CoverFlowView: View {
         CollectionGlowBackground(glowColor: glowColor, reference: glowReference)
     }
 
+    /// The ink fades (spec 01): the glow darkens to ink toward the left and
+    /// right edges, ink sits behind the toolbar's top 160 pt, and behind the
+    /// title and scale's bottom 270 pt, so yolk and white keep their contrast.
+    private var fades: some View {
+        ZStack {
+            LinearGradient(
+                stops: [
+                    .init(color: Theme.ink.opacity(0.9), location: 0),
+                    .init(color: Theme.ink.opacity(0), location: 0.22),
+                    .init(color: Theme.ink.opacity(0), location: 0.78),
+                    .init(color: Theme.ink.opacity(0.9), location: 1),
+                ],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+            VStack(spacing: 0) {
+                LinearGradient(
+                    stops: [
+                        .init(color: Theme.ink.opacity(0.95), location: 0),
+                        .init(color: Theme.ink.opacity(0.85), location: 0.5),
+                        .init(color: Theme.ink.opacity(0), location: 1),
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: 160)
+                Spacer(minLength: 0)
+                LinearGradient(
+                    stops: [
+                        .init(color: Theme.ink.opacity(0), location: 0),
+                        .init(color: Theme.ink.opacity(0.95), location: 0.3),
+                        .init(color: Theme.ink.opacity(0.95), location: 1),
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: 270)
+            }
+        }
+        .ignoresSafeArea()
+    }
+
+    /// "214 / 612", DM Mono 25 in quiet, right-aligned at the 80 pt margin and
+    /// centred on the scale's box. Counts the browsed list, so a genre filter
+    /// shows its own total.
+    private var countLabel: some View {
+        HStack {
+            Spacer(minLength: 0)
+            Text("\(selectedIndex + 1) / \(releases.count)")
+                .font(Theme.mono(Theme.Size.small))
+                .foregroundStyle(Theme.quiet)
+        }
+        .padding(.trailing, Theme.safeSide)
+        .frame(height: scaleBoxHeight)
+        .frame(maxWidth: .infinity, alignment: .top)
+        .padding(.top, scaleBoxTop)
+    }
+
     private var flow: some View {
         ZStack {
             ForEach(visibleIndices, id: \.self) { index in
@@ -152,18 +219,23 @@ struct CoverFlowView: View {
         .animation(reduceMotion ? nil : .spring(response: 0.38, dampingFraction: 0.82), value: selectedIndex)
     }
 
+    /// The album title leads (Fraunces 52/56, text colour) and the artist
+    /// follows (Inter 29/36, body colour): title 821 to 877, artist 883 to 919.
     private var metadata: some View {
-        VStack(spacing: 8) {
-            Text(current?.artistDisplayName ?? "")
-                .font(.title3)
-                .foregroundStyle(.white.opacity(0.7))
-                .lineLimit(1)
+        VStack(spacing: 6) {
             Text(current?.title ?? "")
-                .font(.system(size: 34, weight: .semibold))
-                .foregroundStyle(.white)
+                .font(Theme.serif(Theme.Size.albumTitle))
+                .tracking(-Theme.Size.albumTitle * 0.02)
+                .foregroundStyle(Theme.text)
                 .lineLimit(1)
+                .frame(height: 56)
+            Text(current?.artistDisplayName ?? "")
+                .font(Theme.sans(Theme.Size.control))
+                .foregroundStyle(Theme.body)
+                .lineLimit(1)
+                .frame(height: 36)
         }
-        .padding(.horizontal, 80)
+        .padding(.horizontal, Theme.safeSide)
     }
 
     // MARK: - Layout math
@@ -256,7 +328,7 @@ private struct CoverFlowCard: View {
                 .shadow(color: .black.opacity(0.55), radius: prominent ? 32 : 14, y: 14)
             coverImage
                 .scaleEffect(x: 1, y: -1)
-                .frame(width: coverSize, height: coverSize / 6, alignment: .top)
+                .frame(width: coverSize, height: coverSize * 0.15, alignment: .top)
                 .clipped()
                 .mask(
                     LinearGradient(
