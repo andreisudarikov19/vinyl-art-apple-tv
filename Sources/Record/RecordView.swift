@@ -135,10 +135,6 @@ struct RecordView: View {
         }
         .task(id: release.preferredCoverURL) { await loadPalette() }
         .suppressesScreensaver(suppressesSystemScreensaver)
-        // Menu on the remote dismisses the cover; focus goes back to the notice.
-        .fullScreenCover(isPresented: $showingDiscogsQR, onDismiss: { discogsNoticeFocused = true }) {
-            DiscogsReleaseQRView(url: DiscogsNotice.releasePageURL(releaseId: release.releaseId))
-        }
     }
 
     /// Pulls the (already-cached) cover from Nuke once it's available and
@@ -334,8 +330,19 @@ struct RecordView: View {
                 leftColumn(model)
                     .frame(width: RecordLayout.leftWidth, height: leftHeight, alignment: .topLeading)
                     .padding(.top, sleeveDrop)
-                tracklist(model)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                // Choosing the Discogs line swaps the track list for its
+                // panel. The sleeve, title and table stay where they are.
+                Group {
+                    if showingDiscogsQR {
+                        DiscogsReleasePanel(releaseId: release.releaseId)
+                            .padding(.top, sleeveDrop)
+                            .transition(.opacity)
+                    } else {
+                        tracklist(model)
+                            .transition(.opacity)
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
             .padding(.leading, max(0, RecordLayout.side - safe.leading))
             .padding(.trailing, max(0, RecordLayout.side - safe.trailing))
@@ -546,7 +553,7 @@ struct RecordView: View {
     /// a QR code of the release page, as tvOS cannot open links.
     private var discogsNotice: some View {
         Button {
-            showingDiscogsQR = true
+            setDiscogsPanel(!showingDiscogsQR)
         } label: {
             DiscogsNoticeLabel()
         }
@@ -555,9 +562,18 @@ struct RecordView: View {
         .focusEffectDisabled()
         .focused($discogsNoticeFocused)
         .accessibilityHint("Shows a QR code for this release on discogs.com.")
-        // Its label carries 16 pt of padding at the sides; pull it back so
-        // the icon lines up with the table's left edge.
-        .padding(.leading, -16)
+        // Focus stays on the line while its panel is open, as nothing on the
+        // panel takes focus. Menu closes the panel and leaves focus here;
+        // with the panel closed, Menu goes back to the collection as usual.
+        .onExitCommand(perform: showingDiscogsQR ? { setDiscogsPanel(false) } : nil)
+        // Moving off the line closes the panel too, so the dial is never
+        // steered while the track list is hidden.
+        .onChange(of: discogsNoticeFocused) { _, focused in
+            if !focused { setDiscogsPanel(false) }
+        }
+        // The label keeps room for its focus pill at the sides; pull it back
+        // so the icon lines up with the table's left edge.
+        .padding(.leading, -DiscogsNoticeLabel.sidePadding)
     }
 
     /// The right column: the side dial, then the chosen side's tracks and
@@ -682,6 +698,14 @@ struct RecordView: View {
     }
 
     // MARK: - Behavior
+
+    /// Shows or hides the Discogs panel in place of the track list.
+    private func setDiscogsPanel(_ shown: Bool) {
+        guard shown != showingDiscogsQR else { return }
+        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) {
+            showingDiscogsQR = shown
+        }
+    }
 
     /// Moves a side that is longer than the screen. Does nothing to a side
     /// that fits, or at either end.
