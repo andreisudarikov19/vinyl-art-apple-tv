@@ -190,7 +190,7 @@ extension TideShape {
 /// The tide's timings, from the spec.
 enum TideTiming {
     /// Gallery: seconds without a press before the tide starts.
-    static let galleryIdle: TimeInterval = 60
+    static let galleryIdle: TimeInterval = 30
     /// Track list: seconds without a press before the tide starts.
     static let trackListIdle: TimeInterval = 15
     static let galleryFadeIn: TimeInterval = 3

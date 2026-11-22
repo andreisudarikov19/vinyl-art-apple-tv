@@ -69,7 +69,7 @@ struct TideClockTests {
 
 struct TideTimingTests {
     @Test func startsAtTheSpecTimes() {
-        #expect(TideTiming.galleryIdle == 60)
+        #expect(TideTiming.galleryIdle == 30)
         #expect(TideTiming.trackListIdle == 15)
     }
 
