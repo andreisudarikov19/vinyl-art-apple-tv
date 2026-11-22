@@ -9,7 +9,7 @@ struct SlideRuleScale: View {
     let current: Int
     /// The length of the list, for VoiceOver: "record 214 of 612".
     let total: Int
-    /// The ambient halo is on: the tape fades, the reading and needle drop to 70%.
+    /// The ambient halo is on: the tape fades, the reading drops to 70%, the needle glows.
     let idle: Bool
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -47,6 +47,8 @@ struct SlideRuleScale: View {
         .animation(reduceMotion ? .easeInOut(duration: 0.3) : .easeInOut(duration: 0.5), value: current)
         .animation(.easeInOut(duration: 0.8), value: idle)
         .animation(.easeInOut(duration: 0.3), value: moving)
+        // The needle's idle glow, behind the drawing and free to spill past the box.
+        .background { ScaleNeedleGlow(idle: idle) }
         .task(id: current) {
             moving = true
             try? await Task.sleep(for: .milliseconds(500))
@@ -144,7 +146,7 @@ private struct ScaleCanvas: View {
         )
     }
 
-    /// The needle: 4 pt yolk with a soft glow. Idle drops it to 70% and halves the glow.
+    /// The needle: 4 pt yolk with a soft glow. It stays lit at idle, when `ScaleNeedleGlow` comes up around it.
     private func drawNeedle(into context: GraphicsContext, size: CGSize) {
         var needleContext = context
         needleContext.opacity = ScaleIdleLook.opacity(idleLevel: ScaleIdleLook.needle, idle: idle) * needle

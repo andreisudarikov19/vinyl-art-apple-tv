@@ -9,15 +9,14 @@ struct ScaleIdleLookTests {
         #expect(ScaleIdleLook.opacity(idleLevel: ScaleIdleLook.needle, idle: 0) == 1)
     }
 
-    @Test func idleDropsTheTapeToThirtyAndTheReadingAndNeedleToSeventy() {
+    @Test func idleDropsTheTapeToThirtyAndTheReadingToSeventyAndKeepsTheNeedleLit() {
         #expect(abs(ScaleIdleLook.opacity(idleLevel: ScaleIdleLook.tape, idle: 1) - 0.3) < 1e-9)
         #expect(abs(ScaleIdleLook.opacity(idleLevel: ScaleIdleLook.reading, idle: 1) - 0.7) < 1e-9)
-        #expect(abs(ScaleIdleLook.opacity(idleLevel: ScaleIdleLook.needle, idle: 1) - 0.7) < 1e-9)
+        #expect(ScaleIdleLook.opacity(idleLevel: ScaleIdleLook.needle, idle: 1) == 1)
     }
 
-    @Test func theNeedlesGlowIsHalvedButStillThere() {
-        #expect(abs(ScaleIdleLook.opacity(idleLevel: ScaleIdleLook.glow, idle: 1) - 0.5) < 1e-9)
-        #expect(ScaleIdleLook.opacity(idleLevel: ScaleIdleLook.glow, idle: 1) > 0)
+    @Test func theNeedlesOwnGlowStaysAtIdle() {
+        #expect(ScaleIdleLook.opacity(idleLevel: ScaleIdleLook.glow, idle: 1) == 1)
     }
 
     @Test func thePathBetweenUseAndIdleIsLinear() {

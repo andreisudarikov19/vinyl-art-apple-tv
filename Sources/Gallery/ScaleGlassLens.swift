@@ -15,7 +15,7 @@ struct GlassLensScale: View {
     let current: Int
     /// The length of the list, for VoiceOver: "record 214 of 612".
     let total: Int
-    /// The ambient halo is on: the tape fades, the lens, reading and needle drop to 70%.
+    /// The ambient halo is on: the tape fades, the lens and reading drop to 70%, the needle glows.
     let idle: Bool
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -29,10 +29,13 @@ struct GlassLensScale: View {
         ZStack {
             if usesSystemGlass {
                 // Bottom to top: the tape, the glass, then what sits on it.
+                // The needle's idle glow is on the glass, under the needle.
                 canvas(.tape)
                 lensGlass
+                ScaleNeedleGlow(idle: idle)
                 canvas(.marks)
             } else {
+                ScaleNeedleGlow(idle: idle)
                 canvas(.all, drawsGlass: true)
             }
         }
@@ -349,7 +352,7 @@ private struct LensCanvas: View {
         )
     }
 
-    /// The needle: 4 pt yolk with a soft glow. Idle drops it to 70% and halves the glow.
+    /// The needle: 4 pt yolk with a soft glow. It stays lit at idle, when `ScaleNeedleGlow` comes up around it.
     private func drawNeedle(into context: GraphicsContext, size: CGSize) {
         var needleContext = context
         needleContext.opacity = ScaleIdleLook.opacity(idleLevel: ScaleIdleLook.needle, idle: idle) * needle
