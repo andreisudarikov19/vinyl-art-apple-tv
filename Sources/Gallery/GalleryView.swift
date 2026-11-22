@@ -54,8 +54,8 @@ struct GalleryView: View {
                     .disabled(menu != nil)
                     .onExitCommand(perform: releases.isEmpty ? nil : { toolbarFocus = lastToolbarStop })
                 toolbar
-                    .opacity(tideEngaged ? 0 : 1)
-                    .animation(.easeInOut(duration: tideEngaged ? TideTiming.galleryFadeIn : TideTiming.galleryFadeOut), value: tideEngaged)
+                    .opacity(toolbarIsShown ? 1 : 0)
+                    .animation(.easeInOut(duration: toolbarFadeTime), value: toolbarIsShown)
             }
             .navigationDestination(item: $selected) { release in
                 recordScreen(for: release)
@@ -89,6 +89,41 @@ struct GalleryView: View {
             // Back from Settings: focus returns visibly to the Settings control.
             if !showing { focusSettingsSoon() }
         }
+    }
+
+    /// In the Gallery the toolbar fades out while the tide moves. In the Grid
+    /// it is on screen only while it has focus or one of its menus is open.
+    private var toolbarIsShown: Bool {
+        if releases.isEmpty { return true }
+        switch layout {
+        case .coverFlow: return !tideEngaged
+        case .grid: return toolbarFocus != nil || menu != nil
+        }
+    }
+
+    private var toolbarFadeTime: TimeInterval {
+        if layout == .grid { return GridLook.toolbarFade }
+        return tideEngaged ? TideTiming.galleryFadeIn : TideTiming.galleryFadeOut
+    }
+
+    /// The Grid, with what it shares with the Gallery: the record the
+    /// collection is on, the scale's tape and the filter. A repeated record
+    /// is shown once, and the tape is cut to match.
+    private var gridView: some View {
+        var seen: Set<Int> = []
+        let entries = browsed.filter { seen.insert($0.release.releaseId).inserted }
+        return MosaicGridView(
+            releases: entries.map(\.release),
+            onOpen: { release in openRecord(release) },
+            onMoveUp: { toolbarFocus = lastToolbarStop },
+            landingID: browsedReleaseID,
+            reveal: reveal,
+            onBrowse: { browsedReleaseID = $0 },
+            tape: ScaleTape(groups: entries.map(\.group)),
+            filterGenre: filter?.genre,
+            filterStyle: filter?.style,
+            toolbarShown: toolbarIsShown
+        )
     }
 
     /// The one toolbar for both views, floating over the collection.
@@ -310,11 +345,7 @@ struct GalleryView: View {
                     tideEngaged: $tideEngaged
                 )
             case .grid:
-                MosaicGridView(
-                    releases: GalleryArranger.uniqued(arranged),
-                    onOpen: { release in openRecord(release) },
-                    onMoveUp: { toolbarFocus = lastToolbarStop }
-                )
+                gridView
             }
         }
     }
