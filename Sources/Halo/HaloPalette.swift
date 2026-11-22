@@ -41,8 +41,9 @@ struct HaloPalette: Equatable, Sendable {
     init(pixels: [RGB], side: Int) {
         precondition(pixels.count == side * side && side >= 4)
         let labs = pixels.map { OKLab($0) }
-        colours = Self.chosenColours(labs)
-        edges = Self.edgeColours(labs, side: side)
+        let groups = Self.clusters(labs)
+        colours = Self.chosenColours(centres: groups.centres, area: groups.area)
+        edges = Self.edgeColours(labs, side: side, centres: groups.centres)
     }
 
     init(colours: [OKLab], edges: [OKLab]) {
@@ -132,8 +133,7 @@ struct HaloPalette: Equatable, Sendable {
         return (centres, area)
     }
 
-    private static func chosenColours(_ labs: [OKLab]) -> [OKLab] {
-        let (centres, area) = clusters(labs)
+    private static func chosenColours(centres: [OKLab], area: [Double]) -> [OKLab] {
         // The group that counts for most: its area times its colour weight.
         let counts = (0..<clusterCount).map { area[$0] * colourWeight(centres[$0]) }
         var largest = 0
@@ -155,22 +155,41 @@ struct HaloPalette: Equatable, Sendable {
         return out
     }
 
-    /// The colour of a strip a quarter of the image deep along each side: the
-    /// mean of its pixels, each counted by its colour weight, then toned.
-    private static func edgeColours(_ labs: [OKLab], side: Int) -> [OKLab] {
+    /// The colour of a strip a quarter of the image deep along each side.
+    /// The strip's pixels are sorted into the sleeve's colour groups; the
+    /// group that counts for most in the strip, each pixel counted by its
+    /// colour weight, gives the colour: the weighted mean of that group's
+    /// pixels in the strip, then toned. One strong colour is picked, never a
+    /// blend of several, which turns a many-coloured sleeve brown.
+    private static func edgeColours(_ labs: [OKLab], side: Int, centres: [OKLab]) -> [OKLab] {
         let depth = side / 4
         func strip(_ keep: (_ x: Int, _ y: Int) -> Bool) -> OKLab {
-            var sum = OKLab(l: 0, a: 0, b: 0)
-            var n = 0.0
+            var sums = [OKLab](repeating: OKLab(l: 0, a: 0, b: 0), count: centres.count)
+            var totals = [Double](repeating: 0, count: centres.count)
             for y in 0..<side {
                 for x in 0..<side where keep(x, y) {
                     let p = labs[y * side + x]
+                    // The nearest group; a tie goes to the lowest index.
+                    var nearest = 0
+                    var nearestDistance = p.distanceSquared(to: centres[0])
+                    for j in 1..<centres.count {
+                        let distance = p.distanceSquared(to: centres[j])
+                        if distance < nearestDistance {
+                            nearest = j
+                            nearestDistance = distance
+                        }
+                    }
                     let weight = colourWeight(p)
-                    sum.l += p.l * weight; sum.a += p.a * weight; sum.b += p.b * weight
-                    n += weight
+                    sums[nearest].l += p.l * weight
+                    sums[nearest].a += p.a * weight
+                    sums[nearest].b += p.b * weight
+                    totals[nearest] += weight
                 }
             }
-            return toned(OKLab(l: sum.l / n, a: sum.a / n, b: sum.b / n))
+            var best = 0
+            for j in 1..<centres.count where totals[j] > totals[best] { best = j }
+            let n = totals[best]
+            return toned(OKLab(l: sums[best].l / n, a: sums[best].a / n, b: sums[best].b / n))
         }
         return [
             strip { x, _ in x >= side - depth },
