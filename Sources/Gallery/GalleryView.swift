@@ -81,9 +81,17 @@ struct GalleryView: View {
         .onChange(of: toolbarFocus) { _, new in
             if let new {
                 lastToolbarStop = new.control
+                // Held on screen by more than its focus: see below.
+                toolbarCalled = true
             } else {
-                // Focus has left the toolbar: in the Grid it goes away again.
-                toolbarCalled = false
+                // Focus has left the toolbar: in the Grid it goes away again,
+                // but not at once. Between two of its controls focus is
+                // nowhere for an instant, and a toolbar that turned
+                // transparent in that instant would refuse the focus.
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(250))
+                    if toolbarFocus == nil { toolbarCalled = false }
+                }
             }
         }
         .onChange(of: selected == nil) { wasNil, isNil in

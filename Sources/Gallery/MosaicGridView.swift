@@ -62,9 +62,7 @@ struct MosaicGridView: View {
     var body: some View {
         GeometryReader { proxy in
             let grid = GridMeasures(size: proxy.size, count: releases.count)
-            Button {
-                select()
-            } label: {
+            ZStack(alignment: .topLeading) {
                 ZStack(alignment: .topLeading) {
                     CollectionGlowBackground(glowColor: glowColor)
                     wall(grid)
@@ -81,14 +79,27 @@ struct MosaicGridView: View {
                 }
                 .frame(width: proxy.size.width, height: proxy.size.height)
                 .clipped()
+                // What takes focus is a clear control over the wall that
+                // starts below the toolbar. Were it the whole screen, it
+                // would lie behind the toolbar too, and Left and Right on
+                // the toolbar would fall through to the wall.
+                Button {
+                    select()
+                } label: {
+                    Color.clear
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(GridBareButtonStyle())
+                .focusEffectDisabled()
+                .focused($focused)
+                .accessibilityLabel(current?.galleryAccessibilityLabel ?? "")
+                .onMoveCommand { direction in
+                    move(direction)
+                }
+                .padding(.top, GridLook.focusTop)
             }
-            .buttonStyle(GridBareButtonStyle())
-            .focusEffectDisabled()
-            .focused($focused)
-            .accessibilityLabel(current?.galleryAccessibilityLabel ?? "")
-            .onMoveCommand { direction in
-                move(direction)
-            }
+            .frame(width: proxy.size.width, height: proxy.size.height)
         }
         .ignoresSafeArea()
         .onAppear {
@@ -406,6 +417,8 @@ enum GridLook {
     static let sleeveRadius: CGFloat = 16
 
     static let toolbarFadeHeight: CGFloat = 260
+    /// The wall's focus target starts here, clear of the toolbar's row.
+    static let focusTop: CGFloat = 170
     static let toolbarFade: TimeInterval = 0.25
 
     /// The scale sits where the Gallery's does.
