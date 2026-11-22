@@ -33,6 +33,8 @@ struct CoverFlowView: View {
     /// Reports the record under the needle, so the gallery can keep it there
     /// when the sort or filter changes.
     var onBrowse: (Int) -> Void = { _ in }
+    /// The scale under the cover: one group per entry of `releases`.
+    var tape = ScaleTape(groups: [])
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var selectedIndex = 0
@@ -83,6 +85,7 @@ struct CoverFlowView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             if !releases.isEmpty {
                 countLabel
+                scale
             }
         }
         .ignoresSafeArea()
@@ -218,9 +221,17 @@ struct CoverFlowView: View {
         .ignoresSafeArea()
     }
 
+    /// The scale under the cover, 944 to 1016 pt. It goes to its idle look
+    /// while the halo is on.
+    private var scale: some View {
+        SlideRuleScale(tape: tape, current: selectedIndex, total: releases.count, idle: haloEngaged)
+            .frame(maxWidth: .infinity, alignment: .top)
+            .padding(.top, scaleBoxTop)
+    }
+
     /// "214 / 612", DM Mono 25 in quiet, right-aligned at the 80 pt margin and
     /// centred on the scale's box. Counts the browsed list, so a genre filter
-    /// shows its own total.
+    /// shows its own total. VoiceOver hears the count from the scale.
     private var countLabel: some View {
         HStack {
             Spacer(minLength: 0)
@@ -232,6 +243,7 @@ struct CoverFlowView: View {
         .frame(height: scaleBoxHeight)
         .frame(maxWidth: .infinity, alignment: .top)
         .padding(.top, scaleBoxTop)
+        .accessibilityHidden(true)
     }
 
     private var flow: some View {

@@ -42,6 +42,13 @@ struct StyleOption: Identifiable, Equatable {
     var id: String { name }
 }
 
+/// One place of the browsed list: the record, and the group it sits under
+/// on the scale (a year, a letter or a genre).
+struct GalleryEntry {
+    let release: CachedRelease
+    let group: String
+}
+
 /// Pure sort/filter logic for the gallery, kept separate from the view so it
 /// can be unit-tested without SwiftData or UI.
 enum GalleryArranger {
@@ -74,6 +81,17 @@ enum GalleryArranger {
         sort: GallerySort,
         filter: GalleryFilter?
     ) -> [CachedRelease] {
+        entries(releases, sort: sort, filter: filter).map(\.release)
+    }
+
+    /// The browsed list, each entry with the group it sits under on the
+    /// scale. A record with several genres has one entry per genre in the
+    /// genre sort, so the list and the scale always have the same length.
+    static func entries(
+        _ releases: [CachedRelease],
+        sort: GallerySort,
+        filter: GalleryFilter?
+    ) -> [GalleryEntry] {
         let filtered: [CachedRelease]
         if let filter {
             filtered = releases.filter(filter.matches)
@@ -83,26 +101,41 @@ enum GalleryArranger {
 
         switch sort {
         case .recentlyAdded:
-            return filtered.sorted { $0.dateAdded > $1.dateAdded }
+            return filtered
+                .sorted { $0.dateAdded > $1.dateAdded }
+                .map { GalleryEntry(release: $0, group: ScaleGroup.year(addedYear($0))) }
         case .artist:
-            return filtered.sorted { ordered($0.artistDisplayName, $1.artistDisplayName, then: $0.title, $1.title) }
+            return filtered
+                .sorted { ordered($0.artistDisplayName, $1.artistDisplayName, then: $0.title, $1.title) }
+                .map { GalleryEntry(release: $0, group: ScaleGroup.letter(for: $0.artistDisplayName)) }
         case .album:
-            return filtered.sorted { ordered($0.title, $1.title, then: $0.artistDisplayName, $1.artistDisplayName) }
+            return filtered
+                .sorted { ordered($0.title, $1.title, then: $0.artistDisplayName, $1.artistDisplayName) }
+                .map { GalleryEntry(release: $0, group: ScaleGroup.letter(for: $0.title)) }
         case .year:
-            return filtered.sorted {
-                if $0.year != $1.year { return $0.year < $1.year }
-                return $0.artistDisplayName.localizedStandardCompare($1.artistDisplayName) == .orderedAscending
-            }
+            // Records with no year come last, in their own "Unknown" group.
+            return filtered
+                .sorted {
+                    if ($0.year > 0) != ($1.year > 0) { return $0.year > 0 }
+                    if $0.year != $1.year { return $0.year < $1.year }
+                    return $0.artistDisplayName.localizedStandardCompare($1.artistDisplayName) == .orderedAscending
+                }
+                .map { GalleryEntry(release: $0, group: ScaleGroup.year($0.year)) }
         case .genre:
             return byGenre(filtered, only: filter?.genre)
         }
+    }
+
+    /// The year a record was added, for the recently added sort's scale.
+    private static func addedYear(_ release: CachedRelease) -> Int {
+        Calendar.current.component(.year, from: release.dateAdded)
     }
 
     /// Genre sort: genres A to Z, records by artist then album inside each.
     /// A record with several genres appears under each of them. With a genre
     /// filter on, only that genre's group is listed. Records with no genre
     /// come last.
-    private static func byGenre(_ releases: [CachedRelease], only genre: String?) -> [CachedRelease] {
+    private static func byGenre(_ releases: [CachedRelease], only genre: String?) -> [GalleryEntry] {
         var entries: [(genre: String, release: CachedRelease)] = []
         for release in releases {
             let groups: [String]
@@ -125,7 +158,7 @@ enum GalleryArranger {
                 then: lhs.release.title, rhs.release.title
             )
         }
-        .map(\.release)
+        .map { GalleryEntry(release: $0.release, group: ScaleGroup.genre($0.genre)) }
     }
 
     /// The releases with each one kept once, at its first place. The grid

@@ -148,4 +148,42 @@ struct GalleryArrangerTests {
         #expect(GalleryArranger.index(of: 9, in: input) == 0)
         #expect(GalleryArranger.index(of: nil, in: input) == 0)
     }
+
+    @Test func yearSortPutsRecordsWithoutYearLastInTheirOwnGroup() {
+        let input = [
+            release(id: 1, year: 0),
+            release(id: 2, year: 1999),
+        ]
+        let entries = GalleryArranger.entries(input, sort: .year, filter: nil)
+        #expect(entries.map(\.release.releaseId) == [2, 1])
+        #expect(entries.map(\.group) == ["1999", "Unknown"])
+    }
+
+    @Test func artistAndAlbumSortsGroupByFirstLetter() {
+        let input = [
+            release(id: 1, title: "Zed", artist: "10cc"),
+            release(id: 2, title: "Abbey", artist: "The Beatles"),
+        ]
+        let byArtist = GalleryArranger.entries(input, sort: .artist, filter: nil)
+        #expect(byArtist.map(\.group) == ["#", "T"])
+        let byAlbum = GalleryArranger.entries(input, sort: .album, filter: nil)
+        #expect(byAlbum.map(\.group) == ["A", "Z"])
+    }
+
+    @Test func recentlyAddedGroupsByTheYearAdded() {
+        let input = [release(id: 1, daysAgo: 0)]
+        let entries = GalleryArranger.entries(input, sort: .recentlyAdded, filter: nil)
+        let year = String(Calendar.current.component(.year, from: Date()))
+        #expect(entries.map(\.group) == [year])
+    }
+
+    @Test func genreSortHasOneEntryPerGenreWithThatGenreAsItsGroup() {
+        let input = [
+            release(id: 1, title: "X", artist: "Ana", genres: ["Rock", "Pop"]),
+            release(id: 2, title: "Y", artist: "Bo", genres: []),
+        ]
+        let entries = GalleryArranger.entries(input, sort: .genre, filter: nil)
+        #expect(entries.map(\.group) == ["Pop", "Rock", "Unknown"])
+        #expect(entries.map(\.release.releaseId) == [1, 1, 2])
+    }
 }
