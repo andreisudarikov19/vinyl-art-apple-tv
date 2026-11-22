@@ -84,7 +84,7 @@ struct SettingsView: View {
         }
         .ignoresSafeArea()
         .animation(.easeInOut(duration: 0.2), value: showingSignOut)
-        .onExitCommand(perform: exitAction)
+        .onExitCommand { handleExit() }
         .onChange(of: focus) { _, stop in
             if let stop { described = stop }
         }
@@ -344,12 +344,18 @@ struct SettingsView: View {
     // MARK: - Behaviour
 
     /// What Menu does. In the sign-out dialog it is the same as Cancel; on a
-    /// screen inside Settings it steps back. On the main screen it is left
-    /// alone, and closes Settings.
-    private var exitAction: (() -> Void)? {
-        if showingSignOut { return closeSignOut }
-        if page != .main { return { open(.main) } }
-        return nil
+    /// screen inside Settings it steps back; on the main screen it closes
+    /// Settings. The handler is always in place and closes Settings itself:
+    /// one that was only switched on inside a screen was not picked up, and
+    /// Menu there closed all of Settings.
+    private func handleExit() {
+        if showingSignOut {
+            closeSignOut()
+        } else if page != .main {
+            open(.main)
+        } else {
+            dismiss()
+        }
     }
 
     /// Closes the sign-out dialog and puts focus back on its row.
