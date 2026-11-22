@@ -44,20 +44,20 @@ struct RecordView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var viewModel: RecordViewModel?
-    @State private var toast: String?
-    @State private var toastTask: Task<Void, Never>?
+    @Environment(\.modelContext) private var modelContext
+    /// The cover view's status line, "HALO ON" or "HALO OFF", and the task
+    /// that takes it away after three seconds.
+    @State private var haloStatus: String?
+    @State private var haloStatusTask: Task<Void, Never>?
 
     @Query private var preferences: [UserPreferences]
     /// The sleeve's colours for the track list's tide.
     @State private var tidePalette: HaloPalette = .placeholder
-    @State private var autoHaloEngaged: Bool = false
-    // Manual-mode pill state. Persists across records within an app session
-    // (so toggling the halo on for one record keeps it on when you return);
-    // resets to false on app launch via UserDefaults clearing in App.init.
-    @AppStorage("haloPillEngaged") private var manualHaloEngaged: Bool = false
+    /// The cover view's halo has waited out its three seconds of dark and
+    /// may show, if its switch says so.
+    @State private var haloWaitIsOver = false
     @State private var idleTask: Task<Void, Never>?
     @FocusState private var screenFocused: Bool
-    @FocusState private var pillFocused: Bool
     @FocusState private var discogsNoticeFocused: Bool
     @FocusState private var stickerFocused: Bool
     @State private var showingDiscogsQR = false
@@ -84,20 +84,23 @@ struct RecordView: View {
     @State private var backdropFrozenTime: TimeInterval = 0
     @State private var backdropIdleTask: Task<Void, Never>?
 
-    private var isAutoHalo: Bool {
-        preferences.first?.haloAutoEngage ?? true
+    /// The three ambient-light switches (spec 03). Until Settings can change
+    /// them they are what the old single switch gives: see `HaloSettings`.
+    private var haloSettings: HaloSettings {
+        preferences.first?.haloSettings ?? HaloSettings()
     }
 
     /// The track list's switch, Ambient halo › Track list. Off by default.
     private var isTrackListTideOn: Bool {
-        (preferences.first?.haloSettings ?? HaloSettings()).trackList == .on
+        haloSettings.trackList == .on
     }
 
-    /// Whether the halo should currently be drawn. Only true while we're on
-    /// the cover-focused stage — informative view has its own backdrop.
+    /// Whether the halo is drawn: only in the cover view, only when its
+    /// switch (or the last Left or Right in Manual) says on, and only once
+    /// the three seconds of dark are over.
     private var isHaloEngaged: Bool {
         guard viewModel?.displayMode == .coverFocused else { return false }
-        return isAutoHalo ? autoHaloEngaged : manualHaloEngaged
+        return haloSettings.coverHaloIsOn && haloWaitIsOver
     }
 
     /// True whenever the informative-view backdrop ambient drift is running
@@ -155,25 +158,54 @@ struct RecordView: View {
         }
     }
 
-    // MARK: - Halo idle timer (cover-focused, auto mode)
+    // MARK: - The cover view's halo (spec 05)
 
-    /// Resets the cover-focused idle timer: halo off now, will re-engage after
-    /// 3 seconds with no further input. Called on entering cover-focused and
-    /// on every user input while there. Only used in auto mode.
-    private func restartHaloIdleTimer() {
+    /// Starts the halo's three seconds of dark, after which it fades in over
+    /// three more. Called on opening the cover view and after Right in Manual.
+    /// Does nothing more than stay dark when the halo is off.
+    private func startHaloWait() {
         idleTask?.cancel()
-        autoHaloEngaged = false
+        haloWaitIsOver = false
+        guard haloSettings.coverHaloIsOn else { return }
         idleTask = Task { @MainActor in
             try? await Task.sleep(for: .seconds(3))
             guard !Task.isCancelled else { return }
-            autoHaloEngaged = true
+            haloWaitIsOver = true
         }
     }
 
-    private func cancelHaloIdleTimer() {
+    private func cancelHaloWait() {
         idleTask?.cancel()
         idleTask = nil
-        autoHaloEngaged = false
+        haloWaitIsOver = false
+    }
+
+    /// Left and Right in the cover view. In Manual, Left turns the halo off
+    /// and Right turns it on; the choice is kept, also between launches, and
+    /// the status line answers every press, including one that changes
+    /// nothing. With the switch On or Off the remote has no say.
+    private func setManualHalo(_ on: Bool) {
+        guard haloSettings.coverView == .manual else { return }
+        if haloSettings.manualCoverHaloOn != on {
+            UserPreferences.current(in: modelContext).haloSettings.manualCoverHaloOn = on
+            if on {
+                startHaloWait()
+            } else {
+                cancelHaloWait()
+            }
+        }
+        showHaloStatus(on ? "HALO ON" : "HALO OFF")
+    }
+
+    /// Shows the status line at once and takes it away after three seconds.
+    private func showHaloStatus(_ text: String) {
+        haloStatusTask?.cancel()
+        haloStatus = text
+        haloStatusTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(3))
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeOut(duration: 0.4)) { haloStatus = nil }
+        }
     }
 
     // MARK: - Backdrop ambient idle timer (informative view)
@@ -227,94 +259,50 @@ struct RecordView: View {
     private func interactive(_ model: RecordViewModel) -> some View {
         // The design called for a subtle haptic on each side flip, but tvOS
         // exposes no Siri Remote haptics API (no .sensoryFeedback, no usable
-        // CoreHaptics hardware), so the flip is confirmed visually only: the
-        // tracklist/side header update in informative view, and the side toast
-        // in cover-focused view.
+        // CoreHaptics hardware), so the flip is confirmed visually only, by
+        // the dial and the track list.
         Button {
-            changeSide(on: model, forward: true)
+            // Select changes side on the record screen. In the cover view it
+            // does nothing: that view is a display.
+            if model.displayMode == .informative {
+                changeSide(on: model, forward: true)
+            }
         } label: {
             // top-leading alignment so a tall informative stage (lots of
             // tracks with multiple credits) anchors at the top instead of
-            // being centred — the latter would push the cover above the
-            // visible area as the tracklist grew. The toast overrides with
-            // its own centred frame so it still appears mid-screen.
+            // being centred.
             ZStack(alignment: .topLeading) {
                 if model.displayMode == .coverFocused {
                     coverFocusedStage(model).transition(.opacity)
                 } else {
                     informativeStage(model).transition(.opacity)
                 }
-                toastOverlay
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        // The whole screen is the main focusable control (the manual-mode
-        // halo pill is a sibling focus target). `.plain` + focusEffectDisabled
+        // The whole screen is the main focusable control. `.plain` + focusEffectDisabled
         // still leaves a focus ring framing the screen edge on tvOS, so use a
         // custom style that renders only the label.
         .buttonStyle(AmbientButtonStyle())
         .focusEffectDisabled()
         .focused($screenFocused)
         .accessibilityLabel("\(release.artistDisplayName), \(release.title)")
-        .accessibilityHint("Swipe left or right to change sides. Swipe down and up to read a long side. Swipe up for the cover, down for the tracklist.")
+        .accessibilityHint("Swipe left or right to change sides. Swipe down and up to read a long side. Swipe up for the cover; there, left and right turn the halo off and on, and down returns.")
         .onMoveCommand { direction in
-            let wasCoverFocused = model.displayMode == .coverFocused
-            switch direction {
-            case .up:
-                if wasCoverFocused, !isAutoHalo {
-                    // Manual mode + already on cover stage: up reaches for the
-                    // halo pill that lives below the cover (the focus engine
-                    // wouldn't find it through "up" on its own).
-                    pillFocused = true
-                } else if !wasCoverFocused, listOffset > 0 {
-                    // A long side that has been scrolled goes back up first;
-                    // Up opens the cover view only from the top of the list.
-                    scrollList(forward: false)
-                } else {
-                    setMode(.coverFocused, on: model)
-                }
-            case .down:
-                if wasCoverFocused {
-                    setMode(.informative, on: model)
-                } else {
-                    // On a side longer than the screen, Down reads on. A side
-                    // that fits does not move.
-                    scrollList(forward: true)
-                }
-            case .right: changeSide(on: model, forward: true)
-            case .left:
-                if !wasCoverFocused, model.currentSideIndex == 0 {
-                    // Left from the first side goes to the left column: the
-                    // sticker on a suggested record, otherwise the Discogs line.
-                    if onAnotherSuggestion != nil {
-                        stickerFocused = true
-                    } else {
-                        discogsNoticeFocused = true
-                    }
-                } else {
-                    changeSide(on: model, forward: false)
-                }
-            default: break
-            }
-            // Strict "any input -> halo off, 3s idle to re-engage" rule for
-            // auto mode whenever we stay on the cover-focused stage.
-            if isAutoHalo, model.displayMode == .coverFocused {
-                restartHaloIdleTimer()
-            }
-            // Same rule for the informative backdrop, with a 15 s idle
-            // window: any directional input restarts the wait.
-            if model.displayMode == .informative {
-                restartBackdropIdleTimer()
+            if model.displayMode == .coverFocused {
+                moveInCoverView(direction, on: model)
+            } else {
+                moveOnRecordScreen(direction, on: model)
             }
         }
         .task(id: model.displayMode) {
             // Mode transitions arm the relevant idle timer for the stage
             // we're entering, and cancel the one we're leaving.
-            if model.displayMode == .coverFocused, isAutoHalo {
-                restartHaloIdleTimer()
+            if model.displayMode == .coverFocused {
+                startHaloWait()
             } else {
-                cancelHaloIdleTimer()
+                cancelHaloWait()
+                haloStatus = nil
             }
             if model.displayMode == .informative {
                 restartBackdropIdleTimer()
@@ -375,12 +363,20 @@ struct RecordView: View {
             HaloLight(palette: tidePalette, isEngaged: isHaloEngaged, sleeveSide: 820)
                 .ignoresSafeArea()
             featuredCover(820)
-            if !isAutoHalo {
+            // The only text this view ever shows: "HALO ON" or "HALO OFF",
+            // 24 pt under the sleeve, for three seconds after Left or Right
+            // in Manual.
+            if let haloStatus {
                 VStack {
                     Spacer()
-                    haloPill
-                        .padding(.bottom, 28)
+                    Text(haloStatus)
+                        .font(Theme.mono(Theme.Size.small, medium: true))
+                        .tracking(Theme.Size.small * Theme.eyebrowTracking)
+                        .foregroundStyle(Theme.body)
+                        .padding(.bottom, 16)
                 }
+                .transition(.opacity)
+                .accessibilityHidden(true)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -405,48 +401,6 @@ struct RecordView: View {
                     coverBreath = 1.03
                 }
             }
-    }
-
-    /// Manual-mode toggle pill: liquid glass capsule below the cover.
-    /// Only rendered when haloAutoEngage is OFF.
-    private var haloPill: some View {
-        Button {
-            manualHaloEngaged.toggle()
-        } label: {
-            HStack(spacing: 10) {
-                Image(systemName: "circle.dotted")
-                Text("Halo")
-            }
-            .font(.system(size: 24, weight: .semibold))
-            .foregroundStyle(manualHaloEngaged ? .black : .white)
-            .padding(.horizontal, 28)
-            .padding(.vertical, 14)
-            .background {
-                if manualHaloEngaged {
-                    Capsule().fill(.white.opacity(0.92))
-                } else {
-                    haloPillGlass
-                }
-            }
-        }
-        .buttonStyle(.plain)
-        .focused($pillFocused)
-        .accessibilityLabel(manualHaloEngaged ? "Halo on" : "Halo off")
-        .accessibilityHint("Toggles the ambient halo around the cover.")
-        // Down from the pill returns focus to the cover-screen button. Other
-        // directions are no-ops (pill is the only horizontal control here).
-        .onMoveCommand { direction in
-            if direction == .down { screenFocused = true }
-        }
-    }
-
-    @ViewBuilder
-    private var haloPillGlass: some View {
-        if #available(tvOS 26.0, *) {
-            Capsule().fill(.regularMaterial).glassEffect()
-        } else {
-            Capsule().fill(.regularMaterial)
-        }
     }
 
     // MARK: - Pieces
@@ -722,19 +676,6 @@ struct RecordView: View {
         }
     }
 
-    @ViewBuilder
-    private var toastOverlay: some View {
-        if let toast {
-            Text(toast)
-                .font(.system(size: 56, weight: .bold))
-                .foregroundStyle(.white)
-                .padding(.horizontal, 48)
-                .padding(.vertical, 28)
-                .background(.black.opacity(0.55), in: Capsule())
-                .transition(.opacity)
-        }
-    }
-
     /// Hides the list outside its part of the column, and fades its top or
     /// bottom edge while there is more to read that way.
     private var listFade: some View {
@@ -785,22 +726,65 @@ struct RecordView: View {
         }
     }
 
-    /// Switches to the next/previous side. In cover-focused view the overlay is
-    /// hidden, so a brief "Side B" toast confirms the change.
+    /// Switches to the next or previous side of the record screen. The
+    /// dial and the track list show the change.
     private func changeSide(on model: RecordViewModel, forward: Bool) {
-        let moved = forward ? model.flipToNextSide() : model.flipToPreviousSide()
-        if moved, model.displayMode == .coverFocused, let side = model.currentSide {
-            showToast(side.name)
+        if forward {
+            model.flipToNextSide()
+        } else {
+            model.flipToPreviousSide()
         }
     }
 
-    private func showToast(_ text: String) {
-        toastTask?.cancel()
-        withAnimation { toast = text }
-        toastTask = Task {
-            try? await Task.sleep(for: .seconds(2))
-            guard !Task.isCancelled else { return }
-            withAnimation { toast = nil }
+    /// The remote on the record screen: Left and Right change side, Down
+    /// and Up read a long side, Up from the top opens the cover view.
+    private func moveOnRecordScreen(_ direction: MoveCommandDirection, on model: RecordViewModel) {
+        switch direction {
+        case .up:
+            if listOffset > 0 {
+                // A long side that has been scrolled goes back up first;
+                // Up opens the cover view only from the top of the list.
+                scrollList(forward: false)
+            } else {
+                setMode(.coverFocused, on: model)
+            }
+        case .down:
+            // On a side longer than the screen, Down reads on. A side
+            // that fits does not move.
+            scrollList(forward: true)
+        case .right:
+            changeSide(on: model, forward: true)
+        case .left:
+            if model.currentSideIndex == 0 {
+                // Left from the first side goes to the left column: the
+                // sticker on a suggested record, otherwise the Discogs line.
+                if onAnotherSuggestion != nil {
+                    stickerFocused = true
+                } else {
+                    discogsNoticeFocused = true
+                }
+            } else {
+                changeSide(on: model, forward: false)
+            }
+        default:
+            break
+        }
+        // Any press holds the track list's tide still for another 15 s.
+        if model.displayMode == .informative {
+            restartBackdropIdleTimer()
+        }
+    }
+
+    /// The remote in the cover view (spec 05). Down returns to the track
+    /// list. In Manual, Left turns the halo off and Right turns it on. Up
+    /// does nothing, and no press interrupts the light: this view is a
+    /// display, and a stray press should leave it alone.
+    private func moveInCoverView(_ direction: MoveCommandDirection, on model: RecordViewModel) {
+        switch direction {
+        case .down: setMode(.informative, on: model)
+        case .left: setManualHalo(false)
+        case .right: setManualHalo(true)
+        default: break
         }
     }
 }
