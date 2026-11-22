@@ -19,6 +19,8 @@ final class RecordViewModel {
 
     private(set) var loadState: LoadState = .loading
     private(set) var sides: [RecordSide] = []
+    /// The country of this pressing, known once the release has loaded.
+    private(set) var country: String?
     private(set) var currentSideIndex = 0
     private(set) var displayMode: DisplayMode = .informative
 
@@ -33,6 +35,12 @@ final class RecordViewModel {
         sides.indices.contains(currentSideIndex) ? sides[currentSideIndex] : nil
     }
 
+    /// The duration of every track on every side, for the LENGTH row. A suite
+    /// counts once, as the list shows it.
+    var durations: [String] {
+        sides.flatMap(\.tracks).map(\.duration)
+    }
+
     var isOnFinalSide: Bool {
         currentSideIndex >= sides.count - 1
     }
@@ -42,6 +50,7 @@ final class RecordViewModel {
         do {
             let detail = try await loadDetail(release.releaseId)
             sides = RecordSides.from(detail.tracklist)
+            country = detail.country
             currentSideIndex = 0
             loadState = .loaded
         } catch {

@@ -330,6 +330,31 @@ struct RecordViewModelTests {
         )
     }
 
+    @Test func loadKeepsTheCountryAndEveryDuration() async throws {
+        let object: [String: Any] = [
+            "id": 1, "title": "Album", "country": "Netherlands",
+            "tracklist": [track("A1", "One", duration: "2:36"), track("B1", "Two", duration: "")],
+        ]
+        let data = try JSONSerialization.data(withJSONObject: object)
+        let detail = try JSONDecoder().decode(ReleaseDetail.self, from: data)
+        #expect(detail.country == "Netherlands")
+
+        let model = RecordViewModel(release: sampleRelease()) { _ in detail }
+        #expect(model.country == nil)
+        await model.load()
+        #expect(model.country == "Netherlands")
+        #expect(model.durations == ["2:36", ""])
+    }
+
+    @Test func aReleaseWithoutACountryOrSidesStillLoads() async throws {
+        let detail = try makeReleaseDetail(tracklist: [track("1", "a"), track("2", "b")])
+        #expect(detail.country == nil)
+        let model = RecordViewModel(release: sampleRelease()) { _ in detail }
+        await model.load()
+        #expect(model.sides.count == 1)
+        #expect(model.currentSide?.isLettered == false)
+    }
+
     @Test func loadPopulatesSides() async throws {
         let detail = try makeReleaseDetail(tracklist: [track("A1", "One"), track("B1", "Two")])
         let model = RecordViewModel(release: sampleRelease()) { _ in detail }

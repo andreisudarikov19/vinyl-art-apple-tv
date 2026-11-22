@@ -301,17 +301,32 @@ struct RecordView: View {
 
     // MARK: - Stages
 
+    /// The record screen (design-handoff/specs/04-record-screen.md): the sleeve,
+    /// title and facts on the left, the side dial and its track list on the
+    /// right. Placed from the edges of the screen, whatever the safe area is,
+    /// so the spec's numbers apply directly.
     private func informativeStage(_ model: RecordViewModel) -> some View {
-        HStack(alignment: .top, spacing: 100) {
-            VStack(alignment: .leading, spacing: 24) {
-                cover(coverSide, shadowRadius: 30)
-                albumHeader
+        GeometryReader { geo in
+            let safe = geo.safeAreaInsets
+            // The left column is as tall as the screen allows and no taller,
+            // so a long track list beside it cannot push the Discogs line down.
+            let top = max(0, RecordLayout.dialTop - safe.top)
+            let bottom = max(0, RecordLayout.bottom - safe.bottom)
+            let sleeveDrop = RecordLayout.sleeveTop - RecordLayout.dialTop
+            let leftHeight = max(0, geo.size.height - top - sleeveDrop - bottom)
+            HStack(alignment: .top, spacing: RecordLayout.columnGap) {
+                leftColumn(model)
+                    .frame(width: RecordLayout.leftWidth, height: leftHeight, alignment: .topLeading)
+                    .padding(.top, sleeveDrop)
+                tracklist(model)
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
             }
-            tracklist(model)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.leading, max(0, RecordLayout.side - safe.leading))
+            .padding(.trailing, max(0, RecordLayout.side - safe.trailing))
+            .padding(.top, top)
+            .padding(.bottom, bottom)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
-        .padding(.horizontal, 100)
-        .padding(.top, 90)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(trackListBackdrop)
     }
@@ -440,36 +455,78 @@ struct RecordView: View {
     }
 
 
-    private var albumHeader: some View {
-        VStack(alignment: .leading, spacing: 10) {
+    /// The left column: the sleeve, the album title (Fraunces, up to two
+    /// lines), the artist, the facts table, and the Discogs line at its foot.
+    private func leftColumn(_ model: RecordViewModel) -> some View {
+        let longTitle = RecordFacts.titleTakesTwoLines(release.title)
+        return VStack(alignment: .leading, spacing: 0) {
+            cover(coverSide)
+                .shadow(color: .black.opacity(0.5), radius: 40, x: 0, y: 30)
             Text(release.title)
-                .font(.system(size: 42, weight: .bold))
-                .foregroundStyle(.white)
+                .font(Theme.serif(Theme.Size.albumTitle))
+                .tracking(-Theme.Size.albumTitle * 0.02)
+                .foregroundStyle(Theme.text)
                 .lineLimit(2)
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 28)
             Text(release.artistDisplayName)
-                .font(.system(size: 31))
-                .foregroundStyle(.white.opacity(0.7))
+                .font(Theme.sans(Theme.Size.control))
+                .foregroundStyle(Theme.body)
                 .lineLimit(1)
-            // Year, genres, and styles are categorical metadata — render as
-            // frosted-glass tag pills that flow within the cover's width and
-            // wrap to additional rows when they don't fit on one line. The
-            // year pill carries a calendar SF Symbol so it reads as a date
-            // anchor at a glance; genre / style pills are text-only.
-            if !catalogTags.isEmpty {
-                FlowLayout(spacing: 8) {
-                    ForEach(catalogTags, id: \.self) { tag in
-                        tagPill(tag)
-                    }
-                }
-                .padding(.top, 4)
-            }
+                .padding(.top, 6)
+            factsTable(model, compact: longTitle)
+                .padding(.top, longTitle ? 20 : 28)
+            Spacer(minLength: 12)
             discogsNotice
         }
-        .frame(width: coverSide, alignment: .leading)
     }
 
-    /// The Discogs attribution, the last line of the album block under the
-    /// tags. Discogs' API terms require it beside its data. Selecting it shows
+    /// Published, genre, style, label and length: a label column 186 pt wide
+    /// in DM Mono, the values in Inter 25. Rows with nothing to say are left
+    /// out. With a two-line title the rows sit a little closer, so the table
+    /// clears the Discogs line.
+    private func factsTable(_ model: RecordViewModel, compact: Bool) -> some View {
+        let rows = RecordFacts.rows(
+            year: release.year,
+            country: model.country,
+            genres: release.genres,
+            styles: release.styles,
+            label: release.labelName,
+            durations: model.durations,
+            titleTakesTwoLines: compact
+        )
+        return VStack(alignment: .leading, spacing: 0) {
+            ForEach(rows) { row in
+                HStack(alignment: .firstTextBaseline, spacing: 0) {
+                    Text(row.label)
+                        .font(Theme.mono(Theme.Size.small, medium: true))
+                        .tracking(Theme.Size.small * 0.12)
+                        .foregroundStyle(Theme.quiet)
+                        .frame(width: RecordLayout.factLabelWidth, alignment: .leading)
+                    Text(factValue(row))
+                        .font(Theme.sans(Theme.Size.small))
+                        .lineLimit(row.lineLimit)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(minHeight: compact ? 34 : 36, alignment: .center)
+            }
+        }
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.3), value: rows)
+    }
+
+    /// A row's value in the text colour, with second-rank parts (the styles,
+    /// the playing time) at 65%.
+    private func factValue(_ row: RecordFactRow) -> AttributedString {
+        var value = AttributedString(row.value)
+        value.swiftUI.foregroundColor = Theme.text.opacity(row.isQuiet ? Theme.secondaryOpacity : 1)
+        var tail = AttributedString(row.tail)
+        tail.swiftUI.foregroundColor = Theme.text.opacity(Theme.secondaryOpacity)
+        return value + tail
+    }
+
+    /// The Discogs attribution, at the foot of the left column. Discogs' API terms require it beside its data. Selecting it shows
     /// a QR code of the release page, as tvOS cannot open links.
     private var discogsNotice: some View {
         Button {
@@ -482,165 +539,77 @@ struct RecordView: View {
         .focusEffectDisabled()
         .focused($discogsNoticeFocused)
         .accessibilityHint("Shows a QR code for this release on discogs.com.")
-        // The header's 10pt stack gap plus this 4pt puts the notice 14pt below the tags.
-        .padding(.top, 4)
+        // Its label carries 16 pt of padding at the sides; pull it back so
+        // the icon lines up with the table's left edge.
+        .padding(.leading, -16)
     }
 
-    /// The line of "1985 · Jazz · Big Band" categorical metadata, split into
-    /// individual tags. Year goes first (chronological anchor and the only
-    /// pill that carries an icon), then genres, then more-specific styles.
-    private var catalogTags: [CatalogTag] {
-        var out: [CatalogTag] = []
-        if release.year > 0 {
-            out.append(CatalogTag(label: String(release.year), systemImage: "calendar"))
-        }
-        out.append(contentsOf: release.genres.map { CatalogTag(label: $0, systemImage: nil) })
-        out.append(contentsOf: release.styles.map { CatalogTag(label: $0, systemImage: nil) })
-        return out
-    }
-
-    private func tagPill(_ tag: CatalogTag) -> some View {
-        HStack(spacing: 8) {
-            if let symbol = tag.systemImage {
-                Image(systemName: symbol)
-                    .font(.system(size: 18, weight: .medium))
-            }
-            Text(tag.label)
-                .font(.system(size: 22, weight: .medium))
-        }
-        .foregroundStyle(.white.opacity(0.88))
-        .padding(.horizontal, 16)
-        .padding(.vertical, 6)
-        .background(tagPillBackground)
-    }
-
-    private var tagPillBackground: some View {
-        TagPillGlass()
-    }
-
+    /// The right column: the side dial, then the chosen side's tracks and
+    /// its total. The list is for reading; nothing in it takes focus.
     @ViewBuilder
     private func tracklist(_ model: RecordViewModel) -> some View {
         switch model.loadState {
         case .loading:
             ProgressView().controlSize(.large)
+                .frame(maxWidth: .infinity, minHeight: 300)
         case .failed:
             Text("Couldn't load the tracklist.")
-                .font(.system(size: 30))
-                .foregroundStyle(.white.opacity(0.5))
+                .font(Theme.sans(Theme.Size.control))
+                .foregroundStyle(Theme.quiet)
+                .padding(.top, RecordLayout.sleeveTop - RecordLayout.dialTop)
         case .loaded:
             if let side = model.currentSide {
                 VStack(alignment: .leading, spacing: 0) {
-                    // Hairline lives in the parent ZStack now so it runs the
-                    // full row width — under the slider AND the duration —
-                    // instead of being clipped to the slider's column.
-                    ZStack(alignment: .bottom) {
-                        Rectangle()
-                            .fill(.white.opacity(0.18))
-                            .frame(height: 1)
-                        HStack(alignment: .center, spacing: 24) {
-                            sideTuner(model)
-                                .frame(maxWidth: .infinity)
-                            // Sums the rows, so a suite's parts aren't counted again.
-                            if let total = TrackDuration.total(of: side.tracks.map(\.duration)) {
-                                Text(total)
-                                    .font(.system(size: 24))
-                                    .foregroundStyle(.white.opacity(0.4))
-                                    .monospacedDigit()
-                            }
-                        }
+                    // A release without side letters has no selector: its one
+                    // list starts level with the sleeve.
+                    if side.isLettered {
+                        SideDial(
+                            sides: model.sides.map(\.id),
+                            current: model.currentSideIndex,
+                            focused: screenFocused
+                        )
+                        .padding(.bottom, RecordLayout.listTop - RecordLayout.dialTop - SideDial.height)
+                    } else {
+                        Color.clear
+                            .frame(height: RecordLayout.sleeveTop - RecordLayout.dialTop)
                     }
-                    .padding(.bottom, 18)
                     ForEach(Array(side.tracks.enumerated()), id: \.element.id) { index, track in
                         TrackRow(number: index + 1, title: track.title, credits: track.credits, duration: track.duration, parts: track.parts)
                     }
+                    sideTotal(side)
                 }
             } else {
                 Text("No tracklist available.")
-                    .font(.system(size: 30))
-                    .foregroundStyle(.white.opacity(0.5))
+                    .font(Theme.sans(Theme.Size.control))
+                    .foregroundStyle(Theme.quiet)
+                    .padding(.top, RecordLayout.sleeveTop - RecordLayout.dialTop)
             }
         }
     }
 
-    /// A vintage-radio-tuner-styled side selector: a thin hairline running
-    /// the width of the tracklist, with each side's letter label spaced
-    /// evenly above it, and a Liquid Glass pill "needle" that glides to the
-    /// current side. The letter inside the thumb stands in for the current
-    /// side's static label (which we hide so the thumb doesn't double-print).
-    /// Falls back to a single-position display for unsided tracklists (CD
-    /// rips and the like).
-    private func sideTuner(_ model: RecordViewModel) -> some View {
-        let sides = model.sides
-        let currentIndex = model.currentSideIndex
-        let count = max(sides.count, 1)
-
-        return GeometryReader { geo in
-            let width = geo.size.width
-            let segmentWidth = width / CGFloat(count)
-            let centerY = geo.size.height / 2
-
-            ZStack {
-                // Tick marks at each side's position, dropping into the
-                // hairline (which lives in the parent ZStack now so it can
-                // stretch under the duration text too).
-                ForEach(0..<sides.count, id: \.self) { i in
-                    Rectangle()
-                        .fill(.white.opacity(0.25))
-                        .frame(width: 1, height: 8)
-                        .position(
-                            x: CGFloat(i) * segmentWidth + segmentWidth / 2,
-                            y: geo.size.height - 4
-                        )
+    /// The side's playing time, under the durations it sums, after a
+    /// hairline. Left out when any track lacks a duration, so nothing is
+    /// shown as 0:00. Sums the rows, so a suite's parts aren't counted again.
+    @ViewBuilder
+    private func sideTotal(_ side: RecordSide) -> some View {
+        if let total = TrackDuration.total(of: side.tracks.map(\.duration)) {
+            VStack(spacing: 0) {
+                Rectangle()
+                    .fill(Theme.line)
+                    .frame(height: 1)
+                HStack(alignment: .firstTextBaseline, spacing: 24) {
+                    Text(side.isLettered ? side.name.uppercased() : "TOTAL")
+                        .font(Theme.mono(Theme.Size.small, medium: true))
+                        .tracking(Theme.Size.small * Theme.eyebrowTracking)
+                        .foregroundStyle(Theme.quiet)
+                    Spacer(minLength: 0)
+                    Text(total)
+                        .font(Theme.mono(Theme.Size.small, medium: true))
+                        .foregroundStyle(Theme.text)
                 }
-
-                // Static side letters. The current side's letter is rendered
-                // transparent so the moving thumb's "Side X" label doesn't
-                // double-print on a stationary letter behind it.
-                ForEach(Array(sides.enumerated()), id: \.element.id) { i, side in
-                    Text(side.id)
-                        .font(.system(size: 22, weight: .medium))
-                        .foregroundStyle(i == currentIndex ? Color.clear : Color.white.opacity(0.35))
-                        .monospacedDigit()
-                        .position(
-                            x: CGFloat(i) * segmentWidth + segmentWidth / 2,
-                            y: centerY
-                        )
-                }
-
-                // The needle — a Liquid Glass capsule carrying the current
-                // side's full name ("Side A"), sliding between positions on
-                // a spring. The "Side" word lives here so it's prominent
-                // without needing a separate header.
-                if sides.indices.contains(currentIndex) {
-                    tunerThumb(letter: sides[currentIndex].id)
-                        .position(
-                            x: CGFloat(currentIndex) * segmentWidth + segmentWidth / 2,
-                            y: centerY
-                        )
-                        .animation(.spring(response: 0.42, dampingFraction: 0.78), value: currentIndex)
-                }
+                .padding(.top, 14)
             }
-        }
-        .frame(height: 60)
-    }
-
-    @ViewBuilder
-    private func tunerThumb(letter: String) -> some View {
-        ZStack {
-            tunerThumbGlass
-            Text("Side \(letter)")
-                .font(.system(size: 22, weight: .semibold))
-                .foregroundStyle(.white)
-        }
-        .frame(width: 120, height: 44)
-    }
-
-    @ViewBuilder
-    private var tunerThumbGlass: some View {
-        if #available(tvOS 26.0, *) {
-            Capsule().fill(.regularMaterial).glassEffect()
-        } else {
-            Capsule().fill(.ultraThinMaterial)
+            .padding(.top, 12)
         }
     }
 
@@ -697,18 +666,16 @@ private struct AmbientButtonStyle: ButtonStyle {
     }
 }
 
-/// One track row in the Apple Music–style side list: sequential number, title,
-/// and right-aligned duration. No separators — matches Music on tvOS.
+/// One track of the side list: its number, title and duration, with the
+/// credits beneath the title. Nothing in the list takes focus.
 ///
-/// Title is allowed to wrap to a second line for long song names rather than
-/// truncating with an ellipsis — the side list has vertical room. Credit
-/// lines (Composed by / Vocals by / Backing vocals by / Lyrics by / etc.)
-/// each get their own line beneath the title in the same subdued style,
-/// in the order they appear on Discogs.
+/// The title may wrap to a second line. Each credit line (Composed by,
+/// Vocals by, Lyrics by and so on) gets its own line beneath it, in the
+/// order they appear on Discogs.
 ///
 /// A suite or medley is one row, so one number, with its parts listed
-/// beneath the credits, one line each with the part's duration. They're
-/// subdued like the credits, so they read as the piece's movements rather
+/// beneath the credits, one line each with the part's duration. They are
+/// quiet like the credits, so they read as the piece's movements rather
 /// than as further tracks.
 private struct TrackRow: View {
     let number: Int
@@ -719,135 +686,165 @@ private struct TrackRow: View {
 
     var body: some View {
         // First-text-baseline alignment so the number and duration sit on the
-        // baseline of the title's *first* line when the title wraps —
-        // otherwise center alignment would float them awkwardly between two
-        // title lines.
-        HStack(alignment: .firstTextBaseline, spacing: 24) {
+        // baseline of the title's first line when the title wraps.
+        HStack(alignment: .firstTextBaseline, spacing: 0) {
             Text("\(number)")
-                .font(.system(size: 28))
-                .foregroundStyle(.white.opacity(0.4))
-                .monospacedDigit()
-                .frame(width: 44, alignment: .leading)
-            VStack(alignment: .leading, spacing: 4) {
+                .font(Theme.mono(Theme.Size.small))
+                .foregroundStyle(Theme.quiet)
+                .frame(width: 60, alignment: .leading)
+            VStack(alignment: .leading, spacing: 0) {
                 Text(title)
-                    .font(.system(size: 33))
-                    .foregroundStyle(.white)
+                    .font(Theme.sans(Theme.Size.control, .medium))
+                    .foregroundStyle(Theme.text)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)
                 ForEach(credits, id: \.role) { credit in
                     Text(credit.displayLine)
-                        .font(.system(size: 24))
-                        .foregroundStyle(.white.opacity(0.4))
+                        .font(Theme.sans(Theme.Size.small))
+                        .foregroundStyle(Theme.quiet)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 if !parts.isEmpty {
-                    VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .leading, spacing: 2) {
                         ForEach(Array(parts.enumerated()), id: \.offset) { _, part in
                             HStack(alignment: .firstTextBaseline, spacing: 0) {
                                 Text(part.title)
+                                    .font(Theme.sans(Theme.Size.small))
                                     .lineLimit(2)
                                     .multilineTextAlignment(.leading)
                                     .fixedSize(horizontal: false, vertical: true)
                                 if !part.duration.isEmpty {
                                     Spacer(minLength: 24)
                                     Text(part.duration)
-                                        .monospacedDigit()
+                                        .font(Theme.mono(Theme.Size.small))
                                 }
                             }
-                            .font(.system(size: 26))
-                            .foregroundStyle(.white.opacity(0.5))
+                            .foregroundStyle(Theme.quiet)
                         }
                     }
-                    .padding(.top, 6)
+                    .padding(.top, 4)
                 }
             }
             .layoutPriority(1)
             Spacer(minLength: 24)
+            // Left empty when Discogs gives no duration; never 0:00.
             Text(duration)
-                .font(.system(size: 28))
-                .foregroundStyle(.white.opacity(0.4))
-                .monospacedDigit()
+                .font(Theme.mono(Theme.Size.small))
+                .foregroundStyle(Theme.body)
+                .frame(minWidth: 120, alignment: .trailing)
                 // A suite's part lines stretch the title column, which
                 // would otherwise squeeze this to nothing.
                 .fixedSize()
         }
-        .padding(.vertical, 16)
+        .padding(.vertical, 12)
     }
 }
 
-/// One pill in the catalog-tag row beneath the album header. The optional
-/// `systemImage` lets the year tag display a calendar glyph in front of its
-/// label while genres / styles stay text-only.
-private struct CatalogTag: Hashable {
-    let label: String
-    let systemImage: String?
+/// The measures of the record screen, in points on a 1920 by 1080 screen
+/// (design-handoff/specs/04-record-screen.md).
+private enum RecordLayout {
+    /// The left and right margins.
+    static let side: CGFloat = 80
+    /// The bottom margin: the safe line.
+    static let bottom: CGFloat = 60
+    /// The sleeve's top edge, and the dial's, which starts a little higher.
+    static let sleeveTop: CGFloat = 80
+    static let dialTop: CGFloat = 72
+    /// The first track row's top edge.
+    static let listTop: CGFloat = 186
+    /// The left column holds the 520 pt sleeve and text up to 560 pt wide.
+    /// The right column starts at 700 pt.
+    static let leftWidth: CGFloat = 560
+    static let columnGap: CGFloat = 60
+    static let factLabelWidth: CGFloat = 186
 }
 
-/// Simple flow layout: places subviews left-to-right, wraps to the next line
-/// when the next subview wouldn't fit in the proposed width. Used for the
-/// catalog tag strip under the album header so genres / styles wrap cleanly
-/// inside the cover's width instead of overflowing or truncating.
-private struct FlowLayout: Layout {
-    var spacing: CGFloat = 8
+/// The side selector: a small dial in the language of the scale under the
+/// Gallery's cover. Fine ticks stand on a rule; each side has a taller tick
+/// and its letter; the chosen side is a "Side F" pill with the yolk needle
+/// under it, gliding to the new side when it changes. It takes no focus of
+/// its own: the record screen is one control, and Left and Right change side.
+private struct SideDial: View {
+    /// The sides' letters, in order.
+    let sides: [String]
+    let current: Int
+    /// The screen's main control has focus: the pill is yolk. When focus is
+    /// elsewhere on the screen, the pill is outlined.
+    let focused: Bool
 
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let maxWidth = proposal.width ?? .infinity
-        let arranged = arrange(subviews: subviews, maxWidth: maxWidth)
-        return CGSize(width: arranged.width, height: arranged.height)
-    }
+    static let height: CGFloat = 88
+    private let pillSize = CGSize(width: 160, height: 58)
+    /// The rule sits 2 pt above the dial's bottom edge.
+    private let ruleInset: CGFloat = 2
 
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        let arranged = arrange(subviews: subviews, maxWidth: bounds.width)
-        for placement in arranged.placements {
-            placement.subview.place(
-                at: CGPoint(x: bounds.minX + placement.x, y: bounds.minY + placement.y),
-                proposal: .unspecified
-            )
-        }
-    }
-
-    private struct Placement {
-        let subview: LayoutSubview
-        let x: CGFloat
-        let y: CGFloat
-    }
-
-    private struct Arrangement {
-        let width: CGFloat
-        let height: CGFloat
-        let placements: [Placement]
-    }
-
-    private func arrange(subviews: Subviews, maxWidth: CGFloat) -> Arrangement {
-        var placements: [Placement] = []
-        var cursorX: CGFloat = 0
-        var cursorY: CGFloat = 0
-        var lineHeight: CGFloat = 0
-        var maxRowWidth: CGFloat = 0
-
-        for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
-            // Wrap if this subview wouldn't fit on the current line (but
-            // never wrap at the very start of a line — a single subview
-            // wider than the line just overflows rather than disappearing).
-            if cursorX > 0, cursorX + size.width > maxWidth {
-                maxRowWidth = max(maxRowWidth, cursorX - spacing)
-                cursorX = 0
-                cursorY += lineHeight + spacing
-                lineHeight = 0
+    var body: some View {
+        GeometryReader { geo in
+            let step = geo.size.width / CGFloat(max(sides.count, 1))
+            let ruleY = geo.size.height - ruleInset
+            ZStack {
+                Canvas { context, size in
+                    // The rule, and fine ticks every 16 pt standing on it.
+                    let rule = CGRect(x: 0, y: ruleY, width: size.width, height: 1)
+                    context.fill(Path(rule), with: .color(Theme.lineStrong))
+                    var x: CGFloat = 8
+                    while x < size.width {
+                        let tick = CGRect(x: x - 1, y: ruleY - 8, width: 2, height: 8)
+                        context.fill(Path(tick), with: .color(.white.opacity(0.22)))
+                        x += 16
+                    }
+                    // A taller white tick for each side.
+                    for index in sides.indices {
+                        let centre = (CGFloat(index) + 0.5) * step
+                        let tick = CGRect(x: centre - 1, y: ruleY - 16, width: 2, height: 16)
+                        context.fill(Path(tick), with: .color(.white))
+                    }
+                }
+                // The letters. The chosen side's is hidden under its pill.
+                ForEach(Array(sides.enumerated()), id: \.offset) { index, letter in
+                    Text(letter)
+                        .font(Theme.mono(Theme.Size.control, medium: true))
+                        .foregroundStyle(index == current ? Color.clear : Theme.body)
+                        .position(x: (CGFloat(index) + 0.5) * step, y: pillSize.height / 2)
+                }
+                if sides.indices.contains(current) {
+                    pill(sides[current])
+                        .position(x: (CGFloat(current) + 0.5) * step, y: pillSize.height / 2)
+                    needle
+                        .position(x: (CGFloat(current) + 0.5) * step, y: ruleY - 12)
+                }
             }
-            placements.append(Placement(subview: subview, x: cursorX, y: cursorY))
-            cursorX += size.width + spacing
-            lineHeight = max(lineHeight, size.height)
+            .animation(.spring(response: 0.42, dampingFraction: 0.78), value: current)
         }
-        maxRowWidth = max(maxRowWidth, cursorX - spacing)
-        return Arrangement(
-            width: max(0, maxRowWidth),
-            height: cursorY + lineHeight,
-            placements: placements
-        )
+        .frame(height: Self.height)
+        .accessibilityHidden(true)
+    }
+
+    /// "Side F": yolk with dark text when the dial has focus, the surface
+    /// colour with a line around it when focus is elsewhere.
+    private func pill(_ letter: String) -> some View {
+        Text("Side \(letter)")
+            .font(Theme.sans(Theme.Size.control, focused ? .semibold : .medium))
+            .foregroundStyle(focused ? Theme.onYolk : Theme.text)
+            .frame(width: pillSize.width, height: pillSize.height)
+            .background {
+                if focused {
+                    Capsule().fill(Theme.yolk)
+                } else {
+                    Capsule()
+                        .fill(Theme.surface)
+                        .overlay(Capsule().strokeBorder(Theme.lineStrong, lineWidth: 1))
+                }
+            }
+    }
+
+    /// The scale's needle: 4 by 24 pt, yolk, with its glow.
+    private var needle: some View {
+        RoundedRectangle(cornerRadius: 2)
+            .fill(Theme.yolk)
+            .frame(width: 4, height: 24)
+            .shadow(color: Theme.yolk.opacity(0.85), radius: 7)
     }
 }
