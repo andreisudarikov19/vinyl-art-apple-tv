@@ -87,9 +87,12 @@ struct ReleaseDetail: Decodable, Sendable {
     let id: Int
     let title: String
     let tracklist: [TrackEntry]
+    /// The country of this pressing, as Discogs spells it ("Netherlands",
+    /// "UK & Europe"). Nil when Discogs gives none.
+    let country: String?
 
     enum CodingKeys: String, CodingKey {
-        case id, title, tracklist
+        case id, title, tracklist, country
     }
 
     init(from decoder: Decoder) throws {
@@ -97,6 +100,7 @@ struct ReleaseDetail: Decodable, Sendable {
         id = try c.decode(Int.self, forKey: .id)
         title = try c.decodeIfPresent(String.self, forKey: .title) ?? ""
         tracklist = try c.decodeIfPresent([TrackEntry].self, forKey: .tracklist) ?? []
+        country = try c.decodeIfPresent(String.self, forKey: .country)
     }
 }
 

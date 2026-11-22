@@ -111,6 +111,10 @@ struct RecordSide: Identifiable, Equatable, Sendable {
     let id: String
     let name: String
     let tracks: [RecordTrack]
+
+    /// False for the single list of a release without side letters, which
+    /// gets no side selector.
+    var isLettered: Bool { id != RecordSides.noSideKey }
 }
 
 /// Groups a Discogs tracklist into vinyl sides (A, B, C, …) in order of
@@ -191,7 +195,7 @@ enum RecordSides {
         }
     }
 
-    private static let noSideKey = "—"
+    static let noSideKey = "—"
 
     private static func name(for key: String) -> String {
         key == noSideKey ? "Tracklist" : "Side \(key)"

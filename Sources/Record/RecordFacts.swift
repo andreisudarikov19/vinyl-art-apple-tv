@@ -52,4 +52,74 @@ enum RecordFacts {
         case (false, false): return nil
         }
     }
+
+    // MARK: - The table
+
+    /// The rows of the facts table, in order. A row with nothing to say is
+    /// left out, so a record with no label or no styles has a shorter table.
+    /// - Parameters:
+    ///   - country: Known once the release has loaded; the PUBLISHED row shows
+    ///     the year alone until then.
+    ///   - durations: Every track of every side, empty until the release has
+    ///     loaded, when the LENGTH row appears.
+    ///   - titleTakesTwoLines: The album title is long. The genre and style
+    ///     rows are then held to one line, so the table clears the Discogs line.
+    static func rows(
+        year: Int,
+        country: String?,
+        genres: [String],
+        styles: [String],
+        label: String?,
+        durations: [String],
+        titleTakesTwoLines: Bool
+    ) -> [RecordFactRow] {
+        var rows: [RecordFactRow] = []
+        let lines = titleTakesTwoLines ? 1 : 2
+        if let text = Self.published(year: year, country: country) {
+            rows.append(RecordFactRow(label: "PUBLISHED", value: text))
+        }
+        if !genres.isEmpty {
+            rows.append(RecordFactRow(label: "GENRE", value: genres.joined(separator: ", "), lineLimit: lines))
+        }
+        if !styles.isEmpty {
+            rows.append(RecordFactRow(label: "STYLE", value: styles.joined(separator: ", "), isQuiet: true, lineLimit: lines))
+        }
+        if let name = label?.trimmingCharacters(in: .whitespaces), !name.isEmpty {
+            rows.append(RecordFactRow(label: "LABEL", value: name))
+        }
+        if let whole = Self.length(durations: durations) {
+            // "42 tracks" leads; " · 1 h 52 min" follows, quieter.
+            if let split = whole.range(of: " · ") {
+                rows.append(RecordFactRow(
+                    label: "LENGTH",
+                    value: String(whole[..<split.lowerBound]),
+                    tail: String(whole[split.lowerBound...])
+                ))
+            } else {
+                rows.append(RecordFactRow(label: "LENGTH", value: whole))
+            }
+        }
+        return rows
+    }
+
+    /// Whether an album title runs to a second line in the left column
+    /// (Fraunces 52 in 560 pt). A count of characters, not a measurement:
+    /// about 21 fit on a line.
+    static func titleTakesTwoLines(_ title: String) -> Bool {
+        title.count > 21
+    }
+}
+
+/// One row of the record screen's facts table.
+struct RecordFactRow: Identifiable, Equatable, Sendable {
+    /// "PUBLISHED", "GENRE", "STYLE", "LABEL" or "LENGTH".
+    let label: String
+    let value: String
+    /// A quieter end to the value: " · 1 h 52 min".
+    var tail = ""
+    /// The whole value is second-rank: the styles.
+    var isQuiet = false
+    var lineLimit = 1
+
+    var id: String { label }
 }
