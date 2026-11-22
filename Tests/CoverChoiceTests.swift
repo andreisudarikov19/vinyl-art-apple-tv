@@ -52,6 +52,15 @@ struct CoverChoiceTests {
         ))
     }
 
+    @Test func readsSizeAndThumbnailFromAnImage() {
+        let candidate = CoverChoice.Candidate(flatCGImage(width: 300, height: 150, red: 200, green: 80, blue: 60))
+
+        #expect(candidate.pixelWidth == 300)
+        #expect(candidate.pixelHeight == 150)
+        #expect(candidate.thumbnail.count == CoverChoice.thumbnailSide * CoverChoice.thumbnailSide)
+        #expect(CoverChoice.difference(candidate.thumbnail, flat(200 / 255, 80 / 255, 60 / 255)) < 0.02)
+    }
+
     @Test func measuresDifference() {
         #expect(CoverChoice.difference(red, red) == 0)
         #expect(CoverChoice.difference(red, nearlyRed) < 0.02)

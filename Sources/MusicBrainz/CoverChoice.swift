@@ -38,9 +38,10 @@ enum CoverChoice {
         /// How much less square than the Discogs image it may be.
         var squarenessSlack = 0.02
         /// Largest mean OKLab distance between the two thumbnails for them
-        /// to count as the same picture. A starting value: tune it on real
-        /// pairs (same sleeve scanned twice, and two different pressings).
-        var maximumDifference = 0.08
+        /// to count as the same picture. Tuned on real pairs (0.07; see the
+        /// PR): same-art pressings score 0.04 to 0.06, a sticker-only
+        /// pressing 0.075, and scans of one sleeve up to 0.21.
+        var maximumDifference = 0.07
 
         init() {}
     }
