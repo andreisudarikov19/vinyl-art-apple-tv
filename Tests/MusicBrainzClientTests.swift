@@ -13,6 +13,14 @@ struct MusicBrainzClientTests {
         return try await client.bestMatch(artist: "Artist", title: "Title", catalogNumber: nil)
     }
 
+    @Test func readsTheYearOfAMusicBrainzDate() {
+        #expect(MusicBrainzClient.year(from: "1959") == 1959)
+        #expect(MusicBrainzClient.year(from: "1959-08-17") == 1959)
+        #expect(MusicBrainzClient.year(from: "") == nil)
+        #expect(MusicBrainzClient.year(from: "0000") == nil)
+        #expect(MusicBrainzClient.year(from: nil) == nil)
+    }
+
     @Test func resultsScoringBelowNinetyAreNoMatch() async throws {
         let match = try await search(returning: [("close", 89), ("unscored", nil)])
 

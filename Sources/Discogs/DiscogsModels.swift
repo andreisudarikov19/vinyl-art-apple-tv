@@ -66,6 +66,22 @@ struct BasicInformation: Decodable, Sendable {
     }
 }
 
+/// A master release: the album that all its pressings belong to. Only its
+/// year is read, for pressings Discogs gives no year.
+struct MasterRelease: Decodable, Sendable {
+    /// The year of the master's main release, or 0 when Discogs has none.
+    let year: Int
+
+    enum CodingKeys: String, CodingKey {
+        case year
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        year = try c.decodeIfPresent(Int.self, forKey: .year) ?? 0
+    }
+}
+
 struct Artist: Decodable, Sendable {
     let name: String
     let id: Int?

@@ -1,9 +1,12 @@
 import Foundation
 
-/// A MusicBrainz release match, used to look up cover art.
+/// A MusicBrainz release match, used to look up cover art and, for a
+/// release Discogs gives no year, the year.
 struct MusicBrainzMatch: Sendable {
     let releaseMBID: String
     let releaseGroupMBID: String?
+    /// The year of the matched release, when MusicBrainz has its date.
+    var year: Int?
 }
 
 /// Searches MusicBrainz for the release that best matches a cached Discogs
@@ -67,8 +70,16 @@ actor MusicBrainzClient {
 
         return MusicBrainzMatch(
             releaseMBID: release.id,
-            releaseGroupMBID: release.releaseGroup?.id
+            releaseGroupMBID: release.releaseGroup?.id,
+            year: Self.year(from: release.date)
         )
+    }
+
+    /// The year of a MusicBrainz date: "1959", "1959-08" or "1959-08-17".
+    /// Nil for no date, or one that doesn't start with a believable year.
+    static func year(from date: String?) -> Int? {
+        guard let date, let year = Int(date.prefix(4)), (1860...2100).contains(year) else { return nil }
+        return year
     }
 
     /// Spaces requests at least `interval` apart to respect the MusicBrainz
@@ -99,10 +110,13 @@ actor MusicBrainzClient {
             /// How well the release matches the query, 0–100.
             let score: Int?
             let releaseGroup: ReleaseGroup?
+            /// When this release came out: a year, a month or a day.
+            let date: String?
 
             enum CodingKeys: String, CodingKey {
                 case id
                 case score
+                case date
                 case releaseGroup = "release-group"
             }
         }
