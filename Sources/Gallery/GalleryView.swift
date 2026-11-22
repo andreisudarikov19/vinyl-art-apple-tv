@@ -58,10 +58,7 @@ struct GalleryView: View {
                     .animation(.easeInOut(duration: tideEngaged ? TideTiming.galleryFadeIn : TideTiming.galleryFadeOut), value: tideEngaged)
             }
             .navigationDestination(item: $selected) { release in
-                RecordView(release: release, onAnotherSuggestion: openedBySuggest ? suggestAnother : nil)
-                    // Another suggestion swaps the record in place: a new
-                    // identity gives the new record a screen of its own.
-                    .id(release.releaseId)
+                recordScreen(for: release)
             }
             .overlay(alignment: .bottom) { refreshHUD }
         }
@@ -130,8 +127,22 @@ struct GalleryView: View {
         selected = arranged[index]
     }
 
+    /// The record screen for `release`. Kept out of `body`, whose type the
+    /// compiler could not work out with this built inline. A suggested record
+    /// gets the sticker's action; one opened from the collection gets none.
+    /// Another suggestion swaps the record in place, so each record has its
+    /// own identity and with it a screen of its own.
+    private func recordScreen(for release: CachedRelease) -> some View {
+        var another: (() -> Void)?
+        if openedBySuggest {
+            another = { suggestAnother() }
+        }
+        return RecordView(release: release, onAnotherSuggestion: another)
+            .id(release.releaseId)
+    }
+
     /// Opens a record chosen in the collection.
-    private func open(_ release: CachedRelease) {
+    private func openRecord(_ release: CachedRelease) {
         openedBySuggest = false
         selected = release
     }
@@ -246,7 +257,7 @@ struct GalleryView: View {
                 let entries = browsed
                 CoverFlowView(
                     releases: entries.map(\.release),
-                    onOpen: { open($0) },
+                    onOpen: { release in openRecord(release) },
                     onMoveUp: { toolbarFocus = lastToolbarStop },
                     reveal: reveal,
                     onBrowse: { browsedReleaseID = $0 },
@@ -256,7 +267,7 @@ struct GalleryView: View {
             case .grid:
                 MosaicGridView(
                     releases: GalleryArranger.uniqued(arranged),
-                    onOpen: { open($0) },
+                    onOpen: { release in openRecord(release) },
                     onMoveUp: { toolbarFocus = lastToolbarStop }
                 )
             }
