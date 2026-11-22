@@ -2,11 +2,13 @@ import Foundation
 
 /// The colours the halo and the tide take from a sleeve.
 ///
-/// Replaces `CoverPalette`'s averaged main colour and single-pixel accents:
-/// the sleeve's pixels are grouped into five colours and three are kept, the
-/// largest and the two most different ones that still cover a real share of
-/// the sleeve. Every colour is then held inside lightness and chroma limits,
-/// so the light never outshines the sleeve.
+/// The sleeve's pixels are grouped into five colours and three are kept: the
+/// one that counts for most, and the two most different ones that still
+/// cover a real share of the sleeve. A colourful group counts for more than
+/// a grey one, so the black, white and grey areas of a sleeve do not decide
+/// the light. Every colour then has its chroma lifted a little and is held
+/// inside lightness and chroma limits, so the light is rich in colour and
+/// never outshines the sleeve.
 ///
 /// Port of design-handoff/reference-python/halo_reference.py. Keep the two in step.
 struct HaloPalette: Equatable, Sendable {
@@ -23,9 +25,15 @@ struct HaloPalette: Equatable, Sendable {
     static let iterations = 20
     /// An accent must cover at least this share of the sleeve.
     static let minimumArea = 0.04
-    static let maximumChroma = 0.17
+    static let maximumChroma = 0.21
+    /// The light is a little stronger in colour than the sleeve.
+    static let chromaBoost = 1.5
     static let lightnessScale = 0.88
-    static let lightnessRange = 0.34...0.66
+    static let lightnessRange = 0.40...0.68
+    /// How much more a colourful pixel or group counts than a grey one when
+    /// the halo picks its colours: `colourBase + chroma / colourSpan`.
+    static let colourBase = 0.15
+    static let colourSpan = 0.08
 
     /// - Parameters:
     ///   - pixels: The sleeve scaled down to `side` by `side`, row by row,
@@ -51,10 +59,18 @@ struct HaloPalette: Equatable, Sendable {
         return OKLab.lerp(edges[lower], edges[(lower + 1) % 4], t: position - position.rounded(.down))
     }
 
-    /// Holds a colour inside the halo's lightness and chroma limits.
+    /// How much a colour counts when the halo picks: a colourful one counts
+    /// for more than a grey one.
+    static func colourWeight(_ colour: OKLab) -> Double {
+        colourBase + colour.chroma / colourSpan
+    }
+
+    /// Makes a colour fit for the halo: its chroma lifted by `chromaBoost`
+    /// and held under `maximumChroma`, its lightness held inside the limits.
+    /// A grey stays grey: nothing is invented.
     static func toned(_ colour: OKLab) -> OKLab {
         let chroma = colour.chroma
-        let scale = chroma > 1e-9 ? min(1, maximumChroma / chroma) : 1
+        let scale = chroma > 1e-9 ? min(chromaBoost, maximumChroma / chroma) : 1
         let lightness = min(lightnessRange.upperBound, max(lightnessRange.lowerBound, lightnessScale * colour.l))
         return OKLab(l: lightness, a: colour.a * scale, b: colour.b * scale)
     }
@@ -118,8 +134,10 @@ struct HaloPalette: Equatable, Sendable {
 
     private static func chosenColours(_ labs: [OKLab]) -> [OKLab] {
         let (centres, area) = clusters(labs)
+        // The group that counts for most: its area times its colour weight.
+        let counts = (0..<clusterCount).map { area[$0] * colourWeight(centres[$0]) }
         var largest = 0
-        for j in 1..<clusterCount where area[j] > area[largest] { largest = j }
+        for j in 1..<clusterCount where counts[j] > counts[largest] { largest = j }
         var order = [largest]
         while order.count < 3 {
             var pick: Int?
@@ -137,7 +155,8 @@ struct HaloPalette: Equatable, Sendable {
         return out
     }
 
-    /// Mean colour of a strip a quarter of the image deep along each side, toned.
+    /// The colour of a strip a quarter of the image deep along each side: the
+    /// mean of its pixels, each counted by its colour weight, then toned.
     private static func edgeColours(_ labs: [OKLab], side: Int) -> [OKLab] {
         let depth = side / 4
         func strip(_ keep: (_ x: Int, _ y: Int) -> Bool) -> OKLab {
@@ -146,8 +165,9 @@ struct HaloPalette: Equatable, Sendable {
             for y in 0..<side {
                 for x in 0..<side where keep(x, y) {
                     let p = labs[y * side + x]
-                    sum.l += p.l; sum.a += p.a; sum.b += p.b
-                    n += 1
+                    let weight = colourWeight(p)
+                    sum.l += p.l * weight; sum.a += p.a * weight; sum.b += p.b * weight
+                    n += weight
                 }
             }
             return toned(OKLab(l: sum.l / n, a: sum.a / n, b: sum.b / n))
