@@ -104,6 +104,18 @@ struct GlassLensScale: View {
             Color.clear
                 .frame(width: 2 * GlassLens.halfWidth, height: Self.size.height)
                 .glassEffect(.clear, in: Capsule())
+                // A fine rim, lighter at the top, so the pill has an edge on
+                // a dark ground, where the glass alone is nearly flat.
+                .overlay(
+                    Capsule().strokeBorder(
+                        LinearGradient(
+                            colors: [.white.opacity(0.4), .white.opacity(0.1)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        ),
+                        lineWidth: 1
+                    )
+                )
                 .opacity(idle ? ScaleIdleLook.reading : 1)
                 .animation(.easeInOut(duration: 0.8), value: idle)
         }
@@ -201,9 +213,9 @@ private struct LensCanvas: View {
 
     struct Layers: OptionSet {
         let rawValue: Int
-        /// The ticks and the labels, which pass under the glass.
+        /// The ticks outside the lens and the labels.
         static let tape = Layers(rawValue: 1)
-        /// The reading and the needle, which sit on the glass.
+        /// What sits on the glass: the enlarged ticks, the reading and the needle.
         static let marks = Layers(rawValue: 2)
         static let all: Layers = [.tape, .marks]
     }
@@ -224,12 +236,16 @@ private struct LensCanvas: View {
             if layers.contains(.tape) {
                 // On a copy: the tape leaves its own opacity behind.
                 var tapeContext = context
-                drawTape(into: &tapeContext, size: size)
+                drawTape(into: &tapeContext, size: size, underLens: false)
             }
             if drawsGlass {
                 drawLens(into: context, size: size)
             }
             if layers.contains(.marks) {
+                // The ticks the lens enlarges are drawn on the glass, where
+                // they stay sharp; under it the glass softens them.
+                var lensContext = context
+                drawTape(into: &lensContext, size: size, underLens: true)
                 drawReading(into: &context, size: size)
                 drawNeedle(into: context, size: size)
             }
@@ -282,7 +298,9 @@ private struct LensCanvas: View {
     }
 
     /// Ticks and labels: the tape. Idle fades it down to 30%.
-    private func drawTape(into context: inout GraphicsContext, size: CGSize) {
+    /// - Parameter underLens: True draws only the ticks inside the lens;
+    ///   false draws the ticks outside it and the labels.
+    private func drawTape(into context: inout GraphicsContext, size: CGSize, underLens: Bool) {
         // A long reading keeps more of the tape clear around it.
         let reading = tape.reading(at: Int(position.rounded())) ?? ""
         let readingHalf = ScaleTape.textWidth(reading, size: ScaleTape.readingSize) / 2 + ScaleTape.textGap
@@ -298,6 +316,7 @@ private struct LensCanvas: View {
         if lowest <= highest {
             for index in lowest...highest {
                 let relative = lens.distance(entries: Double(index) - position)
+                guard (abs(relative) < GlassLens.halfWidth) == underLens else { continue }
                 let x = centre + relative
                 let weight = GlassLens.weight(offset: relative)
                 // Outside the lens a tick looks as on the Slide rule. Under
@@ -312,6 +331,7 @@ private struct LensCanvas: View {
             }
         }
         let tapeOpacity = context.opacity
+        guard !underLens else { return }
         // Labels stay outside the glass, which holds the reading alone.
         let labels = tape.labels(
             current: position,
