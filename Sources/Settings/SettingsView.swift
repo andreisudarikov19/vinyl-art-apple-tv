@@ -458,8 +458,9 @@ private enum SettingsLayout {
     static let previewHeight: CGFloat = 400
 }
 
-/// Ink, with a faint warm glow from the top right, behind the card.
-private struct SettingsBackground: View {
+/// Ink, with a faint warm glow from the top right, behind the card. The
+/// About screen stands on it too.
+struct SettingsBackground: View {
     var body: some View {
         ZStack {
             Theme.ink
