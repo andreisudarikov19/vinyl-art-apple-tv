@@ -99,3 +99,35 @@ enum HaloField {
         return c * c * (3 - 2 * c)
     }
 }
+
+/// The sleeve's slow motion in the cover view (spec 05): it breathes by 3%
+/// and drifts a few points, so no edge of it rests on the same pixels. Too
+/// slow to notice. Both stop under Reduce Motion.
+enum CoverMotion {
+    /// The sleeve grows to this and shrinks back, over `breathPeriod` seconds.
+    static let breath = 1.03
+    static let breathPeriod = 60.0
+    /// How far the sleeve drifts each way along each axis, in points.
+    static let reach = 5.6
+    /// Seconds for one swing there and back, across and up and down. They
+    /// differ, so the sleeve follows a looping path, not a line.
+    static let periodAcross = 80.0
+    static let periodUpDown = 120.0
+
+    /// The furthest the sleeve is ever from its place: both drifts at their
+    /// ends at once. Under 8 pt.
+    static var furthest: Double {
+        (2 * reach * reach).squareRoot()
+    }
+
+    /// Seconds until the breathing and both drifts are all back where they
+    /// started together: four minutes.
+    static var repeatsAfter: Double {
+        var seconds = 0.0
+        repeat {
+            seconds += periodUpDown
+        } while seconds.truncatingRemainder(dividingBy: periodAcross) != 0
+            || seconds.truncatingRemainder(dividingBy: breathPeriod) != 0
+        return seconds
+    }
+}

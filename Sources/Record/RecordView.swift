@@ -70,6 +70,9 @@ struct RecordView: View {
     /// total cycle (30s each direction). Imperceptible per second; adds
     /// subtle life over a side of an LP. Disabled in Reduce Motion.
     @State private var coverBreath: CGFloat = 1.0
+    /// The sleeve's slow drift in the cover view, across and up and down.
+    @State private var coverDriftAcross: CGFloat = 0
+    @State private var coverDriftUpDown: CGFloat = 0
 
     /// Informative-view backdrop ambient motion: engages after 15 s of
     /// stillness and freezes mid-motion the instant the user interacts.
@@ -386,7 +389,10 @@ struct RecordView: View {
     /// - **A dark seat** under it, in place of the old shadow in the sleeve's
     ///   own colour (spec 05).
     /// - **Slow breathing** between 1.00x and 1.03x on a 60-second cycle
-    ///   (30 s up, 30 s down). Disabled in Reduce Motion.
+    ///   (30 s up, 30 s down).
+    /// - **A slow wander** of a few points along a path that takes four
+    ///   minutes to repeat, so no edge rests on the same pixels.
+    /// Both are too slow to notice, and both stop under Reduce Motion.
     private func featuredCover(_ size: CGFloat) -> some View {
         cover(size)
             // The dark seat: a tight black shadow for a crisp edge and a wide
@@ -395,12 +401,44 @@ struct RecordView: View {
             .shadow(color: .black.opacity(0.6), radius: 10, x: 0, y: 4)
             .shadow(color: .black.opacity(0.55), radius: 46, x: 0, y: 14)
             .scaleEffect(coverBreath)
-            .onAppear {
-                guard !reduceMotion else { return }
-                withAnimation(.easeInOut(duration: 30).repeatForever(autoreverses: true)) {
-                    coverBreath = 1.03
-                }
+            .offset(x: coverDriftAcross)
+            .offset(y: coverDriftUpDown)
+            .onAppear { startCoverMotion() }
+            .onDisappear { stopCoverMotion() }
+    }
+
+    /// Starts the breathing and the wander from rest, each with its own
+    /// period (`CoverMotion`). Called every time the cover view opens: the
+    /// motion ends when the view closes, so it has to be started afresh.
+    private func startCoverMotion() {
+        stopCoverMotion()
+        guard !reduceMotion else { return }
+        // A moment later, so the values above are in place before they move.
+        Task { @MainActor in
+            withAnimation(.easeInOut(duration: CoverMotion.breathPeriod / 2).repeatForever(autoreverses: true)) {
+                coverBreath = CGFloat(CoverMotion.breath)
             }
+            withAnimation(.easeInOut(duration: CoverMotion.periodAcross / 2).repeatForever(autoreverses: true)) {
+                coverDriftAcross = CGFloat(CoverMotion.reach)
+            }
+            withAnimation(.easeInOut(duration: CoverMotion.periodUpDown / 2).repeatForever(autoreverses: true)) {
+                coverDriftUpDown = CGFloat(CoverMotion.reach)
+            }
+        }
+    }
+
+    /// Puts the sleeve back at rest, without animating: its true size, at
+    /// the far end of each drift, where the wander starts from. Under Reduce
+    /// Motion it rests in the centre, as it will not move.
+    private func stopCoverMotion() {
+        let start = reduceMotion ? 0 : CGFloat(-CoverMotion.reach)
+        var still = Transaction()
+        still.disablesAnimations = true
+        withTransaction(still) {
+            coverBreath = 1
+            coverDriftAcross = start
+            coverDriftUpDown = start
+        }
     }
 
     // MARK: - Pieces

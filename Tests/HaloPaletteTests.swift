@@ -162,3 +162,21 @@ struct TideTests {
         }
     }
 }
+
+struct CoverMotionTests {
+    @Test func theSleeveNeverDriftsFurtherThanEightPoints() {
+        #expect(CoverMotion.furthest < 8)
+        #expect(CoverMotion.furthest > 7)
+    }
+
+    @Test func thePathTakesFourMinutesToRepeat() {
+        #expect(CoverMotion.repeatsAfter == 240)
+        // The two drifts have different periods, so the path loops.
+        #expect(CoverMotion.periodAcross != CoverMotion.periodUpDown)
+    }
+
+    @Test func theBreathingIsThreePercentOverAMinute() {
+        #expect(CoverMotion.breath == 1.03)
+        #expect(CoverMotion.breathPeriod == 60)
+    }
+}
