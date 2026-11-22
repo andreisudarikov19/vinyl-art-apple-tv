@@ -46,6 +46,8 @@ struct RecordView: View {
 
     @Query private var preferences: [UserPreferences]
     @State private var palette: CoverPalette = .placeholder
+    /// The sleeve's colours for the track list's tide.
+    @State private var tidePalette: HaloPalette = .placeholder
     @State private var autoHaloEngaged: Bool = false
     // Manual-mode pill state. Persists across records within an app session
     // (so toggling the halo on for one record keeps it on when you return);
@@ -76,6 +78,11 @@ struct RecordView: View {
 
     private var isAutoHalo: Bool {
         preferences.first?.haloAutoEngage ?? true
+    }
+
+    /// The track list's switch, Ambient halo › Track list. Off by default.
+    private var isTrackListTideOn: Bool {
+        (preferences.first?.haloSettings ?? HaloSettings()).trackList == .on
     }
 
     /// Whether the halo should currently be drawn. Only true while we're on
@@ -136,10 +143,12 @@ struct RecordView: View {
     private func loadPalette() async {
         guard let url = release.preferredCoverURL else {
             palette = .placeholder
+            tidePalette = .placeholder
             return
         }
         if let image = try? await ImagePipeline.shared.image(for: url) {
             palette = CoverColor.palette(from: image, releaseId: release.releaseId)
+            tidePalette = HaloPalette.sleeve(from: image) ?? .placeholder
         }
     }
 
@@ -175,8 +184,9 @@ struct RecordView: View {
     private func restartBackdropIdleTimer() {
         backdropIdleTask?.cancel()
         freezeBackdropMotion()
+        guard isTrackListTideOn else { return }
         backdropIdleTask = Task { @MainActor in
-            try? await Task.sleep(for: .seconds(15))
+            try? await Task.sleep(for: .seconds(TideTiming.trackListIdle))
             guard !Task.isCancelled else { return }
             // Resume: set the new engagement origin to now. Virtual time
             // continues from backdropFrozenTime onward.
@@ -303,7 +313,7 @@ struct RecordView: View {
         .padding(.horizontal, 100)
         .padding(.top, 90)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(blurredBackdrop(dark: 0.5))
+        .background(trackListBackdrop)
     }
 
     private func coverFocusedStage(_ model: RecordViewModel) -> some View {
@@ -397,75 +407,28 @@ struct RecordView: View {
 
     private let coverSide: CGFloat = 520
 
-    /// Edge-to-edge blurred copy of the cover, the ambient backdrop behind
-    /// the informative stage. Fills the whole screen; `dark` scrim keeps
-    /// foreground legible.
-    ///
-    /// The backdrop drifts: a slow ken-burns zoom (60 s cycle), a wandering
-    /// pan (75 s side to side, ~107 s up and down) and a gentle saturation
-    /// breath (40 s). The cycles are out of phase so the combined motion
-    /// doesn't visibly repeat for several minutes — rewards the user for
-    /// lingering on the tracklist with a quiet "the cover is alive" reading
-    /// without ever competing for attention with the title / artist / tracks.
-    /// Reduce Motion freezes all three.
-    private func blurredBackdrop(dark: Double) -> some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { context in
-            // Virtual time: accrued time the motion has been engaged across
-            // ALL engagements so far. Frozen when paused, resumes from the
-            // exact same value on the next engagement — every cycle (zoom,
-            // pan, saturation, fade) picks up at the phase it was paused at.
-            let virtualT = backdropVirtualTime(at: context.date)
-            // Fade-in: 4-second ease driven off virtual time, so it pauses
-            // along with the motion when the user interacts.
-            let fade = min(1.0, virtualT / 4.0)
-            // Three out-of-phase cycles. The scale formula has a non-zero
-            // baseline (+0.20 * fade) independent of zoom phase: that
-            // guarantees the image is at least ~20% over-scaled whenever
-            // any pan is happening, keeping the image's edges past the
-            // screen's edges in every direction so the black "back" can
-            // never appear. Pan ±80pt on a 1080pt-tall frame requires
-            // scale ≥ 1.0 + 80/540 ≈ 1.148; the 1.20 baseline gives a
-            // ~5% safety margin against any wobble.
-            let zoomPhase = (sin(virtualT * 2 * .pi / 60.0) + 1) / 2 // 0..1 over 60s
-            let scale: CGFloat = reduceMotion
-                ? 1.0
-                : 1.0 + (0.20 + 0.25 * CGFloat(zoomPhase)) * CGFloat(fade)
-            let panX: CGFloat = reduceMotion
-                ? 0
-                : CGFloat(sin(virtualT * 2 * .pi / 75.0) * 80 * fade)
-            // A cosine at 0.7× the horizontal frequency: the two axes never
-            // line up, so the pan wanders in a Lissajous-style path rather
-            // than tracing an ellipse or just wobbling left-right.
-            let panY: CGFloat = reduceMotion
-                ? 0
-                : CGFloat(cos(virtualT * 2 * .pi / 75.0 * 0.7) * 80 * fade)
-            // Saturation modulated as a delta off 1.0 so a fade=0 produces
-            // a neutral saturation rather than a wrong base value.
-            let saturationDelta = sin(virtualT * 2 * .pi / 40.0) * 0.12
-            let saturation: Double = reduceMotion
-                ? 1.0
-                : 1.0 + saturationDelta * fade
-
-            LazyImage(url: release.preferredCoverURL) { state in
-                if let image = state.image {
-                    image.resizable().scaledToFill()
-                } else {
-                    Color.black
+    /// The track list's tide (design-handoff/specs/06-ambient-tide.md): the still
+    /// low-tide glow from the top left corner, and the moving tide over it once
+    /// the switch is on and 15 s have passed without a press. It holds still on
+    /// a press (the virtual time freezes) and fades in over four seconds.
+    private var trackListBackdrop: some View {
+        ZStack {
+            Theme.ink
+            TideGlow(shape: .trackList, main: tidePalette.main, reach: 0)
+            if isTrackListTideOn {
+                TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: !isBackdropAmbientEngaged)) { context in
+                    // Virtual time: the time the tide has been moving across all engagements.
+                    let virtualT = backdropVirtualTime(at: context.date)
+                    TideGlow(
+                        shape: .trackList,
+                        main: tidePalette.main,
+                        reach: reduceMotion ? Tide.reducedMotionReach : Tide.reach(running: virtualT)
+                    )
+                    .opacity(min(1, virtualT / TideTiming.trackListFadeIn))
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .clipped()
-            .blur(radius: 80, opaque: true)
-            // Transforms applied AFTER the blur so the blur isn't recomputed
-            // every frame — only the cheap zoom / pan / saturation filters
-            // re-evaluate on each timeline tick.
-            .scaleEffect(scale)
-            .offset(x: panX, y: panY)
-            .saturation(saturation)
-            .overlay(Color.black.opacity(dark))
-            .ignoresSafeArea()
-            .animation(reduceMotion ? nil : .easeInOut(duration: 0.45), value: release.preferredCoverURL)
         }
+        .ignoresSafeArea()
     }
 
     private func cover(_ size: CGFloat, shadowRadius: CGFloat = 0) -> some View {

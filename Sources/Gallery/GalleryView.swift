@@ -22,6 +22,8 @@ struct GalleryView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var selected: CachedRelease?
     @State private var refresh: RefreshState = .idle
+    /// The tide is moving: the toolbar fades out behind it.
+    @State private var tideEngaged = false
     @State private var showingAbout = false
     @FocusState private var toolbarFocus: ToolbarFocus?
 
@@ -49,6 +51,8 @@ struct GalleryView: View {
                     .disabled(menu != nil)
                     .onExitCommand(perform: releases.isEmpty ? nil : { toolbarFocus = lastToolbarStop })
                 toolbar
+                    .opacity(tideEngaged ? 0 : 1)
+                    .animation(.easeInOut(duration: tideEngaged ? TideTiming.galleryFadeIn : TideTiming.galleryFadeOut), value: tideEngaged)
             }
             .navigationDestination(item: $selected) { release in
                 RecordView(release: release)
@@ -223,7 +227,8 @@ struct GalleryView: View {
                     onMoveUp: { toolbarFocus = lastToolbarStop },
                     reveal: reveal,
                     onBrowse: { browsedReleaseID = $0 },
-                    tape: ScaleTape(groups: entries.map(\.group))
+                    tape: ScaleTape(groups: entries.map(\.group)),
+                    tideEngaged: $tideEngaged
                 )
             case .grid:
                 MosaicGridView(
