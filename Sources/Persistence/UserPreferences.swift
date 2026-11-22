@@ -35,6 +35,20 @@ final class UserPreferences {
     /// cover-focused screen (and CoverFlow shows no halo at all).
     var haloAutoEngage: Bool = true
 
+    /// The halo settings once they have been stored. Nil for a row written
+    /// before `HaloSettings` existed, and until the user changes a halo
+    /// setting; `haloSettings` then follows `haloAutoEngage`. Use
+    /// `haloSettings`, not this.
+    var storedHaloSettings: HaloSettings?
+
+    /// The three ambient-light switches. Until they are stored, this is the
+    /// migration of `haloAutoEngage`, so a store from before the change
+    /// reads what its user had. Setting it stores the value.
+    var haloSettings: HaloSettings {
+        get { storedHaloSettings ?? .migrated(fromAutoEngage: haloAutoEngage) }
+        set { storedHaloSettings = newValue }
+    }
+
     init(
         discogsUsername: String = "",
         lastSyncDate: Date? = nil,
