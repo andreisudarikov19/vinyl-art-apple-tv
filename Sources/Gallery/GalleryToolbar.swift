@@ -131,7 +131,7 @@ private struct ToolbarSlot<Label: View>: View {
     }
 }
 
-/// The look of a toolbar control. Also used for the Settings menu's button.
+/// The look of a toolbar control. Also used for the Settings button.
 struct ToolbarButtonStyle: ButtonStyle {
     let width: CGFloat
     var menuOpen = false

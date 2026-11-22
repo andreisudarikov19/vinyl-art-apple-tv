@@ -27,7 +27,7 @@ struct GalleryView: View {
     @State private var refresh: RefreshState = .idle
     /// The tide is moving: the toolbar fades out behind it.
     @State private var tideEngaged = false
-    @State private var showingAbout = false
+    @State private var showingSettings = false
     @FocusState private var toolbarFocus: ToolbarFocus?
 
     private enum RefreshState: Equatable {
@@ -63,7 +63,7 @@ struct GalleryView: View {
             .overlay(alignment: .bottom) { refreshHUD }
         }
         // Menu on the remote dismisses the cover and returns to the gallery.
-        .fullScreenCover(isPresented: $showingAbout) { AboutView() }
+        .fullScreenCover(isPresented: $showingSettings) { settingsScreen }
         .task {
             if let stored = preferences.first {
                 layout = stored.galleryLayout
@@ -85,8 +85,8 @@ struct GalleryView: View {
                 reveal = CoverReveal(index: GalleryArranger.index(of: browsedReleaseID, in: arranged), takesFocus: true)
             }
         }
-        .onChange(of: showingAbout) { _, showing in
-            // Back from About: focus returns visibly to the Settings control.
+        .onChange(of: showingSettings) { _, showing in
+            // Back from Settings: focus returns visibly to the Settings control.
             if !showing { focusSettingsSoon() }
         }
     }
@@ -102,7 +102,7 @@ struct GalleryView: View {
             focus: $toolbarFocus,
             suggest: suggest
         ) {
-            settingsMenu
+            settingsButton
         }
     }
 
@@ -160,19 +160,64 @@ struct GalleryView: View {
         }
     }
 
-    private var settingsMenu: some View {
-        SettingsMenu(
-            accountName: accountName,
-            isRefreshing: isRefreshing,
-            haloAutoEngage: preferences.first?.haloAutoEngage ?? true,
-            // Creates the preferences row if it's missing.
-            setHaloAutoEngage: { UserPreferences.current(in: modelContext).haloAutoEngage = $0 },
-            refresh: { Task { await runRefresh() } },
-            signOut: { erase in Task { await signOut(erase: erase) } },
-            showAbout: { showingAbout = true }
-        )
-        .equatable()
+    /// The gear at the end of the toolbar. It opens Settings in full screen.
+    private var settingsButton: some View {
+        Button {
+            showingSettings = true
+        } label: {
+            Image(systemName: "gearshape")
+                .font(.system(size: 30))
+        }
+        .buttonStyle(ToolbarButtonStyle(width: ToolbarSize.settings, centered: true))
+        .accessibilityLabel("Settings")
         .focused($toolbarFocus, equals: .settings)
+    }
+
+    /// Settings, with what it shows of the Gallery: the account, the refresh
+    /// and the record last looked at. Kept out of `body`, to keep its type
+    /// simple for the compiler.
+    private var settingsScreen: some View {
+        SettingsView(
+            accountName: accountName,
+            refreshProgress: refreshProgress,
+            refreshMessage: refreshMessage,
+            preview: scalePreview,
+            startRefresh: { Task { await runRefresh() } },
+            signOut: { erase in
+                showingSettings = false
+                Task { await signOut(erase: erase) }
+            }
+        )
+    }
+
+    private var refreshProgress: SettingsRefreshProgress? {
+        if case .running(let processed, let total) = refresh {
+            return SettingsRefreshProgress(processed: processed, total: total)
+        }
+        return nil
+    }
+
+    /// How the last refresh ended, in the words of the pill at the bottom of
+    /// the Gallery, which Settings covers.
+    private var refreshMessage: String? {
+        switch refresh {
+        case .idle, .running: nil
+        case .done(let stored): "Updated \(stored)"
+        case .failed(let message): "Refresh failed. \(message)"
+        }
+    }
+
+    /// The record the Gallery was last on, for the scale's preview.
+    private var scalePreview: SettingsScalePreview? {
+        let entries = browsed
+        guard !entries.isEmpty else { return nil }
+        let index = GalleryArranger.index(of: browsedReleaseID, in: entries.map(\.release))
+        return SettingsScalePreview(
+            title: entries[index].release.title,
+            artist: entries[index].release.artistDisplayName,
+            tape: ScaleTape(groups: entries.map(\.group)),
+            index: index
+        )
     }
 
     private var isRefreshing: Bool {
@@ -185,8 +230,8 @@ struct GalleryView: View {
         return name.isEmpty ? "Discogs" : name
     }
 
-    /// Transient progress pill shown while a manual refresh runs (the menu
-    /// closes on tap, so feedback surfaces here instead of a sheet).
+    /// Transient progress pill shown while a manual refresh runs, for when
+    /// Settings is left while it does.
     @ViewBuilder
     private var refreshHUD: some View {
         switch refresh {
@@ -272,62 +317,6 @@ struct GalleryView: View {
                 )
             }
         }
-    }
-}
-
-/// Equal when what it shows is equal. Its actions are new closures on every
-/// gallery update, so SwiftUI would always see it as changed, but they do
-/// the same thing each time. The halo setting comes in as a value: reading
-/// the preferences row here would update the menu on every save as well.
-private struct SettingsMenu: View, Equatable {
-    let accountName: String
-    let isRefreshing: Bool
-    let haloAutoEngage: Bool
-    let setHaloAutoEngage: @MainActor @Sendable (Bool) -> Void
-    let refresh: () -> Void
-    let signOut: (_ erase: Bool) -> Void
-    let showAbout: () -> Void
-
-    nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.accountName == rhs.accountName
-            && lhs.isRefreshing == rhs.isRefreshing
-            && lhs.haloAutoEngage == rhs.haloAutoEngage
-    }
-
-    var body: some View {
-        Menu {
-            Button(action: refresh) {
-                SwiftUI.Label("Refresh collection", systemImage: "arrow.clockwise")
-            }
-            .disabled(isRefreshing)
-            // Plain text: tvOS draws a tick beside it when it's on.
-            Toggle("Engage halo automatically", isOn: Binding(get: { haloAutoEngage }, set: { setHaloAutoEngage($0) }))
-            Section {
-                Text("Account: \(accountName)")
-                Button {
-                    signOut(false)
-                } label: {
-                    SwiftUI.Label("Sign out (keep library)", systemImage: "rectangle.portrait.and.arrow.right")
-                }
-                Button(role: .destructive) {
-                    signOut(true)
-                } label: {
-                    SwiftUI.Label("Sign out & erase library", systemImage: "trash")
-                }
-            }
-            // Like the account line: plain text, so it reads as information.
-            Section {
-                Text(AppVersion.current)
-                Button(action: showAbout) {
-                    SwiftUI.Label("About", systemImage: "info.circle")
-                }
-            }
-        } label: {
-            Image(systemName: "gearshape")
-                .font(.system(size: 30))
-        }
-        .buttonStyle(ToolbarButtonStyle(width: ToolbarSize.settings, centered: true))
-        .accessibilityLabel("Settings")
     }
 }
 

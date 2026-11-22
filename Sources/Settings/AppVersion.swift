@@ -1,6 +1,6 @@
 import Foundation
 
-/// The app's version and build as the Settings menu and the About screen show
+/// The app's version and build as Settings and the About screen show
 /// them, e.g. "Version 0.20.0 (46)". The support page asks people to quote it.
 enum AppVersion {
     /// Built once from the app's own bundle.
