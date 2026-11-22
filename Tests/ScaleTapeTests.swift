@@ -42,6 +42,18 @@ struct ScaleTapeTests {
         #expect(tape.labels(current: 0).first?.offset == 112)
     }
 
+    @Test func keepsALabelClearOfALongerOne() {
+        // "Classical" is 135 pt wide, so the label after it waits until 151 pt
+        // have passed. "Folk" starts 48 pt after it: skipped. "Latin" starts 208 pt after it: kept.
+        let genres = ScaleTape(groups:
+            [String](repeating: "Classical", count: 3)
+                + [String](repeating: "Folk", count: 10)
+                + [String](repeating: "Latin", count: 3)
+                + [String](repeating: "Pop", count: 3)
+        )
+        #expect(genres.labelledStarts == [0, 13])
+    }
+
     @Test func dropsLabelsOutsideTheBox() {
         let long = ScaleTape(groups: [String](repeating: "A", count: 50) + [String](repeating: "B", count: 50))
         #expect(long.labels(current: 0).isEmpty)          // B starts 800 pt away

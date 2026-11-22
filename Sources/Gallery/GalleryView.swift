@@ -32,8 +32,13 @@ struct GalleryView: View {
         case failed(message: String)
     }
 
+    /// The browsed list, each place with its group on the scale.
+    private var browsed: [GalleryEntry] {
+        GalleryArranger.entries(releases, sort: sort, filter: filter)
+    }
+
     private var arranged: [CachedRelease] {
-        GalleryArranger.arrange(releases, sort: sort, filter: filter)
+        browsed.map(\.release)
     }
 
     var body: some View {
@@ -211,12 +216,14 @@ struct GalleryView: View {
             switch layout {
             case .coverFlow:
                 // Fills the entire screen; the toolbar floats over the top.
+                let entries = browsed
                 CoverFlowView(
-                    releases: arranged,
+                    releases: entries.map(\.release),
                     onOpen: { selected = $0 },
                     onMoveUp: { toolbarFocus = lastToolbarStop },
                     reveal: reveal,
-                    onBrowse: { browsedReleaseID = $0 }
+                    onBrowse: { browsedReleaseID = $0 },
+                    tape: ScaleTape(groups: entries.map(\.group))
                 )
             case .grid:
                 MosaicGridView(

@@ -12,6 +12,16 @@ struct ScaleTape: Equatable, Sendable {
     static let pitch = 16.0
     /// A label is skipped if it would start within this distance of the one before it.
     static let minimumLabelGap = 96.0
+    /// Labels are DM Mono Regular 25 pt and the reading DM Mono Medium 36 pt.
+    static let labelSize = 25.0
+    static let readingSize = 36.0
+    /// Room kept between a label and the one after it, or the reading.
+    static let textGap = 16.0
+
+    /// The width of a DM Mono line: 0.6 em a character.
+    static func textWidth(_ text: String, size: Double) -> Double {
+        Double(text.count) * 0.6 * size
+    }
 
     struct Label: Equatable, Sendable {
         var text: String
@@ -33,11 +43,17 @@ struct ScaleTape: Equatable, Sendable {
 
     /// Group starts that carry a label. Decided over the whole tape, not
     /// over what is on screen, so a label never appears or vanishes as the
-    /// tape scrolls.
+    /// tape scrolls. A label is 96 pt or more from the one before it, and
+    /// further still when that one is wider than 96 pt, so long genre names
+    /// do not run into the next.
     var labelledStarts: [Int] {
         var kept: [Int] = []
         for start in groupStarts {
-            if let last = kept.last, Double(start - last) * Self.pitch < Self.minimumLabelGap { continue }
+            if let last = kept.last {
+                let width = Self.textWidth(groups[last], size: Self.labelSize) + Self.textGap
+                let needed = max(Self.minimumLabelGap, width)
+                if Double(start - last) * Self.pitch < needed { continue }
+            }
             kept.append(start)
         }
         return kept
@@ -49,17 +65,20 @@ struct ScaleTape: Equatable, Sendable {
     }
 
     /// Where the tick of entry `index` sits when `current` is under the needle.
-    static func offset(of index: Int, current: Int) -> Double {
-        Double(index - current) * pitch
+    /// `current` is fractional while the tape glides between two entries.
+    static func offset(of index: Int, current: Double) -> Double {
+        (Double(index) - current) * pitch
     }
 
     /// The labels to draw when `current` is under the needle.
     /// - Parameters:
     ///   - halfWidth: Half the width of the scale's box (600 for the 1200 pt box).
-    ///   - readingHalfWidth: Half the width kept clear for the reading.
-    ///   - labelWidth: Room a label needs to the right of its tick.
+    ///   - readingHalfWidth: Half the width kept clear for the reading. The
+    ///     view passes more for a long reading.
+    ///   - labelWidth: Room a label needs to the right of its tick, at least.
+    ///     A longer label needs its own width.
     func labels(
-        current: Int,
+        current: Double,
         halfWidth: Double = 600,
         readingHalfWidth: Double = 80,
         labelWidth: Double = 96
@@ -69,7 +88,8 @@ struct ScaleTape: Equatable, Sendable {
             guard abs(offset) <= halfWidth else { return nil }
             // A label is drawn left-aligned at its tick, so it runs under the
             // reading from further away on the left than on the right.
-            if offset > -(readingHalfWidth + labelWidth), offset < readingHalfWidth { return nil }
+            let room = max(labelWidth, Self.textWidth(groups[start], size: Self.labelSize))
+            if offset > -(readingHalfWidth + room), offset < readingHalfWidth { return nil }
             return Label(text: groups[start], index: start, offset: offset)
         }
     }

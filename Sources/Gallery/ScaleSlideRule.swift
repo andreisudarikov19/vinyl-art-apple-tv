@@ -1,0 +1,165 @@
+import SwiftUI
+
+/// Style A, Slide rule (the default scale): bare ticks on a rule, labels
+/// above, the reading in yolk above the needle. Draws from `ScaleTape`.
+/// The look is design-handoff/reference/ScaleA.jpg; the measures are spec 01.
+struct SlideRuleScale: View {
+    let tape: ScaleTape
+    /// The entry under the needle.
+    let current: Int
+    /// The length of the list, for VoiceOver: "record 214 of 612".
+    let total: Int
+    /// The ambient halo is on: the tape fades, the reading and needle drop to 70%.
+    let idle: Bool
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// True just after a press, while the tape glides: the needle dims slightly.
+    @State private var moving = false
+
+    /// The box, 1200 by 72 pt, centred under the cover.
+    static let size = CGSize(width: 1200, height: 72)
+
+    var body: some View {
+        ScaleCanvas(
+            tape: tape,
+            position: Double(current),
+            idle: idle ? 1 : 0,
+            needle: moving ? 0.75 : 1
+        )
+        .frame(width: Self.size.width, height: Self.size.height)
+        // Labels and ticks fade at the ends of the box, never by changing colour.
+        .mask(
+            LinearGradient(
+                stops: [
+                    .init(color: .clear, location: 0),
+                    .init(color: .white, location: 0.1),
+                    .init(color: .white, location: 0.9),
+                    .init(color: .clear, location: 1),
+                ],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+        )
+        // The glide: a fixed half second, however far the tape moves. With
+        // Reduce Motion, the tape cross-fades to its new place instead.
+        .id(reduceMotion ? current : 0)
+        .transition(.opacity)
+        .animation(reduceMotion ? .easeInOut(duration: 0.3) : .easeInOut(duration: 0.5), value: current)
+        .animation(.easeInOut(duration: 0.8), value: idle)
+        .animation(.easeInOut(duration: 0.3), value: moving)
+        .task(id: current) {
+            moving = true
+            try? await Task.sleep(for: .milliseconds(500))
+            moving = false
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityText)
+    }
+
+    private var accessibilityText: String {
+        guard let reading = tape.reading(at: current) else { return "No records" }
+        return "\(reading), record \(current + 1) of \(total)"
+    }
+}
+
+/// The drawing, animatable so SwiftUI interpolates the tape's position (and
+/// the idle and needle levels) frame by frame. Only the ticks in view are drawn.
+private struct ScaleCanvas: View {
+    var tape: ScaleTape
+    /// Fractional while the tape glides between two entries.
+    var position: Double
+    /// 0 when the screen is in use, 1 when the ambient halo is on.
+    var idle: Double
+    /// Brightness of the needle: 1 when settled, lower while the tape moves.
+    var needle: Double
+
+    // Shared measures from spec 01.
+    private let pitch = ScaleTape.pitch
+    /// Ticks stand on the bottom edge: group 24 pt, record 12 pt, 2 pt wide.
+    private let groupHeight: CGFloat = 24
+    private let recordHeight: CGFloat = 12
+    private let tickWidth: CGFloat = 2
+    /// The label row and the reading sit on this line.
+    private let labelY: CGFloat = 18
+    private let needleTop: CGFloat = 40
+    private let needleWidth: CGFloat = 4
+
+    var body: some View {
+        Canvas { context, size in
+            guard !tape.groups.isEmpty else { return }
+            drawTape(into: &context, size: size)
+            drawReading(into: &context, size: size)
+            drawNeedle(into: context, size: size)
+        }
+    }
+
+    /// Ticks and labels: the tape. Idle fades it down to 30%.
+    private func drawTape(into context: inout GraphicsContext, size: CGSize) {
+        // A long reading keeps more of the tape clear around it.
+        let reading = tape.reading(at: Int(position.rounded())) ?? ""
+        let readingHalf = ScaleTape.textWidth(reading, size: ScaleTape.readingSize) / 2 + ScaleTape.textGap
+        context.opacity = 1 - 0.7 * idle
+        let centre = size.width / 2
+        // Only the entries that can fall inside the box, plus a margin.
+        let reach = Int(size.width / 2 / pitch) + 2
+        let lowest = max(0, Int(position.rounded(.down)) - reach)
+        let highest = min(tape.groups.count - 1, Int(position.rounded(.up)) + reach)
+        if lowest <= highest {
+            for index in lowest...highest {
+                let x = centre + ScaleTape.offset(of: index, current: position)
+                let isGroup = tape.isGroupStart(index)
+                let height = isGroup ? groupHeight : recordHeight
+                let rect = CGRect(x: x - tickWidth / 2, y: size.height - height, width: tickWidth, height: height)
+                context.fill(Path(rect), with: .color(isGroup ? .white : .white.opacity(0.4)))
+            }
+        }
+        for label in tape.labels(current: position, readingHalfWidth: max(80, readingHalf)) {
+            let x = centre + label.offset
+            context.draw(
+                Text(label.text)
+                    .font(Theme.mono(Theme.Size.small))
+                    .foregroundStyle(Theme.body),
+                at: CGPoint(x: x, y: labelY),
+                anchor: .leading
+            )
+        }
+    }
+
+    /// The reading: the group under the needle, in yolk. Idle drops it to 70%.
+    private func drawReading(into context: inout GraphicsContext, size: CGSize) {
+        context.opacity = 1 - 0.3 * idle
+        guard let reading = tape.reading(at: Int(position.rounded())) else { return }
+        context.draw(
+            Text(reading)
+                .font(Theme.mono(Theme.Size.reading, medium: true))
+                .foregroundStyle(Theme.yolk),
+            at: CGPoint(x: size.width / 2, y: labelY),
+            anchor: .center
+        )
+    }
+
+    /// The needle: 4 pt yolk with a soft glow. Idle halves the glow.
+    private func drawNeedle(into context: GraphicsContext, size: CGSize) {
+        var needleContext = context
+        needleContext.opacity = (1 - 0.3 * idle) * needle
+        needleContext.addFilter(.shadow(color: Theme.yolk.opacity(0.6), radius: 8 * (1 - 0.5 * idle)))
+        let rect = CGRect(
+            x: size.width / 2 - needleWidth / 2,
+            y: needleTop,
+            width: needleWidth,
+            height: size.height - needleTop
+        )
+        needleContext.fill(Path(rect), with: .color(Theme.yolk))
+    }
+}
+
+extension ScaleCanvas: @MainActor Animatable {
+    var animatableData: AnimatablePair<Double, AnimatablePair<Double, Double>> {
+        get { AnimatablePair(position, AnimatablePair(idle, needle)) }
+        set {
+            position = newValue.first
+            idle = newValue.second.first
+            needle = newValue.second.second
+        }
+    }
+}
