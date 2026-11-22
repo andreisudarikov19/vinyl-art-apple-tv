@@ -287,7 +287,7 @@ struct RecordView: View {
         .focusEffectDisabled()
         .focused($screenFocused)
         .accessibilityLabel("\(release.artistDisplayName), \(release.title)")
-        .accessibilityHint("Swipe left or right to change sides. Swipe down and up to read a long side. Swipe up for the cover; there, left and right turn the halo off and on, and down returns.")
+        .accessibilityHint("Swipe left or right to change sides. Swipe down and up to read a long side; down from its end reaches the Discogs line. Swipe up for the cover; there, left and right turn the halo off and on, and down returns.")
         .onMoveCommand { direction in
             if model.displayMode == .coverFocused {
                 moveInCoverView(direction, on: model)
@@ -540,6 +540,19 @@ struct RecordView: View {
         }
     }
 
+    /// Moves focus from the sides to the left column: to the sticker, or to
+    /// the Discogs line. Asked for a moment later, not inside the remote's
+    /// own move, which tvOS is still settling and would otherwise win.
+    private func focusLeftColumn(sticker: Bool) {
+        Task { @MainActor in
+            if sticker {
+                stickerFocused = true
+            } else {
+                discogsNoticeFocused = true
+            }
+        }
+    }
+
     /// Puts focus on the sticker when a suggested record opens. Asked twice,
     /// a moment apart: the first ask can come before the screen has settled.
     private func focusStickerSoon() {
@@ -574,7 +587,14 @@ struct RecordView: View {
         }
         .onMoveCommand { direction in
             switch direction {
-            case .up: if onAnotherSuggestion != nil { stickerFocused = true }
+            case .up:
+                // Up goes to the sticker when there is one, otherwise back
+                // to the sides, where Down came from.
+                if onAnotherSuggestion != nil {
+                    stickerFocused = true
+                } else {
+                    screenFocused = true
+                }
             case .right: screenFocused = true
             default: break
             }
@@ -749,20 +769,21 @@ struct RecordView: View {
                 setMode(.coverFocused, on: model)
             }
         case .down:
-            // On a side longer than the screen, Down reads on. A side
-            // that fits does not move.
-            scrollList(forward: true)
+            if SideScroll.more(offset: listOffset, content: listContentHeight, viewport: listViewportHeight).below {
+                // On a side longer than the screen, Down reads on.
+                scrollList(forward: true)
+            } else {
+                // At the end of the list, or on a side that fits, Down
+                // goes to the Discogs line at the foot of the left column.
+                focusLeftColumn(sticker: false)
+            }
         case .right:
             changeSide(on: model, forward: true)
         case .left:
             if model.currentSideIndex == 0 {
                 // Left from the first side goes to the left column: the
                 // sticker on a suggested record, otherwise the Discogs line.
-                if onAnotherSuggestion != nil {
-                    stickerFocused = true
-                } else {
-                    discogsNoticeFocused = true
-                }
+                focusLeftColumn(sticker: onAnotherSuggestion != nil)
             } else {
                 changeSide(on: model, forward: false)
             }
