@@ -77,14 +77,18 @@ struct ScaleTape: Equatable, Sendable {
     ///     view passes more for a long reading.
     ///   - labelWidth: Room a label needs to the right of its tick, at least.
     ///     A longer label needs its own width.
+    ///   - placement: Screen points from the needle for a tick that is this
+    ///     many entries away. A style that spreads its ticks (Glass lens)
+    ///     passes its own; the default is the even pitch.
     func labels(
         current: Double,
         halfWidth: Double = 600,
         readingHalfWidth: Double = 80,
-        labelWidth: Double = 96
+        labelWidth: Double = 96,
+        placement: (Double) -> Double = { ScaleTape.pitch * $0 }
     ) -> [Label] {
         labelledStarts.compactMap { start -> Label? in
-            let offset = Self.offset(of: start, current: current)
+            let offset = placement(Double(start) - current)
             guard abs(offset) <= halfWidth else { return nil }
             // A label is drawn left-aligned at its tick, so it runs under the
             // reading from further away on the left than on the right.
