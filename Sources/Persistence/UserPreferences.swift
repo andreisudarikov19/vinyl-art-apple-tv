@@ -13,6 +13,7 @@ enum GallerySort: String, Codable, CaseIterable, Sendable {
     case artist
     case album
     case year
+    case genre
 }
 
 /// Single-row settings store for the install. Discogs credentials live in

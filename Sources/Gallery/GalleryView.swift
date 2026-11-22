@@ -12,12 +12,18 @@ struct GalleryView: View {
 
     @State private var layout: GalleryLayout = .coverFlow
     @State private var sort: GallerySort = .recentlyAdded
-    @State private var tag: String?
+    @State private var filter: GalleryFilter?
+    @State private var menu: ToolbarMenu?
+    @State private var reveal: CoverReveal?
+    /// The record under the needle in the cover flow; a sort or filter change keeps it there.
+    @State private var browsedReleaseID: Int?
+    /// The toolbar stop used last. Up from the cover, and Menu, return to it.
+    @State private var lastToolbarStop: ToolbarFocus = .sort
     @Environment(\.modelContext) private var modelContext
     @State private var selected: CachedRelease?
     @State private var refresh: RefreshState = .idle
     @State private var showingAbout = false
-    @FocusState private var toolbarFocused: Bool
+    @FocusState private var toolbarFocus: ToolbarFocus?
 
     private enum RefreshState: Equatable {
         case idle
@@ -27,7 +33,7 @@ struct GalleryView: View {
     }
 
     private var arranged: [CachedRelease] {
-        GalleryArranger.arrange(releases, sort: sort, tag: tag)
+        GalleryArranger.arrange(releases, sort: sort, filter: filter)
     }
 
     var body: some View {
@@ -35,6 +41,8 @@ struct GalleryView: View {
             ZStack(alignment: .top) {
                 Color.black.ignoresSafeArea()
                 content
+                    .disabled(menu != nil)
+                    .onExitCommand(perform: releases.isEmpty ? nil : { toolbarFocus = lastToolbarStop })
                 toolbar
             }
             .navigationDestination(item: $selected) { release in
@@ -51,75 +59,61 @@ struct GalleryView: View {
             }
         }
         .onChange(of: layout) { _, new in preferences.first?.galleryLayout = new }
-        .onChange(of: sort) { _, new in preferences.first?.gallerySort = new }
+        .onChange(of: sort) { _, new in
+            preferences.first?.gallerySort = new
+            revealBrowsed()
+        }
+        .onChange(of: filter) { _, _ in revealBrowsed() }
+        .onChange(of: toolbarFocus) { _, new in
+            if let new { lastToolbarStop = new.control }
+        }
+        .onChange(of: selected == nil) { wasNil, isNil in
+            // Back from a record: the cover of that record gets focus, not Suggest.
+            if !wasNil, isNil {
+                reveal = CoverReveal(index: GalleryArranger.index(of: browsedReleaseID, in: arranged), takesFocus: true)
+            }
+        }
+        .onChange(of: showingAbout) { _, showing in
+            // Back from About: focus returns visibly to the Settings control.
+            if !showing { focusSettingsSoon() }
+        }
     }
 
-    /// One consistent control panel pinned to the top, floating over the
-    /// (full-screen) collection. No title — the covers are the content.
+    /// The one toolbar for both views, floating over the collection.
     private var toolbar: some View {
-        HStack(spacing: 7) {
-            if !releases.isEmpty {
-                suggestButton
-                separator
-                sortMenu
-                genreMenu
-                separator
-                layoutToggle
-            }
+        GalleryToolbar(
+            releases: releases,
+            sort: $sort,
+            filter: $filter,
+            layout: $layout,
+            menu: $menu,
+            focus: $toolbarFocus,
+            suggest: suggest
+        ) {
             settingsMenu
         }
-        // Match the inner inset on every side (top/bottom/left/right) and use
-        // the same 7pt as the HStack spacing so the gaps between controls,
-        // around separators, and inside the capsule all read uniform.
-        .padding(7)
-        .glassBar()
-        // Keep left/right focus moves among the controls. Without this the
-        // full-screen view behind the bar (CoverFlow's giant button, or any
-        // mosaic tile) wins horizontal focus moves and traps the user. Down
-        // escapes via the mosaic's focus trampoline / CoverFlow's geometry.
-        .focusSection()
-        // Sits high in the safe area to match Music's top bar on tvOS — the
-        // bar reads "floating chrome" instead of "second header."
-        .padding(.top, 12)
     }
 
-    private var separator: some View {
-        Rectangle()
-            .fill(.white.opacity(0.4))
-            .frame(width: 2, height: 32)
-        // No horizontal padding — the HStack's own spacing (7) provides the
-        // gap on either side so it matches the rest of the bar's geometry.
+    /// Opens a random record from the current (sorted/filtered) collection
+    /// straight into the track view, and puts the cover under the needle.
+    private func suggest() {
+        guard let index = arranged.indices.randomElement() else { return }
+        // No focus here: the record is on screen, and the cover takes focus
+        // when the record is left.
+        reveal = CoverReveal(index: index, takesFocus: false)
+        selected = arranged[index]
     }
 
-    private var sortMenu: some View {
-        SortMenu(sort: $sort)
-            .focused($toolbarFocused) // target for swipe-up from the CoverFlow
+    /// A sort or filter change keeps the record under the needle when it is
+    /// still in the list, and otherwise starts at the first one.
+    private func revealBrowsed() {
+        reveal = CoverReveal(index: GalleryArranger.index(of: browsedReleaseID, in: arranged), takesFocus: false)
     }
 
-    @ViewBuilder
-    private var genreMenu: some View {
-        let tags = GalleryArranger.filterTags(releases)
-        if !tags.isEmpty {
-            GenreMenu(tags: tags, tag: $tag)
-        }
-    }
-
-    private var layoutToggle: some View {
-        Button {
-            layout = layout == .grid ? .coverFlow : .grid
-        } label: {
-            Image(systemName: layout == .grid ? "square.stack" : "square.grid.2x2")
-        }
-        .accessibilityLabel(layout == .grid ? "Switch to CoverFlow" : "Switch to grid")
-    }
-
-    /// Opens a random album from the current (sorted/filtered) collection
-    /// straight into the track view.
-    private var suggestButton: some View {
-        Button {
-            selected = arranged.randomElement()
-        } label: {
-            SwiftUI.Label("Suggest", systemImage: "sparkles")
+    private func focusSettingsSoon() {
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(300))
+            toolbarFocus = .settings
         }
     }
 
@@ -135,6 +129,7 @@ struct GalleryView: View {
             showAbout: { showingAbout = true }
         )
         .equatable()
+        .focused($toolbarFocus, equals: .settings)
     }
 
     private var isRefreshing: Bool {
@@ -219,57 +214,17 @@ struct GalleryView: View {
                 CoverFlowView(
                     releases: arranged,
                     onOpen: { selected = $0 },
-                    onMoveUp: { toolbarFocused = true }
+                    onMoveUp: { toolbarFocus = lastToolbarStop },
+                    reveal: reveal,
+                    onBrowse: { browsedReleaseID = $0 }
                 )
-                .id("\(sort.rawValue)-\(tag ?? "all")")
             case .grid:
                 MosaicGridView(
-                    releases: arranged,
+                    releases: GalleryArranger.uniqued(arranged),
                     onOpen: { selected = $0 },
-                    onMoveUp: { toolbarFocused = true }
+                    onMoveUp: { toolbarFocus = lastToolbarStop }
                 )
             }
-        }
-    }
-}
-
-// MARK: - Toolbar menus
-
-// The menus are views of their own so they update only when what they show
-// changes. The gallery's body runs again on every save the cover sweep
-// makes, and rebuilding an open menu's content makes tvOS reload it: the
-// menu blanks for a moment and comes back.
-
-private struct SortMenu: View {
-    @Binding var sort: GallerySort
-
-    var body: some View {
-        Menu {
-            Picker("Sort", selection: $sort) {
-                ForEach(GallerySort.allCases, id: \.self) { option in
-                    Text(option.displayName).tag(option)
-                }
-            }
-        } label: {
-            SwiftUI.Label("Sort: \(sort.displayName)", systemImage: "arrow.up.arrow.down")
-        }
-    }
-}
-
-private struct GenreMenu: View {
-    let tags: [String]
-    @Binding var tag: String?
-
-    var body: some View {
-        Menu {
-            Picker("Genre", selection: $tag) {
-                Text("All genres").tag(String?.none)
-                ForEach(tags, id: \.self) { name in
-                    Text(name).tag(Optional(name))
-                }
-            }
-        } label: {
-            SwiftUI.Label(tag ?? "All genres", systemImage: "line.3.horizontal.decrease.circle")
         }
     }
 }
@@ -323,7 +278,9 @@ private struct SettingsMenu: View, Equatable {
             }
         } label: {
             Image(systemName: "gearshape")
+                .font(.system(size: 30))
         }
+        .buttonStyle(ToolbarButtonStyle(width: ToolbarSize.settings, centered: true))
         .accessibilityLabel("Settings")
     }
 }

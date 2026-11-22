@@ -32,7 +32,7 @@ struct GalleryArrangerTests {
             release(id: 2, daysAgo: 1),
             release(id: 3, daysAgo: 3),
         ]
-        let result = GalleryArranger.arrange(input, sort: .recentlyAdded, tag: nil)
+        let result = GalleryArranger.arrange(input, sort: .recentlyAdded, filter: nil)
         #expect(result.map(\.releaseId) == [2, 3, 1])
     }
 
@@ -42,7 +42,7 @@ struct GalleryArrangerTests {
             release(id: 2, artist: "ABBA"),
             release(id: 3, artist: "beach house"),
         ]
-        let result = GalleryArranger.arrange(input, sort: .artist, tag: nil)
+        let result = GalleryArranger.arrange(input, sort: .artist, filter: nil)
         #expect(result.map(\.artistDisplayName) == ["ABBA", "beach house", "Radiohead"])
     }
 
@@ -52,28 +52,100 @@ struct GalleryArrangerTests {
             release(id: 2, artist: "Aa", year: 2010),
             release(id: 3, artist: "Mm", year: 1999),
         ]
-        let result = GalleryArranger.arrange(input, sort: .year, tag: nil)
+        let result = GalleryArranger.arrange(input, sort: .year, filter: nil)
         #expect(result.map(\.releaseId) == [3, 1, 2])
     }
 
-    @Test func tagFilterMatchesGenreOrStyle() {
+    @Test func genreFilterMatchesRecordsCarryingTheGenre() {
         let input = [
             release(id: 1, genres: ["Jazz"], styles: []),
             release(id: 2, genres: ["Rock"], styles: ["Jazz Fusion"]),
             release(id: 3, genres: ["Rock"], styles: ["Indie"]),
         ]
-        let byGenre = GalleryArranger.arrange(input, sort: .recentlyAdded, tag: "Jazz")
+        let byGenre = GalleryArranger.arrange(input, sort: .recentlyAdded, filter: GalleryFilter(genre: "Jazz"))
         #expect(Set(byGenre.map(\.releaseId)) == [1])
-
-        let byStyle = GalleryArranger.arrange(input, sort: .recentlyAdded, tag: "Jazz Fusion")
-        #expect(Set(byStyle.map(\.releaseId)) == [2])
+        // A style is not a genre: "Jazz Fusion" as a genre matches nothing.
+        let byStyleName = GalleryArranger.arrange(input, sort: .recentlyAdded, filter: GalleryFilter(genre: "Jazz Fusion"))
+        #expect(byStyleName.isEmpty)
     }
 
-    @Test func filterTagsAreUniqueSortedUnionOfGenresAndStyles() {
+    @Test func styleFilterStaysWithinItsGenre() {
         let input = [
-            release(id: 1, genres: ["Rock"], styles: ["Indie Rock"]),
-            release(id: 2, genres: ["Jazz"], styles: ["Indie Rock"]),
+            release(id: 1, genres: ["Electronic"], styles: ["Ambient"]),
+            release(id: 2, genres: ["Rock"], styles: ["Ambient"]),
+            release(id: 3, genres: ["Electronic"], styles: ["House"]),
         ]
-        #expect(GalleryArranger.filterTags(input) == ["Indie Rock", "Jazz", "Rock"])
+        let filter = GalleryFilter(genre: "Electronic", style: "Ambient")
+        let result = GalleryArranger.arrange(input, sort: .recentlyAdded, filter: filter)
+        #expect(result.map(\.releaseId) == [1])
+    }
+
+    @Test func genreOptionsAreSortedWithCountsAndStylesOfEachGenre() {
+        let input = [
+            release(id: 1, genres: ["Rock", "Pop"], styles: ["Indie Rock"]),
+            release(id: 2, genres: ["Electronic"], styles: ["House", "Ambient"]),
+            release(id: 3, genres: ["Electronic"], styles: ["Ambient"]),
+            release(id: 4, genres: ["Electronic"], styles: []),
+        ]
+        let options = GalleryArranger.genreOptions(input)
+        #expect(options.map(\.name) == ["Electronic", "Pop", "Rock"])
+        #expect(options.map(\.count) == [3, 1, 1])
+        let electronic = options[0]
+        #expect(electronic.styles.map(\.name) == ["Ambient", "House"])
+        #expect(electronic.styles.map(\.count) == [2, 1])
+        #expect(options[2].styles == [StyleOption(name: "Indie Rock", count: 1)])
+    }
+
+    @Test func genreSortGroupsAlphabeticallyByArtistThenAlbum() {
+        let input = [
+            release(id: 1, title: "B", artist: "Zed", genres: ["Rock"]),
+            release(id: 2, title: "A", artist: "Ana", genres: ["Electronic"]),
+            release(id: 3, title: "C", artist: "Ana", genres: ["Rock"]),
+            release(id: 4, title: "D", artist: "Abe", genres: ["Rock"]),
+        ]
+        let result = GalleryArranger.arrange(input, sort: .genre, filter: nil)
+        #expect(result.map(\.releaseId) == [2, 4, 3, 1])
+    }
+
+    @Test func genreSortListsARecordUnderEachOfItsGenres() {
+        let input = [
+            release(id: 1, title: "X", artist: "Ana", genres: ["Rock", "Pop"]),
+        ]
+        let result = GalleryArranger.arrange(input, sort: .genre, filter: nil)
+        #expect(result.map(\.releaseId) == [1, 1])
+    }
+
+    @Test func genreSortWithAGenreFilterListsOnlyThatGenre() {
+        let input = [
+            release(id: 1, title: "X", artist: "Ana", genres: ["Rock", "Pop"]),
+            release(id: 2, title: "Y", artist: "Bo", genres: ["Pop"]),
+        ]
+        let result = GalleryArranger.arrange(input, sort: .genre, filter: GalleryFilter(genre: "Pop"))
+        #expect(result.map(\.releaseId) == [1, 2])
+    }
+
+    @Test func genreSortPutsRecordsWithoutGenreLast() {
+        let input = [
+            release(id: 1, genres: []),
+            release(id: 2, genres: ["Jazz"]),
+        ]
+        let result = GalleryArranger.arrange(input, sort: .genre, filter: nil)
+        #expect(result.map(\.releaseId) == [2, 1])
+    }
+
+    @Test func uniquedKeepsTheFirstPlaceOfEachRecord() {
+        let input = [
+            release(id: 1, genres: ["Rock"]),
+            release(id: 2, genres: ["Rock"]),
+            release(id: 1, genres: ["Pop"]),
+        ]
+        #expect(GalleryArranger.uniqued(input).map(\.releaseId) == [1, 2])
+    }
+
+    @Test func indexKeepsTheRecordUnderTheNeedleOrStartsAtTheFirst() {
+        let input = [release(id: 1), release(id: 2), release(id: 3)]
+        #expect(GalleryArranger.index(of: 3, in: input) == 2)
+        #expect(GalleryArranger.index(of: 9, in: input) == 0)
+        #expect(GalleryArranger.index(of: nil, in: input) == 0)
     }
 }

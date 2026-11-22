@@ -3,6 +3,20 @@ import NukeUI
 import SwiftData
 import SwiftUI
 
+/// Moves the cover to a place in the list (a sort or filter change, a
+/// suggestion, the return from a record). `takesFocus` also puts focus on
+/// the cover. Each request is new, so the same place can be asked for again.
+struct CoverReveal: Equatable {
+    let index: Int
+    let takesFocus: Bool
+    private let token = UUID()
+
+    init(index: Int, takesFocus: Bool) {
+        self.index = index
+        self.takesFocus = takesFocus
+    }
+}
+
 /// Classic Cover Flow browse mode: a 3D carousel of album covers with mirror
 /// reflections over black, with a soft radial glow tinted by the centered
 /// cover. The whole view is one focusable control — left/right move through
@@ -14,6 +28,11 @@ struct CoverFlowView: View {
     /// Called on swipe-up. This view's onMoveCommand consumes the up gesture,
     /// so the parent uses this to move focus to the toolbar explicitly.
     var onMoveUp: () -> Void = {}
+    /// A place to move the cover to; see `CoverReveal`.
+    var reveal: CoverReveal?
+    /// Reports the record under the needle, so the gallery can keep it there
+    /// when the sort or filter changes.
+    var onBrowse: (Int) -> Void = { _ in }
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var selectedIndex = 0
@@ -78,6 +97,22 @@ struct CoverFlowView: View {
             } else {
                 cancelHaloIdleTimer()
             }
+        }
+        .onChange(of: reveal) { _, request in
+            guard let request else { return }
+            selectedIndex = min(max(request.index, 0), max(releases.count - 1, 0))
+            // A pushed record hands focus back only after its pop settles, so
+            // the cover takes focus a moment later, not at once.
+            if request.takesFocus {
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(1000))
+                    focused = true
+                }
+            }
+        }
+        .onChange(of: selectedIndex, initial: true) { _, index in
+            guard releases.indices.contains(index) else { return }
+            onBrowse(releases[index].releaseId)
         }
         .suppressesScreensaver(haloEngaged)
     }
