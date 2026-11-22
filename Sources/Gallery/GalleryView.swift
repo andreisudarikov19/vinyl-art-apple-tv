@@ -28,6 +28,8 @@ struct GalleryView: View {
     /// The tide is moving: the toolbar fades out behind it.
     @State private var tideEngaged = false
     @State private var showingSettings = false
+    /// The Grid has called the toolbar: it is shown before it is given focus.
+    @State private var toolbarCalled = false
     @FocusState private var toolbarFocus: ToolbarFocus?
 
     private enum RefreshState: Equatable {
@@ -52,7 +54,7 @@ struct GalleryView: View {
                 Color.black.ignoresSafeArea()
                 content
                     .disabled(menu != nil)
-                    .onExitCommand(perform: releases.isEmpty ? nil : { toolbarFocus = lastToolbarStop })
+                    .onExitCommand(perform: releases.isEmpty ? nil : { callToolbar() })
                 toolbar
                     .opacity(toolbarIsShown ? 1 : 0)
                     .animation(.easeInOut(duration: toolbarFadeTime), value: toolbarIsShown)
@@ -77,7 +79,12 @@ struct GalleryView: View {
         }
         .onChange(of: filter) { _, _ in revealBrowsed() }
         .onChange(of: toolbarFocus) { _, new in
-            if let new { lastToolbarStop = new.control }
+            if let new {
+                lastToolbarStop = new.control
+            } else {
+                // Focus has left the toolbar: in the Grid it goes away again.
+                toolbarCalled = false
+            }
         }
         .onChange(of: selected == nil) { wasNil, isNil in
             // Back from a record: the cover of that record gets focus, not Suggest.
@@ -97,7 +104,26 @@ struct GalleryView: View {
         if releases.isEmpty { return true }
         switch layout {
         case .coverFlow: return !tideEngaged
-        case .grid: return toolbarFocus != nil || menu != nil
+        case .grid: return toolbarFocus != nil || menu != nil || toolbarCalled
+        }
+    }
+
+    /// Moves focus to the toolbar, on the control used last or on `stop`.
+    /// In the Grid the toolbar is hidden while it has no focus, and tvOS
+    /// will not give focus to something fully transparent, so it is shown
+    /// first and takes focus a moment later.
+    private func callToolbar(_ stop: ToolbarFocus? = nil) {
+        guard layout == .grid, !toolbarIsShown else {
+            toolbarFocus = stop ?? lastToolbarStop
+            return
+        }
+        toolbarCalled = true
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(120))
+            toolbarFocus = stop ?? lastToolbarStop
+            // If focus did not arrive, the toolbar does not stay for nothing.
+            try? await Task.sleep(for: .milliseconds(600))
+            if toolbarFocus == nil { toolbarCalled = false }
         }
     }
 
@@ -115,7 +141,7 @@ struct GalleryView: View {
         return MosaicGridView(
             releases: entries.map(\.release),
             onOpen: { release in openRecord(release) },
-            onMoveUp: { toolbarFocus = lastToolbarStop },
+            onMoveUp: { callToolbar() },
             landingID: browsedReleaseID,
             reveal: reveal,
             onBrowse: { browsedReleaseID = $0 },
@@ -191,7 +217,7 @@ struct GalleryView: View {
     private func focusSettingsSoon() {
         Task { @MainActor in
             try? await Task.sleep(for: .milliseconds(300))
-            toolbarFocus = .settings
+            callToolbar(.settings)
         }
     }
 
@@ -338,7 +364,7 @@ struct GalleryView: View {
                 CoverFlowView(
                     releases: entries.map(\.release),
                     onOpen: { release in openRecord(release) },
-                    onMoveUp: { toolbarFocus = lastToolbarStop },
+                    onMoveUp: { callToolbar() },
                     reveal: reveal,
                     onBrowse: { browsedReleaseID = $0 },
                     tape: ScaleTape(groups: entries.map(\.group)),
