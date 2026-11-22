@@ -13,79 +13,127 @@ enum DiscogsNotice {
 
 /// Renders only the notice's label. tvOS draws a focus platter behind a
 /// `.plain` button, which would frame the label in a large white block; the
-/// label's own glass pill is the only focus cue the notice should show.
+/// label's own yolk pill is the only focus cue the notice should show.
 struct DiscogsNoticeButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
     }
 }
 
-/// The notice's label, in the tag family: a QR glyph and the text, in the
-/// tag pill's shape and padding. At rest it is quiet with no fill; when the
-/// remote focuses it, the tag pill's glass appears, so it reveals itself as
-/// selectable like the pills beside it.
+/// The notice's label (spec 04): a QR icon and the text, quiet at rest. In
+/// focus it is a yolk pill 58 pt high, like every other control in focus.
+/// The pill's room is kept at rest too, so nothing moves when focus arrives.
 struct DiscogsNoticeLabel: View {
     @Environment(\.isFocused) private var isFocused
 
+    /// The room at each side of the pill. The record screen pulls the label
+    /// back by this much, so the icon lines up with the table's left edge.
+    static let sidePadding: CGFloat = 24
+    static let height: CGFloat = 58
+
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 12) {
             Image(systemName: "qrcode")
-                .font(.system(size: 16, weight: .medium))
+                .font(.system(size: 22, weight: .medium))
+                .frame(width: 26, height: 26)
                 .accessibilityHidden(true)
             Text(DiscogsNotice.text)
-                .font(.system(size: 20, weight: .medium))
+                .font(Theme.sans(Theme.Size.small, isFocused ? .semibold : .regular))
         }
-        .foregroundStyle(.white.opacity(isFocused ? 0.88 : 0.5))
-        .padding(.horizontal, 16)
-        .padding(.vertical, 6)
+        .foregroundStyle(isFocused ? Theme.onYolk : Theme.quiet)
+        .padding(.horizontal, Self.sidePadding)
+        .frame(height: Self.height)
         .background {
             if isFocused {
-                TagPillGlass()
+                Capsule().fill(Theme.yolk)
             }
         }
     }
 }
 
-/// Frosted glass for the catalog tag pills and the focused Discogs notice: an
-/// ultra-thin material for the blurred translucency behind the text, plus a
-/// thin white stroke for the edge highlight that sells the "glass" reading at
-/// TV viewing distance. No tvOS 26 dependency — `.ultraThinMaterial` is
-/// available on every supported version.
-struct TagPillGlass: View {
-    var body: some View {
-        Capsule()
-            .fill(.ultraThinMaterial)
-            .overlay(
-                Capsule().strokeBorder(.white.opacity(0.22), lineWidth: 0.8)
-            )
-    }
-}
+/// The panel that takes the track list's place when the Discogs line is
+/// chosen (spec 04, reference/RecordDiscogsQR.jpg): a QR code for this
+/// release's page on discogs.com, the attribution at full size, the
+/// non-affiliation notice, and the address in type for anyone who cannot
+/// scan. Nothing on it takes focus; Menu closes it.
+struct DiscogsReleasePanel: View {
+    let releaseId: Int
 
-/// Full-screen QR code of a release's discogs.com page, opened from the
-/// Discogs notice. Nothing on it is focusable; the remote's Menu button closes it.
-struct DiscogsReleaseQRView: View {
-    let url: String
+    private var address: String { DiscogsNotice.releasePageURL(releaseId: releaseId) }
+
+    /// The panel's inner margin, and the QR code's side.
+    private let margin: CGFloat = 64
+    private let codeSide: CGFloat = 420
 
     var body: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
-            VStack(spacing: 24) {
-                if let qr = QRCode.image(from: url) {
-                    Image(uiImage: qr)
-                        .interpolation(.none)
-                        .resizable()
-                        .frame(width: 360, height: 360)
-                        .background(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                } else {
-                    Text(url)
-                        .font(.footnote)
-                        .foregroundStyle(.white)
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .top, spacing: margin) {
+                code
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("SCAN WITH YOUR PHONE")
+                        .font(Theme.mono(Theme.Size.small, medium: true))
+                        .tracking(Theme.Size.small * Theme.eyebrowTracking)
+                        .foregroundStyle(Theme.yolk)
+                    Text("This record on Discogs")
+                        .font(Theme.serif(Theme.Size.cardTitle))
+                        .tracking(-Theme.Size.cardTitle * 0.02)
+                        .foregroundStyle(Theme.text)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.top, 16)
+                    Text("The code opens the Discogs page for this exact release, with its full credits, notes and pictures.")
+                        .font(Theme.sans(Theme.Size.control))
+                        .foregroundStyle(Theme.body)
+                        .lineSpacing(6)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.top, 20)
                 }
-                Text("Scan with your phone")
-                    .font(.headline)
-                    .foregroundStyle(.white.opacity(0.6))
             }
+            Rectangle()
+                .fill(Theme.line)
+                .frame(height: 1)
+                .padding(.top, margin)
+            Text(DiscogsNotice.text)
+                .font(Theme.sans(Theme.Size.control, .medium))
+                .foregroundStyle(Theme.text)
+                .padding(.top, 40)
+            Text(AboutView.discogsNotice)
+                .font(Theme.sans(Theme.Size.small))
+                .foregroundStyle(Theme.quiet)
+                .lineSpacing(4)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 12)
+            Text("Or type this into a browser")
+                .font(Theme.sans(Theme.Size.small))
+                .foregroundStyle(Theme.quiet)
+                .padding(.top, 28)
+            Text(verbatim: address)
+                .font(Theme.mono(Theme.Size.small))
+                .foregroundStyle(Theme.text)
+                .padding(.top, 6)
+            Spacer(minLength: 0)
+        }
+        .padding(margin)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.cardRadius))
+        .accessibilityElement(children: .combine)
+    }
+
+    /// The code, black on white with 16 pt corners. If it cannot be drawn,
+    /// its square stays empty: the address is in type below.
+    @ViewBuilder
+    private var code: some View {
+        if let qr = QRCode.image(from: address) {
+            Image(uiImage: qr)
+                .interpolation(.none)
+                .resizable()
+                .frame(width: codeSide, height: codeSide)
+                .background(.white)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .accessibilityLabel("QR code for this release on discogs.com")
+        } else {
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Theme.line)
+                .frame(width: codeSide, height: codeSide)
         }
     }
 }
