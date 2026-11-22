@@ -89,3 +89,37 @@ struct MosaicPlaceholderLayoutTests {
         #expect(MosaicPlaceholderLayout.rows(topInset: topInset, pitch: pitch, height: 0).isEmpty)
     }
 }
+
+struct GridMeasuresTests {
+    private let grid = GridMeasures(size: CGSize(width: 1920, height: 1080), count: 30)
+
+    @Test func fourRowsHangEightPointsOverTheTopAndTheBottom() {
+        #expect(abs(grid.side - 272.571) < 0.01)
+        #expect(abs(grid.overhang - 8.143) < 0.01)
+        #expect(abs(grid.wallOffset(topRow: 0) + 8.143) < 0.01)
+    }
+
+    @Test func theRowInFocusIsTheSecondWhereTheEndsAllow() {
+        // 30 records are five rows, so the wall can move up by one row only.
+        #expect(GridMeasures.topRow(forIndex: 0, count: 30) == 0)
+        #expect(GridMeasures.topRow(forIndex: 7, count: 30) == 0)
+        #expect(GridMeasures.topRow(forIndex: 14, count: 30) == 1)
+        #expect(GridMeasures.topRow(forIndex: 29, count: 30) == 1)
+        // A long wall: the row in focus is second from the top.
+        #expect(GridMeasures.topRow(forIndex: 70, count: 700) == 9)
+        // A wall shorter than the screen never moves.
+        #expect(GridMeasures.topRow(forIndex: 13, count: 14) == 0)
+    }
+
+    @Test func theCardStaysInsideTheSafeArea() {
+        let first = grid.cardFrame(index: 0, topRow: 0)
+        #expect(first.minX == 80 && first.minY == 60)
+        let lastColumn = grid.cardFrame(index: 6, topRow: 0)
+        #expect(abs(lastColumn.maxX - (1920 - 80)) < 0.001)
+        // In the middle of the wall the card's sleeve is centred on its cell.
+        let middle = grid.cardFrame(index: 10, topRow: 0)
+        let cell = grid.cellFrame(index: 10, topRow: 0)
+        #expect(abs(middle.midX - cell.midX) < 0.001)
+        #expect(abs(middle.minY + 10 + 161 - cell.midY) < 0.001)
+    }
+}
