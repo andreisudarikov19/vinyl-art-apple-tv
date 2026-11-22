@@ -16,6 +16,13 @@ enum GallerySort: String, Codable, CaseIterable, Sendable {
     case genre
 }
 
+/// The look of the scale under the cover. Settings picks it (spec 03); the
+/// first beta ships two of the five styles in spec 01.
+enum ScaleStyle: String, Codable, CaseIterable, Sendable {
+    case slideRule
+    case glassLens
+}
+
 /// Single-row settings store for the install. Discogs credentials live in
 /// the Keychain; this holds the non-secret state the app needs across
 /// launches.
@@ -35,6 +42,18 @@ final class UserPreferences {
     /// When false, the user controls it manually via the pill on the
     /// cover-focused screen (and CoverFlow shows no halo at all).
     var haloAutoEngage: Bool = true
+
+    /// The scale style once it has been stored. Nil for a row written before
+    /// `ScaleStyle` existed: SwiftData leaves the new column empty for it, and
+    /// a non-optional enum cannot read that. Use `scaleStyle`, not this.
+    var storedScaleStyle: ScaleStyle?
+
+    /// The look of the scale under the Gallery cover. Slide rule until the
+    /// user picks another in Settings.
+    var scaleStyle: ScaleStyle {
+        get { storedScaleStyle ?? .slideRule }
+        set { storedScaleStyle = newValue }
+    }
 
     /// The halo settings once they have been stored. Nil for a row written
     /// before `HaloSettings` existed, and until the user changes a halo

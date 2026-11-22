@@ -224,9 +224,16 @@ struct CoverFlowView: View {
     /// The scale under the cover, 944 to 1016 pt. It goes to its idle look
     /// while the halo is on.
     private var scale: some View {
-        SlideRuleScale(tape: tape, current: selectedIndex, total: releases.count, idle: haloEngaged)
-            .frame(maxWidth: .infinity, alignment: .top)
-            .padding(.top, scaleBoxTop)
+        Group {
+            switch preferences.first?.scaleStyle ?? .slideRule {
+            case .slideRule:
+                SlideRuleScale(tape: tape, current: selectedIndex, total: releases.count, idle: haloEngaged)
+            case .glassLens:
+                GlassLensScale(tape: tape, current: selectedIndex, total: releases.count, idle: haloEngaged)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .top)
+        .padding(.top, scaleBoxTop)
     }
 
     /// "214 / 612", DM Mono 25 in quiet, right-aligned at the 80 pt margin and
