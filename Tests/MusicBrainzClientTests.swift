@@ -21,6 +21,13 @@ struct MusicBrainzClientTests {
         #expect(MusicBrainzClient.year(from: nil) == nil)
     }
 
+    @Test func earliestYearIsTakenFromTheMatchesNotTheBestScore() {
+        // A reissue, a later reissue and an undated match: the original year wins.
+        #expect(MusicBrainzClient.earliestYear(from: ["2014-11-24", "1988-07-01", "1964", nil]) == 1964)
+        #expect(MusicBrainzClient.earliestYear(from: [nil, "garbage"]) == nil)
+        #expect(MusicBrainzClient.earliestYear(from: []) == nil)
+    }
+
     @Test func resultsScoringBelowNinetyAreNoMatch() async throws {
         let match = try await search(returning: [("close", 89), ("unscored", nil)])
 

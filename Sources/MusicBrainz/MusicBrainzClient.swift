@@ -68,11 +68,19 @@ actor MusicBrainzClient {
         let trusted = result.releases.filter { ($0.score ?? 0) >= Self.minimumScore }
         guard let release = trusted.max(by: { ($0.score ?? 0) < ($1.score ?? 0) }) else { return nil }
 
+        // The cover comes from the best match; the year is the earliest one
+        // among the trusted matches, since reissues come out later.
         return MusicBrainzMatch(
             releaseMBID: release.id,
             releaseGroupMBID: release.releaseGroup?.id,
-            year: Self.year(from: release.date)
+            year: Self.earliestYear(from: trusted.map(\.date))
         )
+    }
+
+    /// The earliest year among MusicBrainz dates, ignoring dates with no
+    /// believable year. Nil when none has one.
+    static func earliestYear(from dates: [String?]) -> Int? {
+        dates.compactMap(year(from:)).min()
     }
 
     /// The year of a MusicBrainz date: "1959", "1959-08" or "1959-08-17".
