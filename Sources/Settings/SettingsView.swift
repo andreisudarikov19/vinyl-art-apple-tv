@@ -147,7 +147,7 @@ struct SettingsView: View {
                 line: "Choose how the scale under the cover looks. Every style works the same way."
             )
             ForEach(ScaleStyle.allCases, id: \.self) { style in
-                SettingsRow(style.displayName, value: style == scaleStyle ? "In use" : "", showsTick: style == scaleStyle) {
+                SettingsRow(LocalizedStringKey(style.displayName), value: style == scaleStyle ? "In use" : "", showsTick: style == scaleStyle) {
                     UserPreferences.current(in: modelContext).scaleStyle = style
                 }
                 .focused($focus, equals: .style(style))
