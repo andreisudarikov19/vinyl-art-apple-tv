@@ -125,6 +125,18 @@ struct HaloFieldTests {
         #expect(close(patches[3].opacity, 0.404076))
     }
 
+    @Test func aPatchFadesAcrossItsBlurredEdge() {
+        // Whole well inside, a half on the disc's edge, gone well outside.
+        #expect(HaloField.patchEdge(distance: 0, radius: 600) > 0.999)
+        #expect(abs(HaloField.patchEdge(distance: 300, radius: 300) - 0.5) < 1e-12)
+        // One blur (150 pt) outside the edge: 15.87% is left.
+        #expect(abs(HaloField.patchEdge(distance: 450, radius: 300) - 0.158655) < 1e-5)
+        // The patch is drawn out to three blurs past its edge, where 0.13% is left.
+        let reach = HaloField.patchReach(radius: 300)
+        #expect(reach == 750)
+        #expect(HaloField.patchEdge(distance: reach, radius: 300) < 0.0014)
+    }
+
     @Test func noPatchIsEverStrongerThanTheLimit() {
         for step in 0..<600 {
             for patch in HaloField.patches(at: Double(step) * 0.5, palette: palette) {
