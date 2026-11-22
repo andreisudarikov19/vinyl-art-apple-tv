@@ -373,12 +373,9 @@ struct RecordView: View {
     private func coverFocusedStage(_ model: RecordViewModel) -> some View {
         ZStack {
             Color.black.ignoresSafeArea()
-            // Halo blobs sit behind the cover, born at the screen centre and
-            // drifting outward. The cover hides their cores; only the bloom
-            // past its silhouette becomes visible. The rich style adds a
-            // breathing ambient base and a second tier of edge-origin blobs
-            // after 60s of continuous engagement.
-            HaloView(palette: palette, isEngaged: isHaloEngaged, style: .rich)
+            // The halo (spec 05): a steady rim round the sleeve, a faint aura
+            // and soft patches drifting outward, in the sleeve's own colours.
+            HaloLight(palette: tidePalette, isEngaged: isHaloEngaged, sleeveSide: 820)
                 .ignoresSafeArea()
             featuredCover(820)
             if !isAutoHalo {
@@ -392,20 +389,18 @@ struct RecordView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    /// The cover displayed as ambient art on the cover-focused stage. Three
-    /// touches separate this from the cover in the informative view:
-    /// - **Cover-tinted drop shadow** anchors the cover in its halo. The
-    ///   classic iTunes-Cover-Flow mirror reflection used to live here, but
-    ///   it felt dated alongside the halo blobs and forced a layout dance
-    ///   on engagement. A coloured shadow lets the cover read as the source
-    ///   of the colour around it and removes the need for fade coordination.
-    /// - **Slow ken-burns** breathes the cover between 1.00x and 1.03x on a
-    ///   60-second cycle (30s up, 30s down). Imperceptible per second; adds
-    ///   subtle life over a long viewing session. Disabled in Reduce Motion.
-    /// - **Centred at screen centre**, no longer offset by reflection mass.
+    /// The sleeve on the cover view, centred on the screen:
+    /// - **A dark seat** under it, in place of the old shadow in the sleeve's
+    ///   own colour (spec 05).
+    /// - **Slow breathing** between 1.00x and 1.03x on a 60-second cycle
+    ///   (30 s up, 30 s down). Disabled in Reduce Motion.
     private func featuredCover(_ size: CGFloat) -> some View {
         cover(size)
-            .shadow(color: palette.dominant.opacity(0.4), radius: 60, x: 0, y: 20)
+            // The dark seat: a tight black shadow for a crisp edge and a wide
+            // soft one that pushes the light back a little. In place of the
+            // shadow in the sleeve's own colour, which vanished over the halo.
+            .shadow(color: .black.opacity(0.6), radius: 10, x: 0, y: 4)
+            .shadow(color: .black.opacity(0.55), radius: 46, x: 0, y: 14)
             .scaleEffect(coverBreath)
             .onAppear {
                 guard !reduceMotion else { return }

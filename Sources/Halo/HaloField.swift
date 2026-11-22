@@ -81,6 +81,19 @@ enum HaloField {
         }
     }
 
+    /// How much of a patch is left `distance` points from its centre, before
+    /// the patch's own opacity: a disc of `radius` whose edge is blurred by
+    /// `patchBlur`. 1 well inside, a half on the disc's edge, 0 well outside.
+    static func patchEdge(distance: Double, radius: Double) -> Double {
+        0.5 * erfc((distance - radius) / (2.0.squareRoot() * patchBlur))
+    }
+
+    /// How far from its centre a patch is drawn: three blurs past its edge,
+    /// where a thousandth of it is left.
+    static func patchReach(radius: Double) -> Double {
+        radius + 3 * patchBlur
+    }
+
     static func smoothstep(_ t: Double) -> Double {
         let c = min(1, max(0, t))
         return c * c * (3 - 2 * c)
