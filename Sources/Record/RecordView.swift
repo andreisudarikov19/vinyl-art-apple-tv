@@ -294,7 +294,7 @@ struct RecordView: View {
     private func informativeStage(_ model: RecordViewModel) -> some View {
         HStack(alignment: .top, spacing: 100) {
             VStack(alignment: .leading, spacing: 24) {
-                cover(coverSide, cornerRadius: 12, shadowRadius: 30)
+                cover(coverSide, shadowRadius: 30)
                 albumHeader
             }
             tracklist(model)
@@ -468,17 +468,10 @@ struct RecordView: View {
         }
     }
 
-    private func cover(_ size: CGFloat, cornerRadius: CGFloat = 0, shadowRadius: CGFloat = 0) -> some View {
-        LazyImage(url: release.preferredCoverURL) { state in
-            if let image = state.image {
-                image.resizable().scaledToFill()
-            } else {
-                Rectangle().fill(.white.opacity(0.06))
-            }
-        }
-        .frame(width: size, height: size)
-        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
-        .shadow(radius: shadowRadius)
+    private func cover(_ size: CGFloat, shadowRadius: CGFloat = 0) -> some View {
+        FittedSleeve(url: release.preferredCoverURL)
+            .frame(width: size, height: size)
+            .shadow(radius: shadowRadius)
         // Cross-fades when the cover URL changes (Discogs → resolved cover).
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.45), value: release.preferredCoverURL)
     }

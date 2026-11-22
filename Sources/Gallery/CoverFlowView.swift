@@ -272,15 +272,8 @@ private struct CoverFlowCard: View {
     }
 
     private var coverImage: some View {
-        LazyImage(url: release.preferredCoverURL) { state in
-            if let image = state.image {
-                image.resizable().scaledToFill()
-            } else {
-                Rectangle().fill(.white.opacity(0.06))
-            }
-        }
-        .frame(width: coverSize, height: coverSize)
-        .clipShape(RoundedRectangle(cornerRadius: 6))
+        FittedSleeve(url: release.preferredCoverURL)
+            .frame(width: coverSize, height: coverSize)
     }
 }
 

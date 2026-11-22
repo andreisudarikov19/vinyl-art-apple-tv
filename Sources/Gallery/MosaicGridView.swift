@@ -194,14 +194,8 @@ struct MosaicGridView: View {
     }
 
     private func cover(_ release: CachedRelease) -> some View {
-        LazyImage(url: release.preferredCoverURL) { state in
-            if let image = state.image {
-                image.resizable().scaledToFill()
-            } else {
-                Rectangle().fill(.white.opacity(0.06))
-            }
-        }
-        .aspectRatio(1, contentMode: .fit)
+        FittedSleeve(url: release.preferredCoverURL)
+            .aspectRatio(1, contentMode: .fit)
     }
 
     /// The magnified focused cover, crisp, set in a Liquid Glass bezel that
